@@ -1,0 +1,14 @@
+{
+  ".gemini/task-state.json": {
+    "mtime": 1790806275.5614138,
+    "seen": 1790806309.1824992,
+    "ast_hash": "6571ef2c247c9a67351cc51881d18650",
+    "semantic_hash": "6571ef2c247c9a67351cc51881d18650"
+  },
+  ".agents/rules/session_start_protocol.md": {
+    "mtime": 1790806243.9191139,
+    "seen": 1790806309.182502,
+    "ast_hash": "b3e833ed6ef335c8124290d5a45faf60",
+    "semantic_hash": "b3e833ed6ef335c8124290d5a45faf60"
+  }
+}

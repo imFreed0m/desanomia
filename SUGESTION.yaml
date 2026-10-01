@@ -1,0 +1,237 @@
+# Antigravity CLI Configuration for Greenhouse Frontend Project
+# Tujuan: Membuat agent lebih disiplin sebelum masuk fase pembangunan frontend
+
+philosophy:
+  hooks: "Hanya untuk hal mekanis & deterministik"
+  rules: "Constraint & pemikiran arsitektur (AGENTS.md / rules/)"
+  skills: "Prosedur kerja"
+  note: >
+    Jangan mengubah hook menjadi "AI kedua".
+    Target: Sulit melakukan hal yang salah, mudah mengetahui kesalahan,
+    dan memiliki source of truth yang jelas.
+
+supported_events:
+  - PreToolUse
+  - PostToolUse
+  - PreInvocation
+  - PostInvocation
+  - Stop
+
+hooks_location: ".agents/hooks.json"
+
+# ============================================================
+# 6 HOOK INTI YANG DIREKOMENDASIKAN
+# ============================================================
+hooks:
+  - name: pre_tool_guard
+    event: PreToolUse
+    priority: wajib
+    purpose: Mencegah command berbahaya/destruktif
+    description: |
+      Security/safety gate. Blokir command berbahaya dan akses ke file sensitif.
+    blocked_commands:
+      - rm -rf
+      - git reset --hard
+      - git clean -fd
+      - git checkout -- .
+      - chmod -R
+      - curl | sh
+      - wget | sh
+      - docker system prune
+      - npm publish
+      - git push --force
+    blocked_paths:
+      - .env
+      - .env.*
+      - credentials/
+      - secrets/
+      - "*.pem"
+      - "*.key"
+    note: Kecuali memang eksplisit diperlukan
+
+  - name: pre_write_guard
+    event: PreToolUse
+    priority: wajib
+    purpose: Mencegah agent mengubah file terlarang
+    description: |
+      Hard guard berdasarkan path/command. Keputusan arsitektur tetap di rules/reviewer.
+    protected_structure:
+      - spec/
+      - docs/
+      - architecture/
+      - src/
+      - components/
+    forbidden_actions:
+      - create new framework
+      - replace package manager
+      - change database schema
+      - change API contract
+      - delete existing component
+      - modify architecture documents
+
+  - name: post_write_format
+    event: PostToolUse
+    priority: wajib
+    purpose: Format file setelah perubahan
+    description: |
+      Menjalankan formatter relevan setelah write/edit.
+    supported_extensions:
+      - .ts
+      - .tsx
+      - .js
+      - .jsx
+      - .css
+      - .json
+    pipeline:
+      - write/edit file
+      - PostToolUse
+      - Prettier
+      - ESLint --fix
+
+  - name: post_write_validate
+    event: PostToolUse
+    priority: wajib
+    purpose: Typecheck/lint setelah perubahan
+    description: |
+      Jangan jalankan full test suite setiap tool call. Gunakan matcher terbatas.
+    rules:
+      - when: TS/TSX changed
+        action: typecheck
+      - when: JS/TS/TSX changed
+        action: eslint
+      - when: CSS changed
+        action: lint/style validation
+      - when: package.json changed
+        action: dependency validation
+    flow:
+      - Agent writes code
+      - formatter
+      - typecheck/lint
+      - error → agent fixes
+
+  - name: pre_invocation_context
+    event: PreInvocation
+    priority: sangat_berguna
+    purpose: Memastikan agent membaca context/spec yang diperlukan
+    description: |
+      Cek keberadaan source of truth sebelum model dipanggil.
+    required_specs:
+      - spec/features.md
+      - spec/user-flows.md
+      - spec/data-model.md
+      - spec/rules.md
+      - spec/architecture.md
+      - spec/decisions.md
+    checks:
+      - project state
+      - current branch
+      - required spec files exist
+      - git status (opsional)
+
+  - name: stop_validation
+    event: Stop
+    priority: wajib
+    purpose: Final verification sebelum agent selesai
+    description: |
+      Agent tidak boleh mengatakan "Done" sebelum lolos validasi.
+    pipeline:
+      - git diff --check
+      - typecheck
+      - lint
+      - test
+      - architecture check
+    on_failure: "STOP VALIDATION FAILED - Agent must continue fixing"
+
+# ============================================================
+# STRUKTUR WORKSPACE YANG DISARANKAN
+# ============================================================
+workspace_structure:
+  project:
+    - .agents/
+      - hooks.json
+      - agents/
+      - frontend-reviewer.md
+      - ux-reviewer.md
+      - architecture-reviewer.md
+      - skills/
+      - build-frontend/
+      - review-ui/
+      - responsive-check/
+      - validate-feature/
+      - rules/
+      - architecture.md
+      - frontend.md
+      - ui.md
+      - coding.md
+    - spec/
+      - features.md
+      - user-flows.md
+      - data-model.md
+      - rules.md
+      - architecture.md
+      - decisions.md
+    - scripts/
+      - hooks/
+      - pre-tool-guard.sh
+      - pre-write-guard.sh
+      - format.sh
+      - validate.sh
+      - pre-invocation.sh
+      - stop-validation.sh
+    - src/
+    - ...
+
+# ============================================================
+# 3 CUSTOM AGENTS
+# ============================================================
+custom_agents:
+  - name: frontend-architect
+    role: |
+      Memastikan struktur component, state, data flow, routing,
+      responsive strategy, dan API boundary benar.
+      Bukan coding sebanyak mungkin.
+
+  - name: ui-reviewer
+    role: |
+      Memeriksa hasil implementasi terhadap design specification:
+      spacing, typography, hierarchy, responsive behavior,
+      glassmorphism, component consistency.
+
+  - name: code-reviewer
+    role: |
+      Memeriksa diff setelah feature selesai:
+      duplication, unnecessary abstraction, broken architecture,
+      type safety, error handling, security.
+
+# ============================================================
+# YANG TIDAK DISARANKAN (JANGAN PASANG DULU)
+# ============================================================
+not_recommended:
+  - AI reviewer hook setelah setiap file
+  - AI architecture analysis setelah setiap command
+  - automatic git commit
+  - automatic git push
+  - automatic dependency installation
+  - automatic refactoring
+  - automatic test generation
+
+# ============================================================
+# RINGKASAN SETUP UNTUK FASE FRONTEND
+# ============================================================
+recommended_setup:
+  hooks: 6
+  specialized_agents: 3
+  frontend_rules: 4
+  skills: 4
+  note: >
+    Sudah cukup kuat tanpa over-engineering.
+    Hook menerima JSON via stdin dan mengembalikan JSON via stdout.
+    Script hook sebaiknya program kecil yang deterministic.
+
+# ============================================================
+# CATATAN TEKNIS
+# ============================================================
+technical_notes:
+  - Hook menerima JSON melalui stdin dan mengembalikan JSON melalui stdout
+  - Script hook sebaiknya dibuat sebagai program kecil yang deterministic
+  - Cek hook aktif dengan perintah: /hooks

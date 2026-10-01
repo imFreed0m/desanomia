@@ -1,0 +1,70 @@
+# Antigravity & Agent session states
+.antigravity/
+.gemini/
+task-state.json
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials/
+secrets/
+
+# Dependencies & Package Managers
+node_modules/
+.pnpm-store/
+vendor/
+
+# Build outputs & caches
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+.turbo/
+.cache/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
+
+# Testing & Coverage
+coverage/
+.nyc_output/
+.pytest_cache/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.idea/
+*.sublime-project
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Graphify temporary caches
+graphify-out/cache/
+
+# Spec kit local machine state
+feature.json
+extensions/*/local-config.yml
