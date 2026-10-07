@@ -1,0 +1,626 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1169 827" width="1169" height="827">
+<defs>
+<style>
+  text { font-family: "Segoe UI", Arial, Helvetica, sans-serif; }
+</style>
+</defs>
+<rect width="100%" height="100%" fill="#ffffff" />
+<rect x="18" y="18" width="1133" height="791" stroke="#800000" stroke-width="1.4" fill="none" />
+<rect x="32" y="28" width="1105" height="771" stroke="#800000" stroke-width="1.4" fill="none" />
+<text x="140" y="24" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">1</text>
+<text x="140" y="804" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">1</text>
+<line x1="30" y1="18" x2="30" y2="28" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<line x1="30" y1="799" x2="30" y2="809" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<text x="360" y="24" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">2</text>
+<text x="360" y="804" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">2</text>
+<line x1="250" y1="18" x2="250" y2="28" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<line x1="250" y1="799" x2="250" y2="809" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<text x="585" y="24" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">3</text>
+<text x="585" y="804" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">3</text>
+<line x1="475" y1="18" x2="475" y2="28" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<line x1="475" y1="799" x2="475" y2="809" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<text x="815" y="24" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">4</text>
+<text x="815" y="804" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">4</text>
+<line x1="705" y1="18" x2="705" y2="28" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<line x1="705" y1="799" x2="705" y2="809" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<text x="1045" y="24" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">5</text>
+<text x="1045" y="804" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">5</text>
+<line x1="935" y1="18" x2="935" y2="28" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<line x1="935" y1="799" x2="935" y2="809" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<text x="25" y="125" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">A</text>
+<text x="1144" y="125" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">A</text>
+<line x1="18" y1="30" x2="32" y2="30" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<line x1="1137" y1="30" x2="1151" y2="30" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<text x="25" y="320" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">B</text>
+<text x="1144" y="320" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">B</text>
+<line x1="18" y1="225" x2="32" y2="225" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<line x1="1137" y1="225" x2="1151" y2="225" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<text x="25" y="515" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">C</text>
+<text x="1144" y="515" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">C</text>
+<line x1="18" y1="420" x2="32" y2="420" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<line x1="1137" y1="420" x2="1151" y2="420" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<text x="25" y="710" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">D</text>
+<text x="1144" y="710" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="middle">D</text>
+<line x1="18" y1="615" x2="32" y2="615" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<line x1="1137" y1="615" x2="1151" y2="615" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<text x="65" y="85" font-size="20" font-weight="bold" font-style="italic" fill="#0000bb" text-anchor="start">MVP AUTO PPM MIXER V.1.1</text>
+<rect x="55" y="156" width="521" height="191" stroke="#000000" stroke-width="1.1" fill="none" />
+<text x="65" y="174" font-size="12" font-weight="bold" font-style="normal" fill="#0000aa" text-anchor="start">POWER</text>
+<polygon points="85.0,241.8 91.0,241.8 96,246 91.0,250.2 85.0,250.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="82.0" y="249.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">L</text>
+<polygon points="85.0,271.8 91.0,271.8 96,276 91.0,280.2 85.0,280.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="82.0" y="279.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">N</text>
+<line x1="96" y1="246" x2="135" y2="246" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="96" y1="276" x2="135" y2="276" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<rect x="135" y="226" width="48" height="60" stroke="#000000" stroke-width="1.1" fill="none" />
+<text x="159" y="252" font-size="11" font-weight="bold" font-style="normal" fill="#0000aa" text-anchor="middle">MCB</text>
+<text x="159" y="268" font-size="10" font-weight="bold" font-style="normal" fill="#0000aa" text-anchor="middle">2A 2P</text>
+<line x1="183" y1="246" x2="225" y2="246" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="183" y1="276" x2="225" y2="276" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<rect x="225" y="226" width="44" height="60" stroke="#000000" stroke-width="1.1" fill="none" />
+<text x="247" y="220" font-size="9" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">AC-DC</text>
+<path d="M 237 246 Q 242 240 247 246 T 257 246" stroke="#000000" stroke-width="1.3" fill="none" />
+<line x1="237" y1="268" x2="257" y2="268" stroke="#000000" stroke-width="1.3" stroke-linecap="round" />
+<line x1="237" y1="273" x2="257" y2="273" stroke="#000000" stroke-width="1.3" stroke-dasharray="3,2" />
+<line x1="269" y1="246" x2="320" y2="246" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="320" y1="246" x2="330" y2="246" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<line x1="269" y1="276" x2="320" y2="276" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="320" y1="276" x2="330" y2="276" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<circle cx="295" cy="246" r="2.6" fill="#cc0000" />
+<line x1="295" y1="246" x2="295" y2="222" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="295" y1="222" x2="305" y2="222" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="316.0,217.8 310.0,217.8 305,222 310.0,226.2 316.0,226.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="319.0" y="225.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start">24VDC</text>
+<circle cx="295" cy="276" r="2.6" fill="#cc0000" />
+<line x1="295" y1="276" x2="295" y2="302" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="295" y1="302" x2="305" y2="302" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="316.0,297.8 310.0,297.8 305,302 310.0,306.2 316.0,306.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="319.0" y="305.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start">GND2</text>
+<text x="375" y="214" font-size="9" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">U?</text>
+<text x="375" y="225" font-size="8.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">LM2596 STEPDOWN BUCK CONVERTER-DJM</text>
+<rect x="330" y="231" width="125" height="62" stroke="#000000" stroke-width="1.1" fill="none" />
+<text x="392" y="257" font-size="8.5" font-weight="bold" font-style="normal" fill="#0088cc" text-anchor="middle">LM2596 5V BUCK</text>
+<text x="392" y="269" font-size="8.5" font-weight="bold" font-style="normal" fill="#0088cc" text-anchor="middle">CONVERTER</text>
+<text x="323" y="243" font-size="8.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">1</text>
+<text x="336" y="249" font-size="9" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">Vin</text>
+<text x="323" y="274" font-size="8.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">2</text>
+<text x="336" y="279" font-size="9" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">GND</text>
+<text x="462" y="243" font-size="8.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">3</text>
+<text x="448" y="249" font-size="9" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">Vout</text>
+<text x="462" y="274" font-size="8.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">4</text>
+<text x="448" y="279" font-size="9" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">GND</text>
+<line x1="455" y1="246" x2="465" y2="246" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<line x1="465" y1="246" x2="480" y2="246" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="491.0,241.8 485.0,241.8 480,246 485.0,250.2 491.0,250.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="494.0" y="249.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start">5VDC</text>
+<line x1="455" y1="276" x2="465" y2="276" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<line x1="465" y1="276" x2="480" y2="276" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="491.0,271.8 485.0,271.8 480,276 485.0,280.2 491.0,280.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="494.0" y="279.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start">GND</text>
+<rect x="599" y="76" width="486" height="561" stroke="#000000" stroke-width="1.1" fill="none" />
+<text x="609" y="96" font-size="12" font-weight="bold" font-style="normal" fill="#0000aa" text-anchor="start">MICROCONTROLLER - Peripheral</text>
+<line x1="668" y1="185" x2="684" y2="185" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="684" y1="185" x2="684" y2="211" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="657.0,180.8 663.0,180.8 668,185 663.0,189.2 657.0,189.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="654.0" y="188.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">PPM_sig5V</text>
+<rect x="678" y="211" width="12" height="24" stroke="#880000" stroke-width="1.2" fill="none" />
+<text x="696" y="220" font-size="9.2" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">R1</text>
+<text x="696" y="231" font-size="9.2" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">5k6</text>
+<line x1="684" y1="235" x2="684" y2="265" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<circle cx="684" cy="247" r="2.6" fill="#cc0000" />
+<line x1="684" y1="247" x2="696" y2="247" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="707.0,242.8 701.0,242.8 696,247 701.0,251.2 707.0,251.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="710.0" y="250.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start">SigPPM</text>
+<rect x="678" y="265" width="12" height="24" stroke="#880000" stroke-width="1.2" fill="none" />
+<text x="696" y="274" font-size="9.2" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">R2</text>
+<text x="696" y="285" font-size="9.2" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">10k</text>
+<line x1="684" y1="289" x2="684" y2="309" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<circle cx="684" cy="298" r="2.6" fill="#cc0000" />
+<line x1="684" y1="298" x2="663" y2="298" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="663" y1="298" x2="663" y2="308" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<text x="652" y="286" font-size="8.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">H1</text>
+<text x="652" y="296" font-size="8.0" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">jumper</text>
+<rect x="639" y="300" width="24" height="30" stroke="#880000" stroke-width="1.2" fill="none" />
+<text x="651" y="311" font-size="8.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">2</text>
+<text x="651" y="323" font-size="8.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">1</text>
+<line x1="684" y1="298" x2="684" y2="309" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="674" y1="309" x2="694" y2="309" stroke="#880000" stroke-width="1.5" stroke-linecap="round" />
+<line x1="674" y1="314" x2="694" y2="314" stroke="#880000" stroke-width="1.5" stroke-linecap="round" />
+<line x1="684" y1="314" x2="684" y2="330" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<text x="698" y="309" font-size="8.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">C1</text>
+<text x="698" y="319" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">100nF</text>
+<line x1="663" y1="323" x2="663" y2="330" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="663" y1="330" x2="684" y2="330" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<circle cx="673" cy="330" r="2.6" fill="#cc0000" />
+<line x1="673" y1="330" x2="642" y2="330" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="631.0,325.8 637.0,325.8 642,330 637.0,334.2 631.0,334.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="628.0" y="333.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">GND</text>
+<text x="915" y="126" font-size="10.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">1</text>
+<text x="915" y="139" font-size="10.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">ESP32-DEVKITC-30Pin</text>
+<rect x="855" y="146" width="120" height="202" stroke="#880000" stroke-width="1.3" fill="none" />
+<text x="915" y="166" font-size="14" font-weight="bold" font-style="normal" fill="#0000aa" text-anchor="middle">ESP32</text>
+<line x1="839" y1="162.0" x2="855" y2="162.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="165.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">EN</text>
+<line x1="836.0" y1="159.0" x2="842.0" y2="165.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="836.0" y1="165.0" x2="842.0" y2="159.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="839" y1="174.5" x2="855" y2="174.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="177.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">VP</text>
+<line x1="817" y1="174.5" x2="839" y2="174.5" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="806.0,170.3 812.0,170.3 817,174.5 812.0,178.7 806.0,178.7" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="803.0" y="177.7" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">SigPPM</text>
+<line x1="839" y1="187.0" x2="855" y2="187.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="190.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">VN</text>
+<line x1="836.0" y1="184.0" x2="842.0" y2="190.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="836.0" y1="190.0" x2="842.0" y2="184.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="839" y1="199.5" x2="855" y2="199.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="202.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D34</text>
+<line x1="836.0" y1="196.5" x2="842.0" y2="202.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="836.0" y1="202.5" x2="842.0" y2="196.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="839" y1="212.0" x2="855" y2="212.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="215.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D35</text>
+<line x1="817" y1="212.0" x2="839" y2="212.0" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="806.0,207.8 812.0,207.8 817,212.0 812.0,216.2 806.0,216.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="803.0" y="215.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">Echo</text>
+<line x1="839" y1="224.5" x2="855" y2="224.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="227.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D32</text>
+<line x1="817" y1="224.5" x2="839" y2="224.5" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="806.0,220.3 812.0,220.3 817,224.5 812.0,228.7 806.0,228.7" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="803.0" y="227.7" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">Trig</text>
+<line x1="839" y1="237.0" x2="855" y2="237.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="240.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D33</text>
+<line x1="836.0" y1="234.0" x2="842.0" y2="240.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="836.0" y1="240.0" x2="842.0" y2="234.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="839" y1="249.5" x2="855" y2="249.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="252.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D25</text>
+<line x1="836.0" y1="246.5" x2="842.0" y2="252.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="836.0" y1="252.5" x2="842.0" y2="246.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="839" y1="262.0" x2="855" y2="262.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="265.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D26</text>
+<line x1="817" y1="262.0" x2="839" y2="262.0" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="806.0,257.8 812.0,257.8 817,262.0 812.0,266.2 806.0,266.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="803.0" y="265.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">Ch1</text>
+<line x1="839" y1="274.5" x2="855" y2="274.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="277.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D27</text>
+<line x1="817" y1="274.5" x2="839" y2="274.5" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="806.0,270.3 812.0,270.3 817,274.5 812.0,278.7 806.0,278.7" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="803.0" y="277.7" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">Ch2</text>
+<line x1="839" y1="287.0" x2="855" y2="287.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="290.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D14</text>
+<line x1="817" y1="287.0" x2="839" y2="287.0" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="806.0,282.8 812.0,282.8 817,287.0 812.0,291.2 806.0,291.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="803.0" y="290.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">Ch3</text>
+<line x1="839" y1="299.5" x2="855" y2="299.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="302.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D12</text>
+<line x1="836.0" y1="296.5" x2="842.0" y2="302.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="836.0" y1="302.5" x2="842.0" y2="296.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="839" y1="312.0" x2="855" y2="312.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="315.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D13</text>
+<line x1="817" y1="312.0" x2="839" y2="312.0" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="806.0,307.8 812.0,307.8 817,312.0 812.0,316.2 806.0,316.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="803.0" y="315.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">Ch4</text>
+<line x1="839" y1="324.5" x2="855" y2="324.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="327.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">GND</text>
+<line x1="817" y1="324.5" x2="839" y2="324.5" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="806.0,320.3 812.0,320.3 817,324.5 812.0,328.7 806.0,328.7" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="803.0" y="327.7" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">GND</text>
+<line x1="839" y1="337.0" x2="855" y2="337.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="861" y="340.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">VIN</text>
+<line x1="817" y1="337.0" x2="839" y2="337.0" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="806.0,332.8 812.0,332.8 817,337.0 812.0,341.2 806.0,341.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="803.0" y="340.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">5VDC</text>
+<line x1="975" y1="162.0" x2="991" y2="162.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="165.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">D23</text>
+<line x1="988.0" y1="159.0" x2="994.0" y2="165.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="165.0" x2="994.0" y2="159.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="975" y1="174.5" x2="991" y2="174.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="177.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">D22</text>
+<line x1="988.0" y1="171.5" x2="994.0" y2="177.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="177.5" x2="994.0" y2="171.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="975" y1="187.0" x2="991" y2="187.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="190.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">TX0</text>
+<line x1="988.0" y1="184.0" x2="994.0" y2="190.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="190.0" x2="994.0" y2="184.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="975" y1="199.5" x2="991" y2="199.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="202.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">RX0</text>
+<line x1="988.0" y1="196.5" x2="994.0" y2="202.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="202.5" x2="994.0" y2="196.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="975" y1="212.0" x2="991" y2="212.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="215.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">D21</text>
+<line x1="988.0" y1="209.0" x2="994.0" y2="215.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="215.0" x2="994.0" y2="209.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="975" y1="224.5" x2="991" y2="224.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="227.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">D19</text>
+<line x1="988.0" y1="221.5" x2="994.0" y2="227.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="227.5" x2="994.0" y2="221.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="975" y1="237.0" x2="991" y2="237.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="240.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">D18</text>
+<line x1="988.0" y1="234.0" x2="994.0" y2="240.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="240.0" x2="994.0" y2="234.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="975" y1="249.5" x2="991" y2="249.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="252.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">D5</text>
+<line x1="988.0" y1="246.5" x2="994.0" y2="252.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="252.5" x2="994.0" y2="246.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="975" y1="262.0" x2="991" y2="262.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="265.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">D17</text>
+<line x1="988.0" y1="259.0" x2="994.0" y2="265.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="265.0" x2="994.0" y2="259.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="975" y1="274.5" x2="991" y2="274.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="277.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">D16</text>
+<line x1="988.0" y1="271.5" x2="994.0" y2="277.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="277.5" x2="994.0" y2="271.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="975" y1="287.0" x2="991" y2="287.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="290.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">D4</text>
+<line x1="988.0" y1="284.0" x2="994.0" y2="290.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="290.0" x2="994.0" y2="284.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="975" y1="299.5" x2="991" y2="299.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="302.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">D2</text>
+<line x1="988.0" y1="296.5" x2="994.0" y2="302.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="302.5" x2="994.0" y2="296.5" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="975" y1="312.0" x2="991" y2="312.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="315.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">D15</text>
+<line x1="988.0" y1="309.0" x2="994.0" y2="315.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="315.0" x2="994.0" y2="309.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="975" y1="324.5" x2="991" y2="324.5" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="327.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">GND</text>
+<line x1="991" y1="324.5" x2="1013" y2="324.5" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="1024.0,320.3 1018.0,320.3 1013,324.5 1018.0,328.7 1024.0,328.7" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="1027.0" y="327.7" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start">GND</text>
+<line x1="975" y1="337.0" x2="991" y2="337.0" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="969" y="340.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">3V3</text>
+<line x1="988.0" y1="334.0" x2="994.0" y2="340.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="988.0" y1="340.0" x2="994.0" y2="334.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<text x="909.0" y="406" font-size="9.5" font-weight="bold" font-style="normal" fill="#0000aa" text-anchor="middle">LEVEL CONVERTER 8</text>
+<rect x="880" y="415" width="58" height="102" stroke="#880000" stroke-width="1.2" fill="none" />
+<circle cx="932" cy="513" r="1.8" fill="#880000" />
+<line x1="868" y1="424.0" x2="880" y2="424.0" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="866" y="421.0" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">11</text>
+<text x="883" y="426.8" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">HV8</text>
+<line x1="868" y1="433.4" x2="880" y2="433.4" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="866" y="430.4" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">12</text>
+<text x="883" y="436.2" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">HV7</text>
+<line x1="868" y1="442.8" x2="880" y2="442.8" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="866" y="439.8" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">13</text>
+<text x="883" y="445.6" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">HV6</text>
+<line x1="868" y1="452.2" x2="880" y2="452.2" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="866" y="449.2" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">14</text>
+<text x="883" y="455.0" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">HV5</text>
+<line x1="868" y1="461.6" x2="880" y2="461.6" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="866" y="458.6" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">15</text>
+<text x="883" y="464.40000000000003" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">GND</text>
+<line x1="868" y1="471.0" x2="880" y2="471.0" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="866" y="468.0" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">16</text>
+<text x="883" y="473.8" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">HV</text>
+<line x1="868" y1="480.4" x2="880" y2="480.4" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="866" y="477.4" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">17</text>
+<text x="883" y="483.2" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">HV4</text>
+<line x1="868" y1="489.8" x2="880" y2="489.8" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="866" y="486.8" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">18</text>
+<text x="883" y="492.6" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">HV3</text>
+<line x1="868" y1="499.2" x2="880" y2="499.2" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="866" y="496.2" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">19</text>
+<text x="883" y="502.0" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">HV2</text>
+<line x1="846" y1="499.2" x2="868" y2="499.2" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="835.0,495.0 841.0,495.0 846,499.2 841.0,503.4 835.0,503.4" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="832.0" y="502.4" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">5VTrig</text>
+<line x1="868" y1="508.6" x2="880" y2="508.6" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="866" y="505.6" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">20</text>
+<text x="883" y="511.40000000000003" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">HV1</text>
+<line x1="846" y1="508.6" x2="868" y2="508.6" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="835.0,504.40000000000003 841.0,504.40000000000003 846,508.6 841.0,512.8000000000001 835.0,512.8000000000001" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="832.0" y="511.8" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end">5VEcho</text>
+<line x1="938" y1="424.0" x2="950" y2="424.0" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="952" y="421.0" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">10</text>
+<text x="935" y="426.8" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">LV8</text>
+<line x1="938" y1="433.4" x2="950" y2="433.4" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="952" y="430.4" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">9</text>
+<text x="935" y="436.2" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">LV7</text>
+<line x1="938" y1="442.8" x2="950" y2="442.8" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="952" y="439.8" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">8</text>
+<text x="935" y="445.6" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">LV6</text>
+<line x1="938" y1="452.2" x2="950" y2="452.2" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="952" y="449.2" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">7</text>
+<text x="935" y="455.0" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">LV5</text>
+<line x1="938" y1="461.6" x2="950" y2="461.6" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="952" y="458.6" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">6</text>
+<text x="935" y="464.40000000000003" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">GND</text>
+<line x1="938" y1="471.0" x2="950" y2="471.0" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="952" y="468.0" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">5</text>
+<text x="935" y="473.8" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">LV</text>
+<line x1="938" y1="480.4" x2="950" y2="480.4" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="952" y="477.4" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">4</text>
+<text x="935" y="483.2" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">LV4</text>
+<line x1="938" y1="489.8" x2="950" y2="489.8" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="952" y="486.8" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">3</text>
+<text x="935" y="492.6" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">LV3</text>
+<line x1="938" y1="499.2" x2="950" y2="499.2" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="952" y="496.2" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">2</text>
+<text x="935" y="502.0" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">LV2</text>
+<line x1="950" y1="499.2" x2="972" y2="499.2" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="983.0,495.0 977.0,495.0 972,499.2 977.0,503.4 983.0,503.4" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="986.0" y="502.4" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start">Trig</text>
+<line x1="938" y1="508.6" x2="950" y2="508.6" stroke="#880000" stroke-width="1.1" stroke-linecap="round" />
+<text x="952" y="505.6" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="start">1</text>
+<text x="935" y="511.40000000000003" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">LV1</text>
+<line x1="950" y1="508.6" x2="972" y2="508.6" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="983.0,504.40000000000003 977.0,504.40000000000003 972,508.6 977.0,512.8000000000001 983.0,512.8000000000001" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="986.0" y="511.8" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start">Echo</text>
+<rect x="599" y="521" width="176" height="116" stroke="#000000" stroke-width="1.1" fill="none" />
+<text x="687.0" y="535" font-size="10.5" font-weight="bold" font-style="normal" fill="#0000aa" text-anchor="middle">Summary Pin Conn</text>
+<line x1="599" y1="539" x2="775" y2="539" stroke="#000000" stroke-width="1.0" stroke-linecap="round" />
+<text x="635" y="556.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">SigPPM</text>
+<polygon points="637,549.0 643,549.0 647,553.0 643,557.0 637,557.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.0" />
+<text x="652" y="556.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D36</text>
+<text x="635" y="567.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">Echo</text>
+<polygon points="637,560.5 643,560.5 647,564.5 643,568.5 637,568.5" fill="#ffffff" stroke="#0000cc" stroke-width="1.0" />
+<text x="652" y="567.5" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D35</text>
+<text x="635" y="579.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">Trig</text>
+<polygon points="637,572.0 643,572.0 647,576.0 643,580.0 637,580.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.0" />
+<text x="652" y="579.0" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D32</text>
+<text x="627" y="596.0" font-size="8.0" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">Ch1</text>
+<polygon points="629,589.0 635,589.0 639,593.0 635,597.0 629,597.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.0" />
+<text x="642" y="596.0" font-size="8.0" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D26</text>
+<polygon points="677,589.0 671,589.0 667,593.0 671,597.0 677,597.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.0" />
+<text x="680" y="596.0" font-size="8.0" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">Selenoid</text>
+<text x="627" y="607.0" font-size="8.0" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">Ch2</text>
+<polygon points="629,600.0 635,600.0 639,604.0 635,608.0 629,608.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.0" />
+<text x="642" y="607.0" font-size="8.0" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D27</text>
+<polygon points="677,600.0 671,600.0 667,604.0 671,608.0 677,608.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.0" />
+<text x="680" y="607.0" font-size="8.0" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">MixPump</text>
+<text x="627" y="618.0" font-size="8.0" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">Ch3</text>
+<polygon points="629,611.0 635,611.0 639,615.0 635,619.0 629,619.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.0" />
+<text x="642" y="618.0" font-size="8.0" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D14</text>
+<polygon points="677,611.0 671,611.0 667,615.0 671,619.0 677,619.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.0" />
+<text x="680" y="618.0" font-size="8.0" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">xMainPump</text>
+<text x="627" y="629.0" font-size="8.0" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="end">Ch4</text>
+<polygon points="629,622.0 635,622.0 639,626.0 635,630.0 629,630.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.0" />
+<text x="642" y="629.0" font-size="8.0" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">D13</text>
+<polygon points="677,622.0 671,622.0 667,626.0 671,630.0 677,630.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.0" />
+<text x="680" y="629.0" font-size="8.0" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">DosesPump</text>
+<rect x="80" y="386" width="506" height="401" stroke="#000000" stroke-width="1.1" fill="none" />
+<text x="90" y="404" font-size="12" font-weight="bold" font-style="normal" fill="#0000aa" text-anchor="start">OUTPUT - DRIVER</text>
+<rect x="199" y="506" width="161" height="101" stroke="#880000" stroke-width="1.3" fill="none" rx="6" />
+<line x1="212.0" y1="492" x2="212.0" y2="506" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="209.0" y="500" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">1</text>
+<text x="212.0" y="520" font-size="8" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle" transform="rotate(-90 212.0 520)">VCC</text>
+<line x1="212.0" y1="475" x2="212.0" y2="492" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="207.8,464.0 207.8,470.0 212.0,475 216.2,470.0 216.2,464.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="215.2" y="460.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 215.2 460.0)">5VDC</text>
+<line x1="236.5" y1="492" x2="236.5" y2="506" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="233.5" y="500" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">2</text>
+<text x="236.5" y="520" font-size="8" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle" transform="rotate(-90 236.5 520)">GND</text>
+<line x1="236.5" y1="475" x2="236.5" y2="492" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="232.3,464.0 232.3,470.0 236.5,475 240.7,470.0 240.7,464.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="239.7" y="460.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 239.7 460.0)">GND</text>
+<line x1="261.0" y1="492" x2="261.0" y2="506" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="258.0" y="500" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">3</text>
+<text x="261.0" y="520" font-size="8" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle" transform="rotate(-90 261.0 520)">IN1</text>
+<line x1="261.0" y1="475" x2="261.0" y2="492" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="256.8,464.0 256.8,470.0 261.0,475 265.2,470.0 265.2,464.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="264.2" y="460.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 264.2 460.0)">Ch1</text>
+<line x1="285.5" y1="492" x2="285.5" y2="506" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="282.5" y="500" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">4</text>
+<text x="285.5" y="520" font-size="8" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle" transform="rotate(-90 285.5 520)">IN2</text>
+<line x1="285.5" y1="475" x2="285.5" y2="492" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="281.3,464.0 281.3,470.0 285.5,475 289.7,470.0 289.7,464.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="288.7" y="460.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 288.7 460.0)">Ch2</text>
+<line x1="310.0" y1="492" x2="310.0" y2="506" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="307.0" y="500" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">5</text>
+<text x="310.0" y="520" font-size="8" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle" transform="rotate(-90 310.0 520)">IN3</text>
+<line x1="310.0" y1="475" x2="310.0" y2="492" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="305.8,464.0 305.8,470.0 310.0,475 314.2,470.0 314.2,464.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="313.2" y="460.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 313.2 460.0)">Ch3</text>
+<line x1="334.5" y1="492" x2="334.5" y2="506" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="331.5" y="500" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">6</text>
+<text x="334.5" y="520" font-size="8" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle" transform="rotate(-90 334.5 520)">IN4</text>
+<line x1="334.5" y1="475" x2="334.5" y2="492" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="330.3,464.0 330.3,470.0 334.5,475 338.7,470.0 338.7,464.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="337.7" y="460.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 337.7 460.0)">Ch4</text>
+<line x1="207.0" y1="607" x2="207.0" y2="619" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="205.0" y="615" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">7</text>
+<text x="208.0" y="592" font-size="7" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 208.0 592)">NC1</text>
+<line x1="204.0" y1="616.0" x2="210.0" y2="622.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="204.0" y1="622.0" x2="210.0" y2="616.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="219.8" y1="607" x2="219.8" y2="619" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="217.8" y="615" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">8</text>
+<text x="220.8" y="592" font-size="7" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 220.8 592)">COM1</text>
+<line x1="232.6" y1="607" x2="232.6" y2="619" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="230.6" y="615" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">9</text>
+<text x="233.6" y="592" font-size="7" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 233.6 592)">NO1</text>
+<line x1="245.4" y1="607" x2="245.4" y2="619" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="243.4" y="615" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">10</text>
+<text x="246.4" y="592" font-size="7" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 246.4 592)">NC2</text>
+<line x1="242.4" y1="616.0" x2="248.4" y2="622.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="242.4" y1="622.0" x2="248.4" y2="616.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="258.2" y1="607" x2="258.2" y2="619" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="256.2" y="615" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">11</text>
+<text x="259.2" y="592" font-size="7" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 259.2 592)">COM2</text>
+<line x1="271.0" y1="607" x2="271.0" y2="619" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="269.0" y="615" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">12</text>
+<text x="272.0" y="592" font-size="7" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 272.0 592)">NO2</text>
+<line x1="283.8" y1="607" x2="283.8" y2="619" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="281.8" y="615" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">13</text>
+<text x="284.8" y="592" font-size="7" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 284.8 592)">NC3</text>
+<line x1="280.8" y1="616.0" x2="286.8" y2="622.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="280.8" y1="622.0" x2="286.8" y2="616.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="296.6" y1="607" x2="296.6" y2="619" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="294.6" y="615" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">14</text>
+<text x="297.6" y="592" font-size="7" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 297.6 592)">COM3</text>
+<line x1="309.4" y1="607" x2="309.4" y2="619" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="307.4" y="615" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">15</text>
+<text x="310.4" y="592" font-size="7" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 310.4 592)">NO3</text>
+<line x1="322.2" y1="607" x2="322.2" y2="619" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="320.2" y="615" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">16</text>
+<text x="323.2" y="592" font-size="7" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 323.2 592)">NC4</text>
+<line x1="319.2" y1="616.0" x2="325.2" y2="622.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="319.2" y1="622.0" x2="325.2" y2="616.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="335.0" y1="607" x2="335.0" y2="619" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="333.0" y="615" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">17</text>
+<text x="336.0" y="592" font-size="7" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 336.0 592)">COM4</text>
+<line x1="347.8" y1="607" x2="347.8" y2="619" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="345.8" y="615" font-size="7" font-weight="normal" font-style="normal" fill="#000000" text-anchor="end">18</text>
+<text x="348.8" y="592" font-size="7" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 348.8 592)">NO4</text>
+<rect x="99" y="641" width="21" height="31" stroke="#880000" stroke-width="1.2" fill="none" />
+<text x="107" y="653" font-size="8" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">2</text>
+<text x="107" y="666" font-size="8" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">1</text>
+<text x="110" y="684" font-size="8.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">AC Input</text>
+<line x1="120" y1="653" x2="126" y2="653" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<circle cx="126" cy="653" r="2.6" fill="#cc0000" />
+<line x1="126" y1="653" x2="126" y2="550" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="126" y1="550" x2="138" y2="550" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="138,545.8 144,545.8 149,550 144,554.2 138,554.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="153" y="553.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start">L</text>
+<line x1="120" y1="666" x2="136" y2="666" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<circle cx="136" cy="666" r="2.6" fill="#cc0000" />
+<line x1="136" y1="666" x2="136" y2="575" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="136" y1="575" x2="148" y2="575" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="148,570.8 154,570.8 159,575 154,579.2 148,579.2" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="163" y="578.2" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start">N</text>
+<rect x="209" y="689" width="71" height="23" stroke="#880000" stroke-width="1.2" fill="none" />
+<text x="217" y="744" font-size="9.2" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 217 744)">Selenoid</text>
+<text x="241" y="741" font-size="9.2" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 241 741)">MixPum</text>
+<text x="266" y="748" font-size="9.2" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start" transform="rotate(-90 266 748)">xMainPump</text>
+<line x1="217.0" y1="679" x2="217.0" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="217.0" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">6</text>
+<text x="217.0" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">6</text>
+<line x1="228.0" y1="679" x2="228.0" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="228.0" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">5</text>
+<text x="228.0" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">5</text>
+<line x1="239.0" y1="679" x2="239.0" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="239.0" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">4</text>
+<text x="239.0" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">4</text>
+<line x1="250.0" y1="679" x2="250.0" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="250.0" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">3</text>
+<text x="250.0" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">3</text>
+<line x1="261.0" y1="679" x2="261.0" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="261.0" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">2</text>
+<text x="261.0" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">2</text>
+<line x1="272.0" y1="679" x2="272.0" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="272.0" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">1</text>
+<text x="272.0" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">1</text>
+<line x1="136" y1="666" x2="217" y2="666" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="217" y1="666" x2="217" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<circle cx="217" cy="666" r="2.6" fill="#cc0000" />
+<line x1="217" y1="666" x2="239" y2="666" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="239" y1="666" x2="239" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<circle cx="239" cy="666" r="2.6" fill="#cc0000" />
+<line x1="239" y1="666" x2="261" y2="666" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="261" y1="666" x2="261" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="126" y1="653" x2="185" y2="653" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="185" y1="653" x2="185" y2="638" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="185" y1="638" x2="219.8" y2="638" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="219.8" y1="619" x2="219.8" y2="638" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<circle cx="219.8" cy="638" r="2.6" fill="#cc0000" />
+<line x1="219.8" y1="638" x2="258.2" y2="638" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="258.2" y1="619" x2="258.2" y2="638" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<circle cx="258.2" cy="638" r="2.6" fill="#cc0000" />
+<line x1="258.2" y1="638" x2="296.6" y2="638" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="296.6" y1="619" x2="296.6" y2="638" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="232.6" y1="619" x2="232.6" y2="646" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="232.6" y1="646" x2="228.0" y2="646" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="228.0" y1="646" x2="228.0" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="271.0" y1="619" x2="271.0" y2="650" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="271.0" y1="650" x2="250.0" y2="650" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="250.0" y1="650" x2="250.0" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="309.4" y1="619" x2="309.4" y2="654" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="309.4" y1="654" x2="272.0" y2="654" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="272.0" y1="654" x2="272.0" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<line x1="335.0" y1="619" x2="335.0" y2="644" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="330.8,655.0 330.8,649.0 335.0,644 339.2,649.0 339.2,655.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="338.2" y="659.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end" transform="rotate(-90 338.2 659.0)">24VDC</text>
+<line x1="347.8" y1="619" x2="347.8" y2="644" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="343.6,655.0 343.6,649.0 347.8,644 352.0,649.0 352.0,655.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="351.0" y="659.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end" transform="rotate(-90 351.0 659.0)">DP1A</text>
+<rect x="374" y="689" width="51" height="23" stroke="#880000" stroke-width="1.2" fill="none" />
+<text x="399" y="725" font-size="9.2" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">Ultrasonic</text>
+<circle cx="420" cy="694" r="1.5" fill="#880000" />
+<line x1="381.0" y1="679" x2="381.0" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="381.0" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">4</text>
+<text x="381.0" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">4</text>
+<line x1="381.0" y1="660" x2="381.0" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="376.8,649.0 376.8,655.0 381.0,660 385.2,655.0 385.2,649.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="384.2" y="645.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 384.2 645.0)">5VDC</text>
+<line x1="392.2" y1="679" x2="392.2" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="392.2" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">3</text>
+<text x="392.2" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">3</text>
+<line x1="392.2" y1="660" x2="392.2" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="388.0,649.0 388.0,655.0 392.2,660 396.4,655.0 396.4,649.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="395.4" y="645.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 395.4 645.0)">rawEcho</text>
+<line x1="403.4" y1="679" x2="403.4" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="403.4" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">2</text>
+<text x="403.4" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">2</text>
+<line x1="403.4" y1="660" x2="403.4" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="399.2,649.0 399.2,655.0 403.4,660 407.59999999999997,655.0 407.59999999999997,649.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="406.59999999999997" y="645.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 406.59999999999997 645.0)">rawTrig</text>
+<line x1="414.6" y1="679" x2="414.6" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="414.6" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">1</text>
+<text x="414.6" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">1</text>
+<line x1="414.6" y1="660" x2="414.6" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="410.40000000000003,649.0 410.40000000000003,655.0 414.6,660 418.8,655.0 418.8,649.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="417.8" y="645.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 417.8 645.0)">GND</text>
+<rect x="449" y="689" width="51" height="23" stroke="#880000" stroke-width="1.2" fill="none" />
+<text x="474" y="725" font-size="9.2" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">PPM Sensor</text>
+<circle cx="495" cy="694" r="1.5" fill="#880000" />
+<line x1="456.0" y1="679" x2="456.0" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="456.0" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">4</text>
+<text x="456.0" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">4</text>
+<line x1="456.0" y1="660" x2="456.0" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="451.8,649.0 451.8,655.0 456.0,660 460.2,655.0 460.2,649.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="459.2" y="645.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 459.2 645.0)">5VDC</text>
+<line x1="467.2" y1="679" x2="467.2" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="467.2" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">3</text>
+<text x="467.2" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">3</text>
+<line x1="467.2" y1="660" x2="467.2" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="463.0,649.0 463.0,655.0 467.2,660 471.4,655.0 471.4,649.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="470.4" y="645.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 470.4 645.0)">PPMsignal</text>
+<line x1="478.4" y1="679" x2="478.4" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="478.4" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">2</text>
+<text x="478.4" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">2</text>
+<line x1="478.4" y1="660" x2="478.4" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="474.2,649.0 474.2,655.0 478.4,660 482.59999999999997,655.0 482.59999999999997,649.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="481.59999999999997" y="645.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 481.59999999999997 645.0)">GND</text>
+<line x1="489.6" y1="679" x2="489.6" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="489.6" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">1</text>
+<text x="489.6" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">1</text>
+<line x1="486.6" y1="676.0" x2="492.6" y2="682.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<line x1="486.6" y1="682.0" x2="492.6" y2="676.0" stroke="#00aa00" stroke-width="1.4" stroke-linecap="round" />
+<rect x="524" y="689" width="31" height="23" stroke="#880000" stroke-width="1.2" fill="none" />
+<text x="539" y="725" font-size="9.2" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">Doses Pump</text>
+<line x1="531.0" y1="679" x2="531.0" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="531.0" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">2</text>
+<text x="531.0" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">2</text>
+<line x1="531.0" y1="660" x2="531.0" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="526.8,649.0 526.8,655.0 531.0,660 535.2,655.0 535.2,649.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="534.2" y="645.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 534.2 645.0)">DP1B</text>
+<line x1="545.0" y1="679" x2="545.0" y2="689" stroke="#880000" stroke-width="1.2" stroke-linecap="round" />
+<text x="545.0" y="687" font-size="7.5" font-weight="normal" font-style="normal" fill="#000000" text-anchor="middle">1</text>
+<text x="545.0" y="702" font-size="7.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="middle">1</text>
+<line x1="545.0" y1="660" x2="545.0" y2="679" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="540.8,649.0 540.8,655.0 545.0,660 549.2,655.0 549.2,649.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="548.2" y="645.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 548.2 645.0)">DP1A</text>
+<line x1="528" y1="512" x2="528" y2="540" stroke="#008800" stroke-width="1.5" stroke-linecap="round" />
+<polygon points="523.8,501.0 523.8,507.0 528,512 532.2,507.0 532.2,501.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="531.2" y="497.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="start" transform="rotate(-90 531.2 497.0)">GND2</text>
+<polygon points="523.8,551.0 523.8,545.0 528,540 532.2,545.0 532.2,551.0" fill="#ffffff" stroke="#0000cc" stroke-width="1.1" stroke-linejoin="round" />
+<text x="531.2" y="555.0" font-size="9.2" font-weight="normal" fill="#0000cc" text-anchor="end" transform="rotate(-90 531.2 555.0)">DP1B</text>
+<rect x="704" y="726" width="445" height="81" stroke="#800000" stroke-width="1.3" fill="none" />
+<line x1="704" y1="762" x2="1149" y2="762" stroke="#800000" stroke-width="1.2" stroke-linecap="round" />
+<line x1="1034" y1="726" x2="1034" y2="807" stroke="#800000" stroke-width="1.2" stroke-linecap="round" />
+<line x1="794" y1="762" x2="794" y2="807" stroke="#800000" stroke-width="1.2" stroke-linecap="round" />
+<line x1="794" y1="780" x2="1034" y2="780" stroke="#800000" stroke-width="1.0" stroke-linecap="round" />
+<text x="712" y="740" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="start">TITLE:</text>
+<text x="789" y="750" font-size="15" font-weight="bold" font-style="normal" fill="#0000aa" text-anchor="start">Early_MVP</text>
+<text x="1042" y="750" font-size="11" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">REV:  1.1</text>
+<g transform="translate(712, 770)">
+<path d="M 12 18 A 6 6 0 0 1 6 12 A 5 5 0 0 1 11 7 A 8 8 0 0 1 24 7 A 6 6 0 0 1 28 14 A 5 5 0 0 1 24 19 Z" stroke="#0077dd" stroke-width="1.8" fill="none" />
+<circle cx="9" cy="18" r="1.5" fill="#0077dd" />
+<circle cx="16" cy="18" r="1.5" fill="#0077dd" />
+<text x="32" y="16" font-size="13" font-weight="bold" fill="#0077dd">EasyEDA</text>
+</g>
+<text x="800" y="774" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="start">Company:  </text>
+<text x="854" y="774" font-size="10" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">Desanomia Bantul</text>
+<text x="800" y="793" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="start">Date:  </text>
+<text x="834" y="793" font-size="9.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">2026-09-18</text>
+<text x="909" y="793" font-size="9" font-weight="normal" font-style="normal" fill="#800000" text-anchor="start">Drawn By:  </text>
+<text x="962" y="793" font-size="9.5" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">taoofeexs</text>
+<text x="1042" y="786" font-size="11" font-weight="normal" font-style="normal" fill="#0000aa" text-anchor="start">Sheet:  1/1</text>
+</svg>

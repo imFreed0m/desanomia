@@ -2,6 +2,7 @@
 .antigravity/
 .gemini/
 task-state.json
+.agents/
 
 # Environment variables & secrets
 .env
@@ -68,3 +69,6 @@ graphify-out/cache/
 # Spec kit local machine state
 feature.json
 extensions/*/local-config.yml
+
+# CodeGraph local index
+.codegraph/

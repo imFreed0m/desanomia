@@ -1,0 +1,230 @@
+# ==============================================================================
+# RENCANA ANGGARAN BIAYA (RAB) DEFINITIF - SUBSISTEM MONITOR, SERVER & DISPLAY
+# Greenhouse V2 DESANOMI — Sistem Otomasi Fertigasi Presisi
+# ==============================================================================
+# Status: FINAL DEFINITIF (VERIFIED & READY TO CHECKOUT)
+# Tanggal Verifikasi: 29 September 2026
+# Total Item Fisik: 24 Item (Terenumerasi Rapi 1 s/d 24)
+# Grand Total Anggaran: Rp 12.916.299
+#
+# Ringkasan Verifikasi Teknis Fisik & Mekanikal:
+# 1. Dual Adapter Type-C U-Shape (Item 12):
+#    - VERIFIED 100%. Lebar bodi adapter (13.34 mm) muat berdampingan di dua port
+#      Type-C monitor UPERFECT 15.6" (pitch antar port 16.31 mm, clearance +2.97 mm).
+#    - Jangkauan lengkungan U (5.96 mm) melompati bibir bawah frame monitor (2.59 mm)
+#      dengan aman tanpa terganjal sasis.
+# 2. Adapter Center L-Shape Type-C (Item 11):
+#    - Dialokasikan untuk port depan Beelink EQ12 agar kabel sentuh rata menyusuri bodi
+#      dan aman dari tekanan pintu panel box Fort 60x80x20 cm.
+# 3. Adapter RJ45 LAN Elbow 90° Up (Item 24):
+#    - Dialokasikan untuk port LAN belakang Beelink EQ12 agar kabel langsung naik rapi
+#      ke Cable Duct PMD 33x33 mm di atas rak Beelink.
+# 4. Etalase Proteksi Rel DIN (Item 6 & Item 7):
+#    - Berasal dari 1 tautan etalase Shopee yang sama dengan 2 variasi SKU:
+#      Item 6 = BEVAV MCB 220V 40A (Digital VA Protector Auto-Recovery)
+#      Item 7 = CHNT-1P+N 30MA, 25A (RCBO Pemutus Arus Bocor Tanah)
+# 5. Klem Tiang Antena (Item 21 & Item 22):
+#    - Clamp 1 1/2" (4 pcs) digunakan untuk sepasang Tenda O1 di tiang L 3/4".
+#    - Clamp 1" (4 pcs) dialokasikan sebagai klem cadangan pipa air fertigasi.
+# ==============================================================================
+
+metadata:
+  proyek: "Greenhouse V2 DESANOMI"
+  subsistem: "Server Edge, Kiosk HMI 15.6\", Gazebo Display 43\", & Jaringan PTP 156.5m"
+  status: "FINAL DEFINITIF (READY TO CHECKOUT)"
+  tanggal_kunci: "2026-09-29"
+  total_item: 24
+  grand_total: 12916299
+
+daftar_belanja:
+  - no: 1
+    item: "MINI PC Beelink EQ12 N100 16G DDR5 500GB SSD NVMe WiFi6 Windows 11 Pro"
+    qtt: 1
+    harga: 3799000
+    sub_total: 3799000
+    ket: "Server Edge & SCADA Host (Docker, FastAPI, PostgreSQL, MQTT Broker)"
+    link: "https://shopee.co.id/MINI-PC-Beelink-EQ12-N100-16G-DDR5-500GB-SSD-NVMe-WiFi6-Windows-11-Pro-i.224560815.23967627249?xptdk=8c82e513-5474-4b45-9793-0a5d23faa760"
+
+  - no: 2
+    item: "Xiaomi TV A 43\" FHD 2026"
+    qtt: 1
+    harga: 3399000
+    sub_total: 3399000
+    ket: "TV A 43 2026 (Display Pengawas Gazebo 24/7 Fully Kiosk Browser)"
+    link: "https://shopee.co.id/Xiaomi-TV-A-43-FHD-2026-Resolusi-FHD-Dolby-Audio%E2%84%A2-DTS-X-Google-TV-Xiaomi-Official-Store--i.1629948546.47955426682?xptdk=9ff398bc-0ec4-4e48-baa8-fddc2c1a6549"
+
+  - no: 3
+    item: "BRACKET TV 17\" s/d 43\""
+    qtt: 1
+    harga: 135000
+    sub_total: 135000
+    ket: "Model 2 17\" - 43\" / Bisa semua Merk TV (Swivel Tilt VESA 200x200 mm)"
+    link: "https://shopee.co.id/FREE-EXTRA!!-BRACKET-TV-17-s-d-43-model-lengan-swivel-LEBIH-TEBAL-6-arah-universal-breket-i.122115542.28412954471?xptdk=36eb07c1-0e99-48cb-9d2b-7c512b770aaf"
+
+  - no: 4
+    item: "UPERFECT BE185EF 15.6‘’ 1080P Touch"
+    qtt: 1
+    harga: 1730000
+    sub_total: 1730000
+    ket: "15.6‘’ 1080P Touch (Layar Kontrol HMI Operator Ruang Panel VESA 75x75 mm)"
+    link: "https://shopee.co.id/UPERFECT-BE185EF-18.5''-Touchscreen-Portable-Monitor-120Hz-1920*1080P-FHD-IPS-Touch-Screen-Gaming-Monitor-With-Freesync-Vesa-For-iPad-PC-Mac-Phone-Xbox-Switch-PS4-Type-C-HDMI-i.857238347.23941797803?xptdk=59352223-a57b-41aa-b797-e5a9909d32f1"
+
+  - no: 5
+    item: "Standing Monitor Touchscreen Tinggi 90 Cm Lengkung"
+    qtt: 1
+    harga: 980000
+    sub_total: 980000
+    ket: "Tiang Lengkung Plat Besi Kiosk Lantai 90 cm dengan jalur kabel internal"
+    link: "https://shopee.co.id/Standing-Monitor-Touchscreen-Tinggi-90-Cm-Lengkung-i.15326413.6769234636?xptdk=0cffee5a-2973-4053-8e7d-5c7ea27d8fb3"
+
+  - no: 6
+    item: "Digital Din Rail Over current Under Voltage Protection"
+    qtt: 1
+    harga: 78000
+    sub_total: 78000
+    ket: "BEVAV MCB 220V 40A (Digital VA Protector Over/Under Voltage Auto-Recovery 30s)"
+    link: "https://shopee.co.id/Digital-Din-Rail-Over-current-Under-Voltage-Protection-recoverable-220V-40A-63A-Pengaman-beban-lebih-MCB-i.1090736884.24207228342?xptdk=5a304a82-c233-4cb5-b713-5de6f697d27c"
+
+  - no: 7
+    item: "Digital Din Rail Over current Under Voltage Protection"
+    qtt: 1
+    harga: 58580
+    sub_total: 58580
+    ket: "CHNT-1P+N 30MA,25A (RCBO Pemutus Arus Bocor 30mA Pengaman Sengatan Air)"
+    link: "https://shopee.co.id/Digital-Din-Rail-Over-current-Under-Voltage-Protection-recoverable-220V-40A-63A-Pengaman-beban-lebih-MCB-i.1090736884.24207228342?xptdk=5a304a82-c233-4cb5-b713-5de6f697d27c"
+
+  - no: 8
+    item: "Stop Kontak Din Rail Arde 16A Ewig"
+    qtt: 4
+    harga: 36540
+    sub_total: 146160
+    ket: "Stopkontak Rel DIN 35mm (Slot 1: Beelink, Slot 2: GaN 30W, Slot 3: PoE, Slot 4: Cadangan)"
+    link: "https://shopee.co.id/Stop-Kontak-Din-Rail-Arde-16A-EWIG.-i.50487634.6702432280?xptdk=c05a7516-6bf8-4785-bf3a-e521d720f024"
+
+  - no: 9
+    item: "Telkomsel Orbit Star H2"
+    qtt: 1
+    harga: 689000
+    sub_total: 689000
+    ket: "Modem 4G Gateway DMZ Gazebo + Wi-Fi Publik Pengunjung"
+    link: "https://shopee.co.id/Telkomsel-Orbit-Star-H2-Modem-WiFi-4G-High-Speed-Bonus-Data-i.373052945.24210344913?xptdk=5cdc897a-6521-47f0-9f12-ebde0adb287e"
+
+  - no: 10
+    item: "CABLETIME Kabel Data Type C to Type C USB 3.2 Gen2x2 20Gbps"
+    qtt: 2
+    harga: 168600
+    sub_total: 337200
+    ket: "2M (1x Daya PD IN dari GaN 30W ke Monitor, 1x Data Sentuh Touchscreen ke Beelink)"
+    link: "https://shopee.co.id/CABLETIME-Kabel-Data-Type-C-to-Type-C-USB-3.2-Gen2x2-20Gbps-PD-100W-4K60Hz-Cable-3M-5M-i.1044269675.51115190716?xptdk=a059eac6-4581-40e2-80c1-9b0aa30227c4"
+
+  - no: 11
+    item: "CABLETIME Adapter Converter USB-4 240W 8K 5A Type-C"
+    qtt: 1
+    harga: 71500
+    sub_total: 71500
+    ket: "Center L Shape (Untuk Port Type-C Depan Beelink EQ12 agar kabel rata & rapi di panel)"
+    link: "https://shopee.co.id/CABLETIME-Adapter-Converter-USB-4-240W-8K-5A-Type-C-Exclusive-Series-i.1044269675.27013780368?xptdk=57f7f6bc-7529-4f47-bdae-cc5bf605e559"
+
+  - no: 12
+    item: "CABLETIME Adapter Converter USB-4 240W 8K 5A Type-C"
+    qtt: 2
+    harga: 71500
+    sub_total: 143000
+    ket: "U Shape (Untuk 2 Port Type-C UPERFECT 15.6\", melipat 180° ke bawah bibir monitor)"
+    link: "https://shopee.co.id/CABLETIME-Adapter-Converter-USB-4-240W-8K-5A-Type-C-Exclusive-Series-i.1044269675.27013780368?xptdk=b49a2641-69e1-49ee-b802-5786494dbf8a"
+
+  - no: 13
+    item: "CABLETIME Adaptor Kepala Charger GaN PD Type C Fast Charging 30W"
+    qtt: 1
+    harga: 148300
+    sub_total: 148300
+    ket: "30W - White (Catu Daya Dingin 24/7 Monitor Kiosk di Stopkontak DIN Slot 2)"
+    link: "https://shopee.co.id/CABLETIME-Adaptor-Kepala-Charger-GaN-PD-Type-C-Fast-Charging-20W-100W-i.1044269675.25826537201?xptdk=a02c90c8-5e00-4962-9b1c-c3be0783e0a7"
+
+  - no: 14
+    item: "CABLETIME Kabel LAN RJ45 Cat 6 Gigabit Ethernet UTP Cable"
+    qtt: 2
+    harga: 24800
+    sub_total: 49600
+    ket: "2M (1x Patchcord Beelink ke PoE Greenhouse, 1x Patchcord Orbit ke PoE Gazebo)"
+    link: "https://shopee.co.id/CABLETIME-Kabel-LAN-RJ45-Cat-6-Gigabit-Ethernet-UTP-Cable-1000Mbps-i.1044269675.24081614032?xptdk=d6e62b1c-5ac9-42a4-9a4c-11fb2036364f"
+
+  - no: 15
+    item: "CABLETIME Adapter HDMI Male To Female Display 90 270 Degree"
+    qtt: 1
+    harga: 35300
+    sub_total: 35300
+    ket: "CP44 Right Angle (Adapter Siku HDMI Samping Beelink EQ12)"
+    link: "https://shopee.co.id/CABLETIME-Adapter-HDMI-Male-To-Female-Display-90-270-Degree-i.1044269675.23854851568?xptdk=adea28db-825e-45b2-aaaf-95d78e07e551"
+
+  - no: 16
+    item: "CABLETIME Kabel HDMI Male to Male 2.0 Ultra HD 4K 1080p HDR ARC"
+    qtt: 1
+    harga: 62700
+    sub_total: 62700
+    ket: "2M (Jalur Transmisi Video FHD 60Hz dari Beelink ke Monitor Kiosk)"
+    link: "https://shopee.co.id/CABLETIME-Kabel-HDMI-Male-to-Male-2.0-Ultra-HD-4K-1080p-HDR-ARC-Exclusive-Series-i.1044269675.26751627967?extraParams=%7B%22display_model_id%22%3A195145680679%2C%22model_selection_logic%22%3Anull%7D"
+
+  - no: 17
+    item: "Hagibis mini HDMI to HDMI Adapter Right Angle 90"
+    qtt: 1
+    harga: 80000
+    sub_total: 80000
+    ket: "U mini HD to HD Back x 1 (Adapter Mini-HDMI ke Full HDMI U-Turn Memeluk Belakang Monitor)"
+    link: "https://shopee.co.id/Hagibis-mini-HDMI-to-HDMI-Adapter-Right-Angle-90-Degree-Male-to-Female-mini-HDMI-Connector-L-Shape-Conventer-High-Refresh-Rate-16-sold-i.1451357677.51957179348?xptdk=9842444b-b56c-4208-9e03-f3f5a6fcf0fa"
+
+  - no: 18
+    item: "FTP 10m Cat 5"
+    qtt: 2
+    harga: 54900
+    sub_total: 109800
+    ket: "Kabel Outdoor FTP Cat5e Jaket Hitam PE Tahan UV (Tiang Tenda O1 ke PoE Injector)"
+    link: "https://shopee.co.id/FTP-10-METER-KABEL-LAN-OUTDOOR-FTP-CAT5E-5-CAT-5E-FTP-10-METER-i.17904699.1937562059?extraParams=%7B%22display_model_id%22%3A32257729632%2C%22model_selection_logic%22%3Anull%7D"
+
+  - no: 19
+    item: "UTP 5m Cat 5"
+    qtt: 1
+    harga: 18000
+    sub_total: 18000
+    ket: "Kabel UTP RJ45 5 Meter (Modem Orbit Star H2 ke Port LAN Xiaomi TV 43\" Gazebo)"
+    link: "https://shopee.co.id/Kabel-Lan-5-Meter-Grey-UTP-Cat5E-UTP-CAT-5E-RJ45-Plugboot-i.17904699.1900151883?extraParams=%7B%22display_model_id%22%3A62257729291%2C%22model_selection_logic%22%3A3%7D"
+
+  - no: 20
+    item: "Tenda O1"
+    qtt: 2
+    harga: 325000
+    sub_total: 650000
+    ket: "2pc (Sepasang Outdoor CPE 2.4GHz PTP Bridge 156.5 Meter Gazebo - Greenhouse)"
+    link: "https://shopee.co.id/TENDA-O1-500m-Outdoor-Point-To-Point-CPE-TENDA-01-Wireless-Router-Outdoor-CPE-i.17904699.1537397112?xptdk=ff38425d-c325-449f-8f87-dc0b73001823"
+
+  - no: 21
+    item: "Clamp 1\""
+    qtt: 4
+    harga: 4520
+    sub_total: 18080
+    ket: "1\" (Klem Selang Stainless Steel 304 - Cadangan Pipa Air Fertigasi)"
+    link: "https://shopee.co.id/1-PC-Kleman-Selang-Stainless-Steel-Untuk-Berbagai-Keperluan-Ukuran-1-2-3-4-5-8-7-8-1-1-4-2-4-5-6-10-12-8-Inch-Inci-Klem-Air-Gas-Kompor-Hose-Clamp-Pengikat-Stainles-SS-Pengencang-i.1543993457.40258529350?xptdk=1ef1b482-bf74-4b29-9e62-d7eda5f23d92"
+
+  - no: 22
+    item: "Clamp 1 1/2\""
+    qtt: 4
+    harga: 4520
+    sub_total: 18080
+    ket: "1 1/2\" (Klem Selang Stainless Steel 304 - Pengikat Tenda O1 ke Pipa L 3/4\")"
+    link: "https://shopee.co.id/1-PC-Kleman-Selang-Stainless-Steel-Untuk-Berbagai-Keperluan-Ukuran-1-2-3-4-5-8-7-8-1-1-4-2-4-5-6-10-12-8-Inch-Inci-Klem-Air-Gas-Kompor-Hose-Clamp-Pengikat-Stainles-SS-Pengencang-i.1543993457.40258529350?xptdk=1ef1b482-bf74-4b29-9e62-d7eda5f23d92"
+
+  - no: 23
+    item: "Tiang Bracket"
+    qtt: 2
+    harga: 60000
+    sub_total: 120000
+    ket: "Hitam / 30cm x 2 (Tiang Bracket Pipa L 3/4\" Antena CPE Luar Ruang)"
+    link: "https://shopee.co.id/TIANG-BRACKET-ANTENA-TV-DINDING-LUAR-DALAM-i.169099458.10695848424?xptdk=9f1f8690-03b7-4b28-bc0c-c05fce7c283c"
+
+  - no: 24
+    item: "RJ45 LAN Elbow Direction Adapter Converter siku colokan 90 Degree"
+    qtt: 1
+    harga: 39999
+    sub_total: 39999
+    ket: "Up (Adapter Siku 90° LAN Belakang Beelink EQ12 Mengarah ke Ducting Atas Panel)"
+    link: "https://shopee.co.id/RJ45-LAN-Elbow-Direction-Adapter-Converter-siku-colokan-90-Degree-i.8082565.17290959051?xptdk=6132152d-47c1-4c8b-b10d-78cd4f3f179e"

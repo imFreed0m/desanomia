@@ -1,0 +1,68 @@
+{
+  "brand": "Beelink",
+  "model": "EQ12",
+  "type": "Mini PC",
+  "system": "Windows 11 Pro",
+  "cpu": {
+    "cores": "Quad Core",
+    "max_frequency": "3.4 GHz"
+  },
+  "gpu": "Intel UHD Graphics 24EUs",
+  "ram": {
+    "capacity": "16GB",
+    "type": "DDR5",
+    "speed": "4800 MHz"
+  },
+  "storage": {
+    "internal": "500GB SSD NVMe",
+    "expansion": {
+      "slot": "1x SATA 2.5\"",
+      "max_capacity": "2TB"
+    }
+  },
+  "supported_formats": {
+    "decoder": ["H.263", "H.264", "H.265", "HD MPEG4"],
+    "video": ["4K", "4K x 2K"],
+    "audio": ["AAC", "AC-3", "APE", "FLAC", "M4A", "MP3", "MPEG", "RM", "WAV", "WMA"],
+    "photo": ["BMP", "GIF", "JPEG", "JPG", "PNG", "TIFF"]
+  },
+  "connectivity": {
+    "wifi": {
+      "standard": "WiFi 6 (802.11 b/g/n/ac)",
+      "band": "5G"
+    },
+    "bluetooth": "5.2",
+    "ethernet": {
+      "ports": 2,
+      "speed": "2.5 Gbps"
+    },
+    "usb": "4x USB 3.2",
+    "hdmi": "2.0"
+  },
+  "ports": ["DC 12V", "HDMI", "Microphone Jack", "RJ45", "USB 3.2"],
+  "power": {
+    "type": "External Power Adapter",
+    "input_voltage": "12V",
+    "suggested_input": "12V 3A",
+    "adapter_input": "100-240V / 50-60Hz",
+    "consumption": "36W"
+  },
+  "dimensions": {
+    "product": "115 x 102 x 39 mm",
+    "product_weight": "0.295 kg",
+    "package_weight": "0.680 kg"
+  },
+  "environment": {
+    "operating": "-10°C to 45°C, 30%-90% humidity",
+    "storage": "-20°C to 60°C, 10%-90% humidity"
+  },
+  "package_contents": [
+    "1 x Mini PC",
+    "1 x HDMI Cable",
+    "1 x Wall-Mounted Bracket",
+    "1 x Power Adapter 12V / 3A",
+    "1 x English User Manual",
+    "1 x Kartu garansi"
+  ],
+  "language": "Multilanguage"
+}
