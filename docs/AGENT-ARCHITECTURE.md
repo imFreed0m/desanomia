@@ -26,12 +26,3 @@ Skills answer: “What specialized knowledge or procedure is needed?”
 Documentation answers: “What is true about the system?”
 
 Do not solve the same problem in more than one layer.
-
-## Deliberate removals from the old files
-
-- Removed the full skill catalogue from root project instructions.
-- Removed MCP-specific schemas and filesystem paths from project policy.
-- Removed session/memory implementation details from root project policy.
-- Removed UI-specific lint/design instructions from the root.
-- Removed the seven-rung “Ponytail” ladder; retained its useful outcome as minimal-change/root-cause guidance.
-- Removed repeated safety numbers from the root; keep them in canonical safety/spec documents and load them for relevant firmware/hardware work.
