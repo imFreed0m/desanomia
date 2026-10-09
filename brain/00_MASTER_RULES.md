@@ -37,7 +37,7 @@ The edge stack runs on an on-site **Beelink EQ12 Mini PC (Intel N100)** hosting 
    - **Frontend UI/UX:** [02_APPFLOW.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/02_APPFLOW.md), [03_UI_UX_BRIEF.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/03_UI_UX_BRIEF.md), [12_UI_SPEC.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/12_UI_SPEC.md)
    - **Safety, Auth & Errors:** [08_SECURITY.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/08_SECURITY.md), [09_ERROR_HANDLING.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/09_ERROR_HANDLING.md), [13_TESTING.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/13_TESTING.md)
    - **DevOps, Deployment & Operations:** [14_GITHUB_ACTIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/14_GITHUB_ACTIONS.md), [15_DEPLOYMENT.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/15_DEPLOYMENT.md), [16_PRODUCTION_CHECKLIST.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/16_PRODUCTION_CHECKLIST.md)
-   - **Task Selection & Logging:** [17_MICROTASKS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/17_MICROTASKS.md), [18_DECISIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md), [19_CHANGELOG.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/19_CHANGELOG.md)
+   - **Task Selection & Logging:** [17_MICROTASKS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/17_MICROTASKS.md), [18_DECISIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md), [19_CHANGELOG.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/19_CHANGELOG.md), [20_GLOSSARY.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/20_GLOSSARY.md)
 
 ---
 
@@ -83,7 +83,7 @@ The edge stack runs on an on-site **Beelink EQ12 Mini PC (Intel N100)** hosting 
 - Work strictly on one microtask at a time selected from [17_MICROTASKS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/17_MICROTASKS.md).
 - Follow Test-Driven Development (TDD): write the failing test first for FSM transitions, safety gates, authentication, and command handling.
 - Record any significant design trade-offs in [18_DECISIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md).
-- Maintain [GLOSSARY.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/GLOSSARY.md) whenever new domain terms or hardware boundaries are established.
+- Maintain [20_GLOSSARY.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/20_GLOSSARY.md) whenever new domain terms or hardware boundaries are established.
 
 ---
 

@@ -17,7 +17,8 @@ Research greenhouse IoT system spanning ESP32 firmware, backend/edge services, a
 - `backend/**` — API, services, edge/infrastructure.
 - `firmware/**` — ESP32, FreeRTOS, sensors, actuators.
 - `hardware/**` — hardware/BOM documentation.
-- `docs/**` — agent config (`docs/agents/`), test results, and working notes. Not the spec; that lives in `brain/`.
+- `docs/**` — test results, and working notes. Not the spec; that lives in `brain/`.
+- `.agents/**` — agent skills, rules, and workflow configuration.
 - Keep changes inside the relevant domain. Cross-domain edits require an explicit end-to-end integration task.
 
 ## Working rules
@@ -34,6 +35,7 @@ Research greenhouse IoT system spanning ESP32 firmware, backend/edge services, a
 `brain/00_MASTER_RULES.md` → entry point, read order, safety/system rules
 `brain/05_ARCHITECTURE.md` → system boundaries and integration
 `brain/18_DECISIONS.md` → accepted/rejected design decisions
+`brain/20_GLOSSARY.md` → canonical domain vocabulary and forbidden terms
 `docs/SPEC.md` → source of frozen constants (`[SPEC]`); transitional, `brain/` is being aligned to it
 
 For workflow procedures, use `.agents/rules/`. For specialized expertise, load the matching skill from `.agents/skills/`.
@@ -42,12 +44,12 @@ For workflow procedures, use `.agents/rules/`. For specialized expertise, load t
 
 ### Issue tracker
 
-Issues live as markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+Issues live as markdown files under `.scratch/<feature>/`. See `.agents/issue-tracker.md`.
 
 ### Triage labels
 
-Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`), recorded in each issue's `Status:` line. See `docs/agents/triage-labels.md`.
+Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`), recorded in each issue's `Status:` line. See `.agents/triage-labels.md`.
 
 ### Domain docs
 
-Single-context: one `GLOSSARY.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+Single-context: one `brain/20_GLOSSARY.md` + `brain/18_DECISIONS.md`. See `.agents/domain.md`.

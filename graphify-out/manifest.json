@@ -1,14 +1,314 @@
 {
-  ".gemini/task-state.json": {
-    "mtime": 1790806275.5614138,
-    "seen": 1790806309.1824992,
-    "ast_hash": "6571ef2c247c9a67351cc51881d18650",
-    "semantic_hash": "6571ef2c247c9a67351cc51881d18650"
+  ".vscode/settings.json": {
+    "mtime": 1791377573.339632,
+    "seen": 1791539301.1138086,
+    "ast_hash": "3106177ce12d2f2d03bcb63da0de2a6e",
+    "semantic_hash": ""
   },
-  ".agents/rules/session_start_protocol.md": {
-    "mtime": 1790806243.9191139,
-    "seen": 1790806309.182502,
-    "ast_hash": "b3e833ed6ef335c8124290d5a45faf60",
-    "semantic_hash": "b3e833ed6ef335c8124290d5a45faf60"
+  "hardware/MIni_PC_Spec.json": {
+    "mtime": 1791395417.4458456,
+    "seen": 1791539301.1138122,
+    "ast_hash": "95133f75418275170a043e6747fd7ebb",
+    "semantic_hash": ""
+  },
+  "skills-lock.json": {
+    "mtime": 1791383772.443559,
+    "seen": 1791539301.1138139,
+    "ast_hash": "2b03fc8b50ab7b46f0b49e9e64f4e7f0",
+    "semantic_hash": ""
+  },
+  ".agents/domain.md": {
+    "mtime": 1791539044.3728158,
+    "seen": 1791539301.1138148,
+    "ast_hash": "fd68682f55f0c31c2452759c0ec8f296",
+    "semantic_hash": ""
+  },
+  ".agents/issue-tracker.md": {
+    "mtime": 1791539052.8698626,
+    "seen": 1791539301.1138155,
+    "ast_hash": "217ea82cdf22fe75db4afcaafcded36e",
+    "semantic_hash": ""
+  },
+  ".agents/rules/context-intelligence.md": {
+    "mtime": 1791413931.1353972,
+    "seen": 1791539301.1138165,
+    "ast_hash": "1e5ce447c0462717ee2ed7bb0adc14c3",
+    "semantic_hash": ""
+  },
+  ".agents/rules/mcp-tool-usage.md": {
+    "mtime": 1791387596.0,
+    "seen": 1791539301.1138175,
+    "ast_hash": "d5fba2e184f90a67848ac06a65bd18e0",
+    "semantic_hash": ""
+  },
+  ".agents/rules/skill-use.md": {
+    "mtime": 1791387596.0,
+    "seen": 1791539301.1138182,
+    "ast_hash": "3e96df74a2f8db4c1860899e4e8c7d49",
+    "semantic_hash": ""
+  },
+  ".agents/rules/task-execution.md": {
+    "mtime": 1791387596.0,
+    "seen": 1791539301.1138186,
+    "ast_hash": "371eebf59355d6ce1bed4fd376021475",
+    "semantic_hash": ""
+  },
+  ".agents/triage-labels.md": {
+    "mtime": 1791539059.7339003,
+    "seen": 1791539301.1138194,
+    "ast_hash": "cd6c8f54bcbec88036460af9e2d19fca",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1791539151.564339,
+    "seen": 1791539301.1138198,
+    "ast_hash": "e04634b80074704b4fed54c0d6e26c79",
+    "semantic_hash": ""
+  },
+  "backend/AGENTS.md": {
+    "mtime": 1791387596.0,
+    "seen": 1791539301.1138206,
+    "ast_hash": "bfa3bf4f624f7e0ecfb5ed760f72a254",
+    "semantic_hash": ""
+  },
+  "brain/00_MASTER_RULES.md": {
+    "mtime": 1791539175.1554413,
+    "seen": 1791539301.1138215,
+    "ast_hash": "2a6af3a40853618b8d56d7efb0bce35c",
+    "semantic_hash": ""
+  },
+  "brain/01_PRD.md": {
+    "mtime": 1791484470.9969177,
+    "seen": 1791539301.113822,
+    "ast_hash": "2cc0376193945ef3fe1fe77ca9d5d635",
+    "semantic_hash": ""
+  },
+  "brain/02_APPFLOW.md": {
+    "mtime": 1791483722.2302732,
+    "seen": 1791539301.1138227,
+    "ast_hash": "1d29f3ab09481c409c235e8b563312e8",
+    "semantic_hash": ""
+  },
+  "brain/03_UI_UX_BRIEF.md": {
+    "mtime": 1791495106.3533015,
+    "seen": 1791539301.1138234,
+    "ast_hash": "eecae69cc8e45bd0f33750d0dd19a0b9",
+    "semantic_hash": ""
+  },
+  "brain/04_TRD.md": {
+    "mtime": 1791405713.0,
+    "seen": 1791539301.113824,
+    "ast_hash": "c5937ee4ba4500d3a44acf42b080a316",
+    "semantic_hash": ""
+  },
+  "brain/05_ARCHITECTURE.md": {
+    "mtime": 1791482570.541134,
+    "seen": 1791539301.113825,
+    "ast_hash": "07b0b1dc6dd7987fc6aaf5f41730a239",
+    "semantic_hash": ""
+  },
+  "brain/06_DATA_MODEL.md": {
+    "mtime": 1791482600.3738372,
+    "seen": 1791539301.1138256,
+    "ast_hash": "801101932457808c21a56168394ba6f0",
+    "semantic_hash": ""
+  },
+  "brain/07_DATA_SOURCES.md": {
+    "mtime": 1791405713.0,
+    "seen": 1791539301.1138263,
+    "ast_hash": "6bdd3b9ebca1b0b2fa81f7434b94fbe8",
+    "semantic_hash": ""
+  },
+  "brain/08_SECURITY.md": {
+    "mtime": 1791405713.0,
+    "seen": 1791539301.113827,
+    "ast_hash": "0a0095f6e7405b781a4e8e136f7020af",
+    "semantic_hash": ""
+  },
+  "brain/09_ERROR_HANDLING.md": {
+    "mtime": 1791405713.0,
+    "seen": 1791539301.113828,
+    "ast_hash": "046b4d40c48c8006cb6d66f363716077",
+    "semantic_hash": ""
+  },
+  "brain/10_FIRMWARE_SPEC.md": {
+    "mtime": 1791405713.0,
+    "seen": 1791539301.113829,
+    "ast_hash": "eb2827845604ef364477f033a2f2ffb3",
+    "semantic_hash": ""
+  },
+  "brain/11_API_CONTRACT.md": {
+    "mtime": 1791405713.0,
+    "seen": 1791539301.1138296,
+    "ast_hash": "aa8986a146b967d97f25c329e39d5278",
+    "semantic_hash": ""
+  },
+  "brain/12_UI_SPEC.md": {
+    "mtime": 1791483784.089731,
+    "seen": 1791539301.1138303,
+    "ast_hash": "4059e191064bf7c9e6b66caca808b289",
+    "semantic_hash": ""
+  },
+  "brain/13_TESTING.md": {
+    "mtime": 1791405713.0,
+    "seen": 1791539301.1138313,
+    "ast_hash": "ca7780a28f774fa38a47d3c1e67822ee",
+    "semantic_hash": ""
+  },
+  "brain/14_GITHUB_ACTIONS.md": {
+    "mtime": 1791405713.0,
+    "seen": 1791539301.113832,
+    "ast_hash": "6d6e9ec3d3421f3022aee197afd3f3aa",
+    "semantic_hash": ""
+  },
+  "brain/15_DEPLOYMENT.md": {
+    "mtime": 1791405713.0,
+    "seen": 1791539301.1138325,
+    "ast_hash": "eb2628889e8f08ad941dce58739489ab",
+    "semantic_hash": ""
+  },
+  "brain/16_PRODUCTION_CHECKLIST.md": {
+    "mtime": 1791469641.7659447,
+    "seen": 1791539301.1138332,
+    "ast_hash": "c4afa4ddbc7159b0fa64858f1d5d94da",
+    "semantic_hash": ""
+  },
+  "brain/17_MICROTASKS.md": {
+    "mtime": 1791405713.0,
+    "seen": 1791539301.113834,
+    "ast_hash": "6c8e034ee9e49ac2adb1eb5ba089ce8d",
+    "semantic_hash": ""
+  },
+  "brain/18_DECISIONS.md": {
+    "mtime": 1791484485.772266,
+    "seen": 1791539301.1138349,
+    "ast_hash": "0a77247c009aceec5260370b43b6c15c",
+    "semantic_hash": ""
+  },
+  "brain/19_CHANGELOG.md": {
+    "mtime": 1791495120.7546399,
+    "seen": 1791539301.1138356,
+    "ast_hash": "79276d71fc7c9b9b0fd0ec074e913a76",
+    "semantic_hash": ""
+  },
+  "brain/20_GLOSSARY.md": {
+    "mtime": 1791483797.0900373,
+    "seen": 1791539301.113836,
+    "ast_hash": "a7e77b24ca2225b44cef44f49a0f9ea6",
+    "semantic_hash": ""
+  },
+  "docs/AGENT-ARCHITECTURE.md": {
+    "mtime": 1791414836.8804862,
+    "seen": 1791539301.1138365,
+    "ast_hash": "f694cd302522592b6d38cca611bb8d96",
+    "semantic_hash": ""
+  },
+  "docs/ARSITEKTUR_DAN_PERANCANGAN_SISTEM_GREENHOUSE_V2.md": {
+    "mtime": 1791424791.8455944,
+    "seen": 1791539301.1138372,
+    "ast_hash": "1fb682ba5475c3b252d026b2a332f254",
+    "semantic_hash": ""
+  },
+  "docs/Automated_Fertigation_&_PPM_Control_Specification_v1.md": {
+    "mtime": 1791424588.5370026,
+    "seen": 1791539301.1138377,
+    "ast_hash": "fb33718bd937c8a58473a70a8ebb0a13",
+    "semantic_hash": ""
+  },
+  "docs/CONSTITUTION.md": {
+    "mtime": 1791399595.6185074,
+    "seen": 1791539301.1138384,
+    "ast_hash": "26a73fa0712ce273c0e8927f815c3ba0",
+    "semantic_hash": ""
+  },
+  "docs/DOSE_TEST_RESULT.md": {
+    "mtime": 1789148117.0,
+    "seen": 1791539301.1138391,
+    "ast_hash": "1fbe05131187bb3def2d6ac68edf9b89",
+    "semantic_hash": ""
+  },
+  "docs/SPEC.md": {
+    "mtime": 1791484495.9085047,
+    "seen": 1791539301.1138396,
+    "ast_hash": "a2022e03ca2336e8bfcd9996111f63f7",
+    "semantic_hash": ""
+  },
+  "docs/SUGESTION.yaml": {
+    "mtime": 1790866650.3901362,
+    "seen": 1791539301.1138403,
+    "ast_hash": "16f97706013738e7f1296a458ece7254",
+    "semantic_hash": ""
+  },
+  "firmware/AGENTS.md": {
+    "mtime": 1791387596.0,
+    "seen": 1791539301.1138408,
+    "ast_hash": "5c4caffafbe998270a3bc2c45770e3bf",
+    "semantic_hash": ""
+  },
+  "frontend/AGENTS.md": {
+    "mtime": 1791387596.0,
+    "seen": 1791539301.1138418,
+    "ast_hash": "350681ba384792d78e11bb7ae3017e9e",
+    "semantic_hash": ""
+  },
+  "hardware/AGENTS.md": {
+    "mtime": 1791387596.0,
+    "seen": 1791539301.1138422,
+    "ast_hash": "dcc621ac9d4e3d9e92c8dd561be79b3a",
+    "semantic_hash": ""
+  },
+  "hardware/BOM_HARDWARE_MINI_PC_DISPLAY.md": {
+    "mtime": 1790621466.0,
+    "seen": 1791539301.1138434,
+    "ast_hash": "c344cf023acdaa9e51cc0639c3088a00",
+    "semantic_hash": ""
+  },
+  "hardware/RAB_HARDWARE_MINI_PC_DISPLAY.md": {
+    "mtime": 1790621546.0,
+    "seen": 1791539301.1138442,
+    "ast_hash": "8ae0dead243156855d3a3d6832699e20",
+    "semantic_hash": ""
+  },
+  "hardware/RAB_MONITOR.yaml": {
+    "mtime": 1790632414.0,
+    "seen": 1791539301.1138446,
+    "ast_hash": "aacd1487bf847fb132ceadcafaf11dd9",
+    "semantic_hash": ""
+  },
+  "hardware/BOM_HARDWARE_MINI_PC_DISPLAY.pdf": {
+    "mtime": 1790418967.0,
+    "seen": 1791539301.1138456,
+    "ast_hash": "e5b2ee37ed26564066ef9f3799690ba9",
+    "semantic_hash": ""
+  },
+  "hardware/ESP32S3_DATASET.webp": {
+    "mtime": 1791385697.4528773,
+    "seen": 1791539301.113846,
+    "ast_hash": "84336653a9dfc6e839644e242e1d1225",
+    "semantic_hash": ""
+  },
+  "hardware/ESP32S3_MODULE_INFO.webp": {
+    "mtime": 1791385744.1923997,
+    "seen": 1791539301.1138465,
+    "ast_hash": "526604826f60d2752f40d08a1ee26701",
+    "semantic_hash": ""
+  },
+  "hardware/ESP32S3_PIN_INFO.webp": {
+    "mtime": 1791385772.8127198,
+    "seen": 1791539301.1138473,
+    "ast_hash": "64680e1188114709e6a5d709bf81049e",
+    "semantic_hash": ""
+  },
+  "hardware/FLOW_DIAGRAM.jpg": {
+    "mtime": 1789812282.0,
+    "seen": 1791539301.113848,
+    "ast_hash": "3fc4b4ba4b558b60542fbd0ac3e9791c",
+    "semantic_hash": ""
+  },
+  "hardware/SCHEMATIC.svg": {
+    "mtime": 1789812282.0,
+    "seen": 1791539301.113849,
+    "ast_hash": "dafe4bf9fe5c8a80dc81da77382d89ba",
+    "semantic_hash": ""
   }
 }

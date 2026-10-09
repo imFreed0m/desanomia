@@ -1,0 +1,77 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "id": "MemoryFallbackHierarchy",
+      "label": "Memory Fallback Hierarchy",
+      "community": 0,
+      "community_name": "Session & Context Memory",
+      "description": "Graceful degradation chain: OpenViking -> claude-mem -> task-state.json -> graphify.",
+      "file_type": "concept",
+      "norm_label": "memory fallback hierarchy",
+      "source_file": ".agents/rules/session_start_protocol.md"
+    },
+    {
+      "id": "SessionStartProtocol",
+      "label": "Session Start Protocol",
+      "community": 0,
+      "community_name": "Session & Context Memory",
+      "description": "Protocol for session initialization and mandatory OpenViking memory retrieval before answering user requests.",
+      "file_type": "document",
+      "norm_label": "session start protocol",
+      "source_file": ".agents/rules/session_start_protocol.md"
+    },
+    {
+      "id": "OpenVikingContextDatabase",
+      "label": "OpenViking Context Database",
+      "community": 1,
+      "community_name": "MCP Integration",
+      "description": "Persistent context database for AI agents providing semantic memory retrieval via find and search.",
+      "file_type": "concept",
+      "norm_label": "openviking context database",
+      "source_file": ".agents/rules/session_start_protocol.md"
+    },
+    {
+      "id": "OpenVikingMCPEndpoint",
+      "label": "OpenViking MCP Endpoint",
+      "community": 1,
+      "community_name": "MCP Integration",
+      "description": "Streamable HTTP/SSE FastMCP interface exposing OpenViking memory tools on port 1933.",
+      "file_type": "concept",
+      "norm_label": "openviking mcp endpoint",
+      "source_file": ".agents/rules/session_start_protocol.md"
+    }
+  ],
+  "links": [
+    {
+      "source": "SessionStartProtocol",
+      "target": "MemoryFallbackHierarchy",
+      "relation": "defines_fallback_to",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "edge_type": "EXTRACTED",
+      "source_file": ".agents/rules/session_start_protocol.md"
+    },
+    {
+      "source": "OpenVikingContextDatabase",
+      "target": "OpenVikingMCPEndpoint",
+      "relation": "exposed_via",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "edge_type": "EXTRACTED",
+      "source_file": ".agents/rules/session_start_protocol.md"
+    },
+    {
+      "source": "SessionStartProtocol",
+      "target": "OpenVikingContextDatabase",
+      "relation": "queries_memory_from",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "edge_type": "EXTRACTED",
+      "source_file": ".agents/rules/session_start_protocol.md"
+    }
+  ],
+  "hyperedges": []
+}

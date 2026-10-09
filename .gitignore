@@ -2,7 +2,9 @@
 .antigravity/
 .gemini/
 task-state.json
-.agents/
+.agents/*
+!.agents/*.md
+!.agents/rules/
 
 # Environment variables & secrets
 .env
