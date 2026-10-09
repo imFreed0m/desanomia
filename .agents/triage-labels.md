@@ -12,4 +12,4 @@ The engineering skills speak in terms of five canonical triage roles. This file 
 
 When a skill mentions a role (e.g. "apply the AFK-ready triage label"), record the corresponding label string from this table in the issue's `Status:` field.
 
-See [.agents/issue-tracker.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/.agents/issue-tracker.md) for tracker layout details.
+See [.agents/issue-tracker.md] for tracker layout details.
