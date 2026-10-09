@@ -18,7 +18,7 @@ The edge stack runs on an on-site **Beelink EQ12 Mini PC (Intel N100)** hosting 
 - **Backend:** FastAPI (Python 3.12, async, aiomqtt, WebSockets)
 - **Database:** PostgreSQL (with SQLAlchemy 2.0 & Alembic)
 - **Frontend Dashboard:** React + Vite + TypeScript + Tailwind CSS (served as a static offline bundle via Nginx)
-- **Microcontroller:** ESP32 WROOM-32 running FreeRTOS firmware, autonomously executing the batch FSM and local safety interlocks.
+- **Microcontroller:** ESP32-S3 N16R8 running FreeRTOS firmware, autonomously executing the batch FSM and local safety interlocks.
 
 **Phase 1 Scope:** Automated batch fertigation only. Environmental monitoring, crop tracking, and complex greenhouse automation are explicitly out of scope.
 

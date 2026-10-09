@@ -449,7 +449,7 @@ MANUAL mode allows individual actuator control for **testing and maintenance onl
 
 | # | Decision | Status | Notes |
 | --- | --- | --- | --- |
-| OD-01 | Exact ESP32 board model / variant | RESOLVED | ESP32 WROOM-32 38-Pin DevKit with hardware pull-down and dedicated E-Stop ISR pin. |
+| OD-01 | Exact ESP32 board model / variant | RESOLVED | ESP32-S3 N16R8 (16MB Flash, 8MB PSRAM) DevKit with hardware pull-down and dedicated E-Stop ISR pin. |
 | OD-02 | Radar level sensor exact model & protocol | OPEN | Interface confirmed UART/Digital — exact frame parser to be finalized in firmware driver. |
 | OD-03 | TDS sensor exact model & ADC calibration | RESOLVED | Analog interface confirmed with 50 ppm plausibility floor and calibrated curve from `DOSE_TEST_RESULT.md`. |
 | OD-04 | Telegram Bot token & chat ID provisioning | OPEN | Bot provisioning via BotFather for greenhouse operations team. |

@@ -22,7 +22,7 @@ Do not go live until every box is checked. Tick in this file and commit.
 ## Network and security
 
 - [ ] No internet-facing ports, verified with an external port scan
-- [ ] Tailscale ACLs restrict access to the Pi
+- [ ] Tailscale ACLs restrict access to the Beelink EQ12 Mini PC
 - [ ] MQTT anonymous access off, ACLs tested
 - [ ] Default passwords changed, admin account created, kiosk viewer account created
 - [ ] Secrets only in `.env` and GitHub secrets, none in git history
@@ -32,14 +32,14 @@ Do not go live until every box is checked. Tick in this file and commit.
 
 - [ ] E2E suite green against simulator
 - [ ] Viewer, Operator, Admin permissions verified manually
-- [ ] Control-room screen loads with internet disconnected, no external requests in the browser network tab
+- [ ] Primary HMI touchscreen kiosk loads with internet disconnected, no external requests in the browser network tab
 - [ ] Stale and offline banners verified by unplugging the ESP32
 - [ ] Telegram alerts received for fault, gate failure, offline
-- [ ] Clock consistent between ESP32, Pi, and UI after a reboot with no internet
+- [ ] Clock consistent between ESP32, Beelink EQ12, and UI after a reboot with no internet
 
 ## Operations
 
-- [ ] Compose stack auto-starts after Pi reboot, kiosk auto-starts
+- [ ] Compose stack auto-starts after Beelink EQ12 reboot, Primary HMI kiosk auto-starts
 - [ ] Nightly backup running, restore tested on another machine
 - [ ] Disk usage alert configured, telemetry retention job verified
 - [ ] Rollback procedure rehearsed
