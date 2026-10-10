@@ -53,11 +53,11 @@ Node LTS, `npm ci`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run bu
 
 ## firmware.yml checks
 
-`pio test -e native` must pass with the FSM, gate boundary, and all 5 interlock tests before the ESP32 build runs. Upload the .bin as an artifact.
+`pio test -e native` must pass with the FSM, gate boundary, and all 7 safety interlock tests (`IL-01` through `IL-07`) before the ESP32 build runs. Upload the .bin as an artifact.
 
 ## release.yml
 
-Use docker/setup-qemu-action and buildx for linux/arm64, push `ghcr.io/<owner>/desanomia-backend` and `-frontend` tagged with the version. No automatic deploy to the Pi in Phase 1, deployment is manual per 15.
+Use buildx for `linux/amd64` (targeting Beelink EQ12 Intel N100), push `ghcr.io/<owner>/desanomia-backend` and `-frontend` tagged with the release version. No automatic deploy to the Beelink EQ12 edge host in Phase 1; deployment is manual per 15.
 
 ## Rules
 

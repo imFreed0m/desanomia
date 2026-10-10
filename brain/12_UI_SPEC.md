@@ -36,8 +36,8 @@ Bundle all assets. No CDN scripts, remote fonts, analytics, or external images. 
 
 | ID | Component | Behavior |
 | --- | --- | --- |
-| UI-01 | FSM status card | Current state of 10, active batch id, elapsed time in state, fault banner when latched |
-| UI-02 | TDS live card | Large ppm value and gauge, green 550 to 650, yellow near either bound, red outside, target marker at 600. "Near" threshold is a setting, default 25 ppm [PROPOSED] |
+| UI-01 | FSM status card | Current state of 12 lifecycle states (IDLE through BATCH_DEPLETED plus BATCH_PAUSED_INSPECTION), active batch id, elapsed time in state, fault banner when latched |
+| UI-02 | TDS live card | Large ppm value and gauge, green within active recipe gate band [Target ± 50 ppm] (e.g. 1200–1300 ppm for default Generatif 1250 ppm), amber in deficit recovery band [Target − 250, Target − 50), red outside band or starved (< Target − 250 ppm), target marker at active recipe target |
 | UI-03 | Multi-Tank 5-Pair Visualizer | Visualizes 5 Concentrate Drums (K1–K5, 20 L each, compact scale, viscous fluid glow) and 5 Distribution Drums (D1–D5, 140 L each, full scale, fluid wave/ripple animations). Pair 1 active with live radar/virtual stock telemetry; Pairs 2–5 rendered with 'Standby / Belum Terpasang' badges |
 | UI-04 | Actuator status panel | Each actuator on or off, source badge (FSM, manual, interlock) |
 | UI-05 | Batch event timeline | Live list of state transitions and gate result for the active batch |

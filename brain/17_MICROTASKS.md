@@ -68,7 +68,7 @@ T-093 Full water-only batch. Done when: gate evaluates, distribution runs, batch
 
 ## M7 Production
 
-T-100 Deploy to the Pi, auto-start, backups, restore test. Done when: 16 operations section ticked.
+T-100 Deploy to Beelink EQ12 Mini PC, auto-start, backups, restore test. Done when: 16 operations section ticked.
 T-101 Tailscale ACLs and port scan. Done when: security section of 16 ticked.
 T-102 Control-room kiosk with internet unplugged. Done when: dashboard fully functional.
 T-103 Supervised first fertilizer batch, then 7-day review. Done when: 16 first runs ticked.

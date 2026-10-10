@@ -1,45 +1,65 @@
 # 10 Firmware Spec
 
-ESP32 with FreeRTOS, PlatformIO project. [SPEC stack, structure PROPOSED]
+ESP32-S3 N16R8 with FreeRTOS dual-core asymmetric task allocation, PlatformIO project. [SPEC stack, aligned with 00_MASTER_RULES.md, 04_TRD.md, 05_ARCHITECTURE.md, and 18_DECISIONS.md]
 
-## Tasks [PROPOSED]
+## Tasks [SPEC]
 
-sensor_task (read TDS and radar, filter), fsm_task (state machine and gate), interlock_task (evaluate all 5 interlocks every cycle, highest priority, drives outputs low on violation), actuator_task (single owner of GPIO outputs), mqtt_task (publish, subscribe, reconnect with backoff), ota_task, watchdog on all tasks. Only actuator_task writes outputs, and every output request passes through the interlock check first.
+- **Core 1 (Real-Time Control & Safety Domain, 240 MHz):**
+  - `fsm_task` (Priority 5, 20 Hz / 50 ms tick via `vTaskDelayUntil()`): 12-state fertigation lifecycle FSM execution.
+  - `safety_interlock_matrix`: Synchronously evaluates all 7 autonomous safety interlocks (`IL-01` through `IL-07`) every 50 ms loop before GPIO relay registers are updated.
+  - `sensor_task` (Priority 3, 10 Hz): Analog TDS multisampling (10-sample moving trimmed median filter, 27.0°C baseline compensation) on ADC1_CH0 (GPIO 1), and 60 GHz FMCW radar binary frame parser on UART1 (GPIO 17 TX / GPIO 18 RX @ 115200 bps).
+  - `actuator_task`: Single hardware owner of 4 active-LOW optoisolated relay pins (Fill GPIO 4, Dose GPIO 5, Mix GPIO 6, Distribute GPIO 7) and panel alarm pins (Buzzer GPIO 2, Pilot Lamp GPIO 3).
+- **Core 0 (Network & Communication Domain, 240 MHz):**
+  - W5500 SPI Ethernet driver (`192.168.10.20` on OT LAN `ETH0`).
+  - `mqtt_task` (Priority 2): Mosquitto client connection, 10s keep-alive with LWT on `desanomia/gh1/status`, QoS 0 telemetry streaming (5s standard, 1s measuring), QoS 1 command subscription on `desanomia/gh1/cmd`, QoS 1 correlated execution receipts on `desanomia/gh1/ack`, and 32-slot RAM + NVS circular idempotency cache (`last_executed_cmd_id`, D-045).
+  - `psram_spooler_task` (Priority 1): Spools discrete FSM state transitions and fault trips into an 8MB Octal PSRAM ring buffer (capacity 500 events) during network loss and flushes chronologically to `desanomia/gh1/events` upon reconnection.
+  - Watchdog timer supervising all tasks.
 
 ## Interlocks [SPEC]
 
-Five interlocks enforced here, active in AUTO and MANUAL, no override path. Copy the exact definitions from SPEC.md into this table before implementing.
+Seven autonomous safety interlocks enforced in firmware, active in both AUTO and MANUAL mode, with zero software or UI bypass:
 
-| ID | Condition | Action | Reset rule |
-| --- | --- | --- | --- |
-| IL-01 | copy from SPEC.md | | |
-| IL-02 | copy from SPEC.md | | |
-| IL-03 | copy from SPEC.md | | |
-| IL-04 | copy from SPEC.md | | |
-| IL-05 | copy from SPEC.md | | |
+| ID | Interlock Name | Trigger Condition | Latched Fault Code | Hardware Safety Response | Reset Requirement (Gated Reset) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **IL-01** | **TDS Safety Gate** | Final mean TDS $< (\text{Target}-50)$ or $> (\text{Target}+50\text{ ppm})$ | `FAULT_PPM_OUT_OF_RANGE` | Distribution pump (GPIO 7) locked OFF | Manual gravity drain to waste ditch until level $\le 5.0\text{ L}$ |
+| **IL-02** | **Radar Dry-Run Cutoff** | Drum 2 level $< 5.0\text{ L}$ while distribution pump is active | `FAULT_DRY_RUN` | Cut distribution pump (GPIO 7) in $< 50\text{ ms}$ | FSM returns to `IDLE` / refilling allowed |
+| **IL-03** | **Batch Depletion Guard** | `START_BATCH` received while Drum 2 level $> 5.0\text{ L}$ | `FAULT_BATCH_REJECTED` | Reject command, all relays remain OFF | Drain residual water to $\le 5.0\text{ L}$ |
+| **IL-04** | **Dual-Stage Fill Guard** | Level rise $< 1.0\text{ L}$ in 90 s OR total fill time $> 20\text{ min}$ | `FAULT_NO_WATER_SUPPLY` / `FAULT_FILL_TIMEOUT` | Close fill valve (GPIO 4), halt timer | Clear water supply issue, send `RESUME_FILL` command |
+| **IL-05** | **Water Baseline Plausibility** | Raw clean water TDS $< 50$, $> 2000$, or baseline $\ge 350\text{ ppm}$ | `FAULT_TDS_INVALID` / `FAULT_BASE_TDS_HIGH` | Close fill valve, abort batch immediately | Inspect probe cable or raw water source |
+| **IL-06** | **Radar Liveness Watchdog** | Radar UART1 silent / missing frames for $> 3.0\text{ s}$ | `FAULT_RADAR_OFFLINE` | Cut all 4 relays immediately | Auto-clears immediately upon receiving valid UART frame |
+| **IL-07** | **Emergency Stop Guard** | Physical NC switch loop open (GPIO 21 High / ISR) OR software E-Stop command | `FAULT_ESTOP` | Mechanical relay coil bus cut ($0\text{ ms}$) + GPIO Low ($< 5\text{ ms}$) | Twist physical switch NC (`hw_estop_pressed == false`) AND Drum 2 level $\le 5.0\text{ L}$ |
 
-Categories worth checking against the SPEC list for gaps, not the list itself: dry-run protection on pumps, Drum 2 overflow, sensor invalid or out of range, dose over-limit, simultaneous conflicting actuators, distribution without a passed gate.
+Hardware mutual exclusion enforced in output registers: `fill_valve` and `dist_pump` cannot run simultaneously; `dosing_pump` and `dist_pump` cannot run simultaneously.
 
 ## FSM and gate
 
-States per 05_ARCHITECTURE. Transitions are driven by sensor conditions and timers read from config. GATE_EVALUATE passes only if the measured TDS is within the gate band, inclusive of 550 and 650 [VERIFY inclusivity]. Failure latches a fault, blocks DISTRIBUTING, and does not trigger re-dosing.
+States per `05_ARCHITECTURE.md` §4.2 (12 operational lifecycle states: `IDLE`, `FILLING_WATER`, `CHECK_BASE`, `DOSING`, `MIXING`, `STABILIZING`, `MEASURING_TDS`, `GATE_EVALUATE`, `TOPUP_DOSING`, `RECOVERY_MIX_EVALUATE`, `DISTRIBUTING`, `BATCH_DEPLETED`). Semi-closed loop dosing with open-loop feedforward calculation ($V_{\text{mL}} \times 0.107\text{ s/mL}$). 
 
-## Behavior on connectivity loss [PROPOSED]
+`GATE_EVALUATE` evaluates against dynamic recipe band $[\text{Target} - 50\text{ ppm},\ \text{Target} + 50\text{ ppm}]$ (1200–1300 ppm for default Generatif 1250 ppm recipe):
+- **Pass:** Transitions autonomously to `DISTRIBUTING`.
+- **Top-Up Recovery:** If TDS is in $[\text{Target} - 250\text{ ppm},\ \text{Target} - 50\text{ ppm})$, transitions to `TOPUP_DOSING` (single-pass dose capped at $\le 300\text{ mL}$ max), followed by `RECOVERY_MIX_EVALUATE` (60s mix, 15s settle, 10s measure).
+- **Starvation:** If TDS is $< (\text{Target} - 250\text{ ppm})$, raises `STARVATION_SUSPECTED`, skips top-up, and latches `FAULT_PPM_OUT_OF_RANGE`.
+- **Failure:** If TDS remains outside $[\text{Target} \pm 50\text{ ppm}]$ or initial TDS exceeds $\text{Target} + 50\text{ ppm}$, latches `FAULT_PPM_OUT_OF_RANGE`, locks distribution pump OFF, and requires manual gravity drain to $\le 5.0\text{ L}$. Zero continuous PID loops or secondary top-up attempts.
 
-Active batch continues to a safe end using stored config. Events are buffered in RAM (bounded ring) and flushed on reconnect. Commands are accepted only while connected. Manual actuator commands expire if the link drops.
+## Behavior on connectivity loss
+
+Active batch continues autonomously to safe completion using parameters snapshotted in NVS. Transitions, gate evaluations, and fault trips are committed to the 500-event PSRAM ring buffer and flushed chronologically upon reconnection. Manual actuator commands expire if link drops.
 
 ## Config and persistence
 
-Target TDS, gate band, volumes, timings, calibration stored in NVS, changed only via cmd/config/set with ack, and reported back in state. Firmware version and config hash published on boot.
+Target TDS, tolerance band, volume calibration, timings, and probe calibration slope/offset ($K_{\text{cell}}$, $V_{\text{offset}}$) stored in NVS flash namespace `calib_tds`. Updated only via validated commands on `desanomia/gh1/cmd` with ack on `desanomia/gh1/ack`. Firmware version, hardware MAC, and config hash published on boot.
 
-## Boot and recovery
+## Boot and recovery (D-013)
 
-On boot, outputs are low. If power was lost mid-batch, do not resume dosing or distribution automatically. Enter IDLE with a latched fault that an Operator must reset. [PROPOSED]
+On cold boot, outputs are pulled LOW. If power was lost mid-batch:
+- ESP32 reads NVS journal: if batch was active and Drum 2 radar level is $> 5.0\text{ L}$, the firmware enters un-energized `BATCH_PAUSED_INSPECTION` mode.
+- Firmware calculates deficit concentrate volume required to reach recipe target and awaits a `RESUME_DEFICIT_BATCH` command from the backend (manual confirmation or 30-minute auto-resume timer if all 7 interlocks pass).
+- If solution exhibits catastrophic spike ($> 500\text{ ppm}$ above target), manual gravity drain to $\le 5.0\text{ L}$ is required before reset is unlocked.
 
 ## OTA
 
-HTTPS or MQTT-triggered OTA from the Pi on LAN, signed images, dual-partition rollback, refused unless FSM is IDLE.
+Signed firmware update images delivered over local OT LAN from the Beelink EQ12 Mini PC edge host, dual-partition rollback (app0/app1), refused unless FSM is strictly in `IDLE`.
 
 ## Testing
 
-FSM, gate, and interlock modules are hardware-free and run in host-native unit tests, see 13_TESTING.
+FSM, gate, and interlock modules are hardware-independent and validated via host-native unit tests, see `13_TESTING.md`.

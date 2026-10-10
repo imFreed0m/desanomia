@@ -1,6 +1,6 @@
 # 03 UI/UX Brief
 
-Visual design language, component tokens, 3D fluid rendering, and per-screen layout specifications for Desanomia. This document establishes the definitive visual and architectural authority, ensuring pixel-perfect, accessible, and high-performance interfaces across all display tiers. Functional behavior is detailed in `12_UI_SPEC`, and navigation flows are specified in `02_APPFLOW`.
+Visual design language, component tokens, SVG/Canvas fluid rendering, and per-screen layout specifications for Desanomia. This document establishes the definitive visual and architectural authority, ensuring pixel-perfect, accessible, and high-performance interfaces across all display tiers. Functional behavior is detailed in `12_UI_SPEC`, and navigation flows are specified in `02_APPFLOW`.
 
 ---
 
@@ -14,28 +14,28 @@ Desanomia breaks decisively from dark, cluttered, hobbyist IoT boards and generi
    - High-key, natural, and airy atmosphere inspired by modern plant biology laboratories and precision research facilities.
    - Pure white panels (`#FFFFFF`) floating on warm, subtle off-white foundations (`#F5F7FA` and `#F9FAFB`) with delicate, airy drop shadows and crisp micro-borders.
 2. **Differentiation Anchor:**
-   > *"If this interface were screenshotted with the logo and title removed, an engineer or researcher would immediately recognize it by the dual volumetric 3D glass fluid vessels with real-time procedural wave physics, volumetric Liters calibrations, Space Grotesk scientific telemetry numerals, and the asymmetric horticultural Bento grid."*
+   > *"If this interface were screenshotted with the logo and title removed, an engineer or researcher would immediately recognize it by the dual glass fluid vessels with real-time procedural wave physics, volumetric Liters calibrations, Space Grotesk scientific telemetry numerals, and the asymmetric horticultural Bento grid."*
 3. **Status Semantics Over Decorative Color:**
    - Color is strictly reserved for process meaning (OK, Warning, Danger, Idle).
    - Interactive primary buttons use vibrant Royal Blue (`#2563EB`) so they are never conflated with operational green status indicators.
 4. **Touch-First Panel Ergonomics (Panel Room Cockpit):**
    - Minimum interactive tap target of **56×56 CSS px** on the HMI Kiosk (exceeding standard 44 px).
    - Integrated On-Screen Touch Numpad for all numeric entries—completely eliminating awkward operating system virtual keyboards in the panel room.
-5. **Lightweight 3D Web Experience:**
-   - Real-time 3D fluid cylinders powered by React Three Fiber (R3F) and Three.js with capped 30fps/on-demand frameloops to run cool (< 45°C) and stably 24/7 on embedded hardware (Beelink EQ12 Intel N100 and Xiaomi TV A Mali-G52 GPU).
+5. **Lightweight Fluid Web Experience:**
+   - Real-time fluid vessels rendered with SVG/Canvas wave physics at 60 FPS (D-046) to run cool (< 45°C) and stably 24/7 on embedded hardware (Beelink EQ12 Intel N100 and Xiaomi TV A Mali-G52 GPU).
 6. **Modern Web Standards & Complete Offline Autonomy:**
    - CSS Container Queries (`@container`) for intrinsic component responsiveness.
    - Native HTML5 `<dialog>` for rock-solid focus trapping and modal isolation.
-   - 100% bundled local assets (variable fonts, Lucide SVG icons, GLSL shaders) with zero external CDN dependencies.
+   - 100% bundled local assets (variable fonts, Lucide SVG icons) with zero external CDN dependencies.
 
 ### 1.2 Design Feasibility & Impact Index (DFII)
 
 | Dimension | Score (1–5) | Justification |
 | :--- | :---: | :--- |
-| **Aesthetic Impact** | 5 | Unmistakable, distinctive laboratory aesthetic; 3D glass vessels & scientific type. |
+| **Aesthetic Impact** | 5 | Unmistakable, distinctive laboratory aesthetic; glass fluid vessels & scientific type. |
 | **Context Fit** | 5 | Perfectly tailored for research greenhouse fertigation and multi-tier displays. |
-| **Implementation Feasibility** | 5 | Next.js, React Three Fiber, Tailwind CSS, and Modern CSS container queries. |
-| **Performance Safety** | 4 | Capped 30 FPS, demand frameloops, lightweight shaders, zero layout shift. |
+| **Implementation Feasibility** | 5 | React + Vite (D-005), SVG/Canvas fluid rendering, Tailwind CSS, and Modern CSS container queries. |
+| **Performance Safety** | 4 | 60 FPS SVG/Canvas wave physics (< 5% CPU), zero layout shift. |
 | **Consistency Risk** | 1 | Strictly centralized CSS tokens and typed component primitives. |
 
 $$\text{DFII} = (\text{Impact} + \text{Fit} + \text{Feasibility} + \text{Performance}) - \text{Consistency Risk} = (5 + 5 + 5 + 4) - 1 = \mathbf{17} \longrightarrow \mathbf{15/15 \text{ (Max: Excellent, Execute Fully)}}$$
@@ -173,68 +173,24 @@ Per `modern-web-guidance`, Bento grid components use CSS Container Queries (`con
 
 ---
 
-## 5. React Three Fiber (R3F) 3D Drum Liquid Engine
+## 5. SVG/Canvas Drum Liquid Engine (D-046)
 
-Per `3d-web-experience`, `UX-FR-01`, and the physical industrial reference (`id-11134207-7r98p-lxp8w56k0dv280.webp`), drums are rendered as authentic **Industrial HDPE Blue Barrels** with a **Dynamic View-Dependent Camera-Facing X-Ray Transparency Shader**, allowing the operator to peer inside the drum from any viewing angle.
-
-```
-+-----------------------------------------------------------------------+
-|              AUTHENTIC INDUSTRIAL HDPE BLUE DRUM (3D)                 |
-|                                                                       |
-|              [  Black Molded Lid + Silver Clamp Ring Collar  ]        |
-|            /---------------------------------------------------\      |
-|           /   Outer Silhouette: Deep Blue HDPE Barrel (#1D4ED8) \     |
-|          |                                                       |    |
-|          |    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    |    |
-|          |    Camera-Facing Dynamic X-Ray Translucent Facet: |    |
-|          |    - Surface facing camera becomes clear acrylic   |    |
-|          |    - Liquid & waves fully visible inside           |    |
-|          |    - Opaque blue rear wall provides deep contrast  |    |
-|          |    - Etched volumetric Liters graduation lines    |    |
-|          |                                                       |    |
-|          |    - - - - - - - - - - - - - - - - - - - - - - - -    |    |
-|          |    Safe Drain Threshold Guideline (<= 5.0 L Mark)     |    |
-|           \                                                     /     |
-|            \---------------------------------------------------/      |
-|                        Molded Base Ribbing Ring                       |
-+-----------------------------------------------------------------------+
-```
+Per `UX-FR-01`, `TR-30`, and decision D-046, drums are rendered as **Industrial HDPE Blue Barrels** using SVG for the vessel outline and an HTML5 `<canvas>` for the fluid surface, with optimized sine-curve wave physics at **60 FPS**. React Three Fiber, WebGL, and GLSL shaders are not used.
 
 ### 5.1 Geometry & Material Specifications
 
-1. **Vessel Geometry (Industrial HDPE Drum Profile):**
-   - Modeled after standard 20 L / 140 L open-top chemical barrels:
-     - Characteristic subtle barrel curvature (gentle middle bulge tapered toward top rim and base).
-     - Molded top lid in matte dark charcoal (`#1E293B`, `roughness: 0.6`).
-     - Galvanized steel lever-lock clamp ring collar (`#94A3B8`, `metalness: 0.85`, `roughness: 0.25`).
-     - Circumferential body ribbing rings providing structural visual depth.
-2. **Dynamic View-Dependent Camera-Facing X-Ray Shader:**
-   - Rather than an artificial static cutout, the drum shell uses a custom GLSL fragment shader evaluating the facing ratio between the surface normal $\vec{N}$ and camera view direction $\vec{V}$:
-     ```glsl
-     float facingRatio = max(0.0, dot(vNormal, vViewPosition));
-     // Front-facing facet transitions smoothly into clear glass/acrylic
-     float frontAlpha = mix(0.12, 1.0, 1.0 - pow(facingRatio, 1.8));
-     ```
-   - **Front-Facing Surface (Facing User):** Becomes crystal-clear acrylic (`transmission: 0.88`, `roughness: 0.08`, `opacity: 0.12`), revealing the inner liquid, wave dynamics, and graduation lines. As the drum is rotated 360°, the transparent inspection window dynamically follows the user's eye line.
-   - **Rear & Side Walls (Curving Away):** Transition smoothly into solid, opaque Industrial Blue HDPE plastic (`#1D4ED8` to `#1E40AF`, `roughness: 0.35`, `metalness: 0.05`), creating a high-contrast dark blue backdrop that makes the internal fluids visually pop.
-3. **Procedural Liquid Mesh & Custom GLSL Wave Shader:**
-   - Inner fluid volume scaled along Y-axis matching live telemetry volume (`uLevel` normalized 0.0 to 1.0).
-   - **Wave Motion (Vertex Shader):**
-     - Wave turbulence frequency and amplitude driven by FSM state uniforms (`uState: IDLE, FILLING, MIXING, DOSING, DISTRIBUTING`).
-     - *IDLE:* Gentle, calm surface breathing (`amplitude: 0.02`, `frequency: 1.2`).
-     - *FILLING / DOSING:* Concentric ripples emanating from concentrate/water injection inlet.
-     - *MIXING:* High-frequency shearing wave turbulence (`amplitude: 0.08`, `frequency: 4.5`).
-     - *DISTRIBUTING:* Smooth draining vortex / whirlpool depression at bottom center.
-   - **Internal Fluid Color & Contrast:**
-     - **Drum 1 (Concentrate 20 L):** Translucent golden-amber liquid (`#F59E0B` to `#D97706`), glowing warmly against the dark blue interior backing. Soft pulsing coral/amber rim emission (`#F97316`) when stock $\le$ 2.8 L; emergency red glowing base ring (`#EF4444`) when starved.
-     - **Drum 2 (Distribution 140 L):** Luminous translucent azure-blue liquid (`#0284C7` to `#38BDF8`), with illuminated white graduation lines (20L, 50L, 100L, 140L), a red guideline at $\le 5.0\text{ L}$ (safe fault drain threshold), and an emerald line at $140.0\text{ L}$ (target batch fill).
+1. **Vessel Profile:** Standard 20 L / 140 L open-top chemical barrel silhouette: gentle barrel curvature, matte dark charcoal lid (`#1E293B`), galvanized clamp ring collar (`#94A3B8`), circumferential ribbing rings. Deep Blue HDPE body (`#1D4ED8` to `#1E40AF`) with a translucent front inspection window so the liquid and etched Liters graduation lines are visible.
+2. **Procedural Liquid Surface (Canvas):**
+   - Fluid height follows live telemetry volume (normalized 0.0 to 1.0).
+   - Wave amplitude and frequency are driven by FSM state: *IDLE* gentle breathing; *FILLING / DOSING* concentric ripples from the inlet; *MIXING* high-frequency rotational vortex swirl; *STABILIZING* glassy calm; *MEASURING_TDS* neon probe glow; *DISTRIBUTING* draining wave; *FAULT_\** red hazard pulse; *BATCH_PAUSED_INSPECTION* amber deficit wave.
+3. **Internal Fluid Color & Contrast:**
+   - **Drum 1 (Concentrate 20 L):** Translucent golden-amber liquid (`#F59E0B` to `#D97706`). Soft pulsing coral/amber rim emission (`#F97316`) when stock $\le$ 3,000 mL (3.0 L); emergency red glowing base ring (`#EF4444`) when starved.
+   - **Drum 2 (Distribution 140 L):** Luminous translucent azure-blue liquid (`#0284C7` to `#38BDF8`), with white graduation lines (20L, 50L, 100L, 140L), a red guideline at $\le 5.0\text{ L}$ (safe fault drain threshold), and an emerald line at $140.0\text{ L}$ (target batch fill).
 
 ### 5.2 Device Optimization & Accessibility Integration
 
-- **Framerate Cap:** Capped at **30 FPS** on Xiaomi TV A (Mali-G52 GPU) and Beelink EQ12 (Intel N100) to keep hardware temperatures low (< 45°C) 24/7.
-- **Frameloop Mode:** `frameloop="demand"` when liquid is calm and static; switches to dynamic loop only during active telemetry changes or user rotation.
-- **Accessibility & DOM Reflection (Modern Web Guidance):**
-  Assistive technology and automated testing tools cannot inspect WebGL canvas pixels. Every R3F Canvas is paired with an accessible semantic DOM element:
+- **Frame Rate:** Target 60 FPS using `requestAnimationFrame`, staying below 5% CPU on the Beelink EQ12 (Intel N100); animation pauses when the surface is static.
+- **Accessibility & DOM Reflection:** Assistive technology cannot inspect canvas pixels. Every drum canvas is paired with an accessible semantic DOM element:
   ```html
   <div class="drum-canvas-wrapper" style="position: relative;">
     <canvas id="drum-2-canvas" aria-hidden="true"></canvas>
@@ -263,7 +219,7 @@ Per `3d-web-experience`, `UX-FR-01`, and the physical industrial reference (`id-
 +-------------------------------------------------------------------------------------------------------------------------+
 | [LOGO] desanomia              GAZEBO MONITORING BILLBOARD             October 9, 2026 • 04:25:10        STATUS: NORMAL  |
 +-------------------------------------------------+-----------------------------------------------------------------------+
-| LEFT PANEL (30% Width): SHOWCASE & 3D CAROUSEL  | RIGHT PANEL (70% Width): PASSIVE OPERATIONAL BENTO GRID               |
+| LEFT PANEL (30% Width): SHOWCASE & DRUM CAROUSEL | RIGHT PANEL (70% Width): PASSIVE OPERATIONAL BENTO GRID               |
 |                                                 |                                                                       |
 | +---------------------------------------------+ | +-----------------------------------+ +-----------------------------+ |
 | | Greenhouse Ambient Visual / Bay Camera Feed | | | ACTIVE PROCESS STATE              | | HERO TDS PPM (Glanceable 3m)| |
@@ -271,7 +227,7 @@ Per `3d-web-experience`, `UX-FR-01`, and the physical industrial reference (`id-
 | +---------------------------------------------+ | | PREPARING: DOSING NPK             | |       612 ppm               | |
 |                                                 | | Target: 600 ppm | Step 3 of 6      | |  Target: [550 - 650 ppm]    | |
 | +---------------------------------------------+ | +-----------------------------------+ +-----------------------------+ |
-| | 3D TURNTABLE DRUM CAROUSEL                  | |                                                                       |
+| | DRUM CAROUSEL                            | |                                                                       |
 | | (Auto-cycles every 10s across Drum A, B,    | | +---------------------+ +---------------------+ +-----------------+ |
 | |  and Standby Pairs 2-5)                     | | | DRUM 1 (NPK CONC.)  | | DRUM 2 (DISTRIBUT.) | | LIVE ACTUATORS    | |
 | |                                             | | | 18.4 L / 20.0 L     | | 140.0 L / 140.0 L   | | Solenoid: OFF     | |
@@ -284,7 +240,7 @@ Per `3d-web-experience`, `UX-FR-01`, and the physical industrial reference (`id-
 ```
 
 - **Typography Scaling:** Space Grotesk Hero TDS reads at 112 px Bold for effortless legibility across the 3–5 meter gazebo perimeter.
-- **Auto-Cycle Animation:** Every 10 seconds, the 3D showcase smoothly transitions between Drum 1 (NPK), Drum 2 (Distribution), and Standby Pairs 2–5 with a subtle cross-fade.
+- **Auto-Cycle Animation:** Every 10 seconds, the drum showcase smoothly transitions between Drum 1 (NPK), Drum 2 (Distribution), and Standby Pairs 2–5 with a subtle cross-fade.
 
 ---
 
@@ -297,10 +253,10 @@ Per `3d-web-experience`, `UX-FR-01`, and the physical industrial reference (`id-
 | [LOGO] desanomia    [Pair 1: Active] [Pairs 2-5: Standby]     Operator: Auto-Auth   [HW E-STOP: CLEAR]  [!! E-STOP BUTTON] |
 +-------------------------------------------------------------------------------------------------------------------------+
 | +-----------------------------+ +-----------------------------+ +-----------------------------+ +---------------------+ |
-| | PROCESS STATE & DISPATCH    | | HERO TDS & GATE TELEMETRY   | | DRUM 1 CONCENTRATE (3D)     | | DRUM 2 WATER (3D)   | |
+| | PROCESS STATE & DISPATCH    | | HERO TDS & GATE TELEMETRY   | | DRUM 1 CONCENTRATE        | | DRUM 2 WATER         | |
 | | State: IDLE                 | |        600 ppm              | |      18.4 L (92%)           | |      0.0 L (Empty)  | |
 | | Next: 06:00 (Vegetatif)     | | In Tolerance Band           | | Status: Healthy             | | Status: Ready Fill  | |
-| |                             | | [~~~~~~~~ Wave Chart ~~~~~] | | [  3D R3F Interactive Cyl ] | | [ 3D R3F Cyl ]      | |
+| |                             | | [~~~~~~~~ Wave Chart ~~~~~] | | [ SVG/Canvas Drum Vessel ] | | [ SVG/Canvas Drum ] | |
 | | [JADWALKAN / MULAI BATCH]   | | Baseline Ref: 104 ppm       | | [Konfirmasi Isi Ulang (20L)]| | [Manual Drain]      | |
 | +-----------------------------+ +-----------------------------+ +-----------------------------+ +---------------------+ |
 |                                                                                                                         |
@@ -416,7 +372,7 @@ Accessible via `/manual` for analog probes (DFRobot Gravity TDS & 60 GHz Radar).
 
 | Screen Route | Primary Layout Structure | Key Components |
 | :--- | :--- | :--- |
-| **`/` Dashboard** | Bento Grid (1920×1080 fixed on Kiosk; Split Showcase on TV; 1-Col Stack on Mobile) | 3D Drum Vessels, Hero TDS PPM, FSM Status, 5-Tank Selector, Actuator bench, Schedule timeline. |
+| **`/` Dashboard** | Bento Grid (1920×1080 fixed on Kiosk; Split Showcase on TV; 1-Col Stack on Mobile) | Drum Vessels, Hero TDS PPM, FSM Status, 5-Tank Selector, Actuator bench, Schedule timeline. |
 | **`/batches`** | Data Table on `#F5F7FA` with sticky header | Filter pills (Status, Date), Search, Status Badges, CSV Export button, Pagination. |
 | **`/batches/:id`** | Detailed Analytical Card + Timeline | Summary metrics row, Interactive ECharts time-series scrubber (TDS & Level), FSM Step Timeline. |
 | **`/recipes`** | Modern 3-Column Card Grid | Recipe Cards (*Vegetatif 1100*, *Generatif 1250*, *Panen 1050*), Target PPM Pill, On-Screen Numpad Editor, "+ Resep Baru". |
@@ -432,9 +388,9 @@ Accessible via `/manual` for analog probes (DFRobot Gravity TDS & 60 GHz Radar).
 | Requirement | Standard Source | Implementation Verification in Desanomia |
 | :--- | :--- | :--- |
 | **Non-Default Typography** | `frontend-design` | **Space Grotesk** (Display/Hero) + **Geist Sans** (Body) + **Geist Mono** (Hardware/Logs). Zero generic Inter/Roboto. |
-| **Differentiation Anchor** | `frontend-design` | 3D volumetric glass vessels with procedural waves + Space Grotesk scientific telemetry numerals + horticultural bento grid. |
+| **Differentiation Anchor** | `frontend-design` | Glass fluid vessels with procedural waves + Space Grotesk scientific telemetry numerals + horticultural bento grid. |
 | **Container Queries** | `modern-web-guidance` | `@container` used on Bento cards for intrinsic scaling across Kiosk, Gazebo TV, and Mobile drawers. |
-| **Accessible 3D Canvas** | `modern-web-guidance` | Semantic `<div role="meter">` mirrored alongside R3F `<canvas>` for screen readers and deterministic testing. |
-| **Modern Color Spaces** | `modern-web-guidance` | `oklch()` definitions for smooth fluid shader gradient interpolation without muddy grays. |
+| **Accessible Canvas** | `modern-web-guidance` | Semantic `<div role="meter">` mirrored alongside the drum `<canvas>` for screen readers and deterministic testing. |
+| **Modern Color Spaces** | `modern-web-guidance` | `oklch()` definitions for smooth fluid canvas gradient interpolation without muddy grays. |
 | **Native Dialog API** | `modern-web-guidance` | Native HTML5 `<dialog>` with `::backdrop` for Tier 1, 2, and 3 modals. Zero external dialog library bloat. |
 | **Touch Ergonomics** | Industrial Spec | Strict minimum 56×56 px targets on HMI Kiosk, 64 px critical buttons, custom On-Screen Touch Numpad. |

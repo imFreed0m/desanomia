@@ -2,7 +2,7 @@
 
 > **System:** DESANOMIA Greenhouse Automated Fertigation System  
 > **Platform:** Beelink EQ12 Mini PC (Intel N100) + ESP32-S3 N16R8 Edge Microcontroller  
-> **Authority:** Governed by [00_MASTER_RULES.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/00_MASTER_RULES.md), [04_TRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/04_TRD.md), and [18_DECISIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md) (D-001 through D-045).
+> **Authority:** Governed by [00_MASTER_RULES.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/00_MASTER_RULES.md), [04_TRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/04_TRD.md), and [18_DECISIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md) (D-001 through D-046).
 
 ---
 
@@ -191,7 +191,8 @@ stateDiagram-v2
   MEASURING_TDS --> GATE_EVALUATE: 10s multisample complete
 
   GATE_EVALUATE --> DISTRIBUTING: TDS in Gate Band [Target ± 50 ppm]
-  GATE_EVALUATE --> TOPUP_DOSING: TDS in Deficit Band [Target - 250 to Target - 50 ppm]
+  GATE_EVALUATE --> TOPUP_DOSING: TDS in Deficit Band [Target - 250 to Target - 50 ppm)
+  GATE_EVALUATE --> FAULT_LATCHED: TDS < [Target - 250 ppm] (STARVATION_SUSPECTED)
   GATE_EVALUATE --> FAULT_LATCHED: TDS > [Target + 50 ppm] OR Catastrophic Anomaly
 
   TOPUP_DOSING --> RECOVERY_MIX_EVALUATE: Top-up Volume Delivered (<= 300 mL)
@@ -222,7 +223,7 @@ stateDiagram-v2
 | :--- | :--- | :--- | :--- | :--- |
 | **`IDLE`** | Resting state, awaiting batch dispatch | All relays OFF | Valid `START_BATCH` command $\to$ `FILLING_WATER` | IL-03: Rejected if level $> 5.0\text{ L}$ |
 | **`FILLING_WATER`** | Fill Drum 2 with clean water to 140.0 L | Relay 1 (Fill Valve AC 220V) ON | Radar level $\ge 140.0\text{ L} \to$ `CHECK_BASE` | IL-04: Rise $< 1.0\text{ L}$ in 90s or $> 20\text{ min} \to$ `FAULT_NO_WATER_SUPPLY` |
-| **`CHECK_BASE`** | Measure raw groundwater baseline TDS | All relays OFF | Baseline captured ($50 \le \text{TDS} < 350\text{ ppm}) \to$ `DOSING` | IL-05: TDS $< 50$ or $\ge 350\text{ ppm} \to$ `FAULT_BASE_TDS_HIGH` |
+| **`CHECK_BASE`** | Measure raw groundwater baseline TDS | All relays OFF | Baseline captured ($50 \le \text{TDS} < 350\text{ ppm}) \to$ `DOSING` | IL-05: TDS $< 50\text{ ppm} \to$ `FAULT_TDS_INVALID`; $\ge 350\text{ ppm} \to$ `FAULT_BASE_TDS_HIGH` |
 | **`DOSING`** | Deliver calculated fertilizer concentrate | Relay 2 (Peristaltic Pump DC 12V) ON | Pump runtime $t_{\text{pump\_sec}}$ elapsed $\to$ `MIXING` | E-Stop or Power cut |
 | **`MIXING`** | Submersible pump circulation | Relay 3 (Mixing Pump AC 220V) ON | Timer $120\text{ s}$ elapsed $\to$ `STABILIZING` | E-Stop or Radar offline |
 | **`STABILIZING`** | Turbulence settling before sampling | All relays OFF | Timer $15\text{ s}$ elapsed $\to$ `MEASURING_TDS` | E-Stop or Radar offline |
@@ -246,7 +247,7 @@ All 7 interlocks execute in the 20 Hz FreeRTOS Core 1 loop prior to relay actuat
 | **IL-04** | **Dual-Stage Fill Guard** | Level rise $< 1.0\text{ L}$ in 90s OR total fill time $> 20\text{ min}$ | `FAULT_NO_WATER_SUPPLY` / `FAULT_FILL_TIMEOUT` | Close fill valve (GPIO 4), halt timer | Clear water supply issue, click `Resume Fill` on UI |
 | **IL-05** | **Water Baseline Plausibility** | Raw water TDS $< 50$, $> 2000$, or baseline $\ge 350\text{ ppm}$ | `FAULT_TDS_INVALID` / `FAULT_BASE_TDS_HIGH` | Close fill valve, abort batch immediately | Inspect TDS probe cable or raw water source |
 | **IL-06** | **Radar Liveness Watchdog** | Radar UART1 silent / missing frames for $> 3.0\text{ s}$ | `FAULT_RADAR_OFFLINE` | Cut all 4 relays immediately | Auto-clears immediately upon receiving valid UART frame |
-| **IL-07** | **Emergency Stop Guard** | Physical NC switch loop open (GPIO 21 High / ISR) | `FAULT_ESTOP` | Mechanical power bus cut ($0\text{ ms}$) + GPIO Low ($< 5\text{ ms}$) | Twist physical switch NC (`hw_estop_pressed == false`) AND Drum 2 level $\le 5.0\text{ L}$ |
+| **IL-07** | **Emergency Stop Guard** | Physical NC switch loop open (GPIO 21 High / ISR) OR software E-Stop command | `FAULT_ESTOP` | Mechanical power bus cut ($0\text{ ms}$) + GPIO Low ($< 5\text{ ms}$) | Twist physical switch NC (`hw_estop_pressed == false`) AND Drum 2 level $\le 5.0\text{ L}$ |
 
 ---
 
@@ -267,7 +268,7 @@ sequenceDiagram
   Note over Op,Relays: 1. Command Execution Lifecycle (QoS 1)
   Op->>UI: Click "Mulai Batch"
   UI->>API: POST /api/v1/batches (REST)
-  API->>API: Generate batch_id & cmd_id UUID
+  API->>API: Generate batch_id (BIGINT) & cmd_id (UUID)
   API->>Brk: PUBLISH desanomia/gh1/cmd (QoS 1, cmd_id)
   Brk->>ESP: DELIVER cmd (Core 0 Network Task)
   ESP->>ESP: Check 32-slot RAM Cache & NVS
@@ -319,10 +320,10 @@ desanomia/gh1/
 The Beelink EQ12 runs PostgreSQL 16 Alpine with optimizations designed to protect the internal 500GB NVMe SSD against excessive write amplification:
 
 1. **5-Second RAM Write Buffering:** Incoming 1 Hz telemetry readings are accumulated in backend RAM and bulk-inserted every 5 seconds in a single transaction.
-2. **Monthly Range Partitioning:** Table `raw_telemetry` is partitioned by month (`raw_telemetry_y2026m10`, etc.). Data drops occur instantaneously via `DROP TABLE` on the oldest monthly partition (effective retention **90–120 days**), eliminating disk fragmentation and vacuum overhead.
-3. **2-Year 1-Minute Rollups:** Long-term historical trend analysis uses table `telemetry_1min_rollups` (storing min, max, mean for TDS and level) retained for 2 years.
+2. **Monthly Range Partitioning:** Table `telemetry` is partitioned by month (`telemetry_y2026m10`, etc.). Data drops occur instantaneously via `DROP TABLE` on the oldest monthly partition (effective retention **90–120 days**), eliminating disk fragmentation and vacuum overhead.
+3. **2-Year 1-Minute Rollups:** Long-term historical trend analysis uses table `telemetry_1m` (storing min, max, mean for TDS and level) retained for 2 years.
 4. **Cryptographic Audit Trail (TR-16):** Table `audit_logs` enforces SHA-256 hash chaining:
-   $$\text{row\_hash} = \text{SHA256}(\text{prev\_hash} \mathbin{\Vert} \text{timestamp} \mathbin{\Vert} \text{user\_id} \mathbin{\Vert} \text{action\_type} \mathbin{\Vert} \text{payload})$$
+   $$\text{row\_hash} = \text{SHA256}(\text{coalesce}(\text{prev\_hash}, \text{'GENESIS'}) \mathbin{\Vert} \text{ts} \mathbin{\Vert} \text{coalesce}(\text{user\_id}::\text{text}, \text{'system'}) \mathbin{\Vert} \text{action\_type} \mathbin{\Vert} \text{target\_resource} \mathbin{\Vert} \text{payload\_snapshot}::\text{text})$$
    Enforced append-only via database trigger; zero `UPDATE` or `DELETE` permissions granted.
 5. **Dual-Target Backup Strategy:**
    - *Target A (Local NVMe):* Automated daily `pg_dump` compressed with `zstd` stored in `/var/backups/postgres` (retaining 30 daily snapshots).
@@ -360,7 +361,7 @@ The repository enforces strict domain isolation governed by [00_MASTER_RULES.md]
 
 ```
 desanomia/
-  ├── brain/          # Architectural authority, PRD, TRD, Data Model, Decisions (D-001 to D-045)
+  ├── brain/          # Architectural authority, PRD, TRD, Data Model, Decisions (D-001 to D-046)
   ├── firmware/       # ESP32-S3 C++/FreeRTOS firmware, drivers (ADS1115, FMCW radar), interlocks
   ├── backend/        # FastAPI Python 3.12 application, aiomqtt, SQLAlchemy models, Alembic migrations
   ├── frontend/       # React 19 + TypeScript + Vite dashboard, Canvas wave physics, Apache ECharts

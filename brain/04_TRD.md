@@ -182,7 +182,7 @@ Each Technical Requirement directly satisfies and enforces its corresponding Pro
 - **Specification:**
   - When an Operator initiates a batch, backend verifies that the caller role is `Operator` or `Admin`.
   - Backend performs pre-flight validation against current telemetry: Drum 2 level must be $\le 5.0\text{ L}$, no active latched faults, ESP32 liveness online, and same-day distribution lock clear.
-  - Generates a UUIDv4 `batch_id` and unique `cmd_id`. Snapshots the selected recipe parameters (name, target TDS, gate min/max, fill volume) into PostgreSQL table `batches`.
+  - Generates an auto-incrementing `BIGINT` (`BIGSERIAL`) `batch_id` and unique UUIDv4 `cmd_id`. Snapshots the selected recipe parameters (name, target TDS, gate min/max, fill volume) into PostgreSQL table `batches`.
   - **Empirical Feedforward Dosing Formula:**
     $$V_{\text{dose\_mL}} = \frac{(\text{TDS}_{\text{target}} - \text{TDS}_{\text{baseline}}) \times V_{\text{water\_L}}}{K_{\text{fert}}}$$
     - $\text{TDS}_{\text{target}}$: Target TDS resep aktif ($1250\text{ ppm}$ Generatif, $1100\text{ ppm}$ Vegetatif, $1050\text{ ppm}$ Panen).
@@ -193,7 +193,7 @@ Each Technical Requirement directly satisfies and enforces its corresponding Pro
     $$t_{\text{pump\_sec}} = V_{\text{dose\_mL}} \times 0.107\text{ s/mL}$$
   - **Dynamic Gate Band Definition:**
     - Rentang Gate Band lolos: $[\text{TDS}_{\text{target}} - 50\text{ ppm}] \le \text{TDS}_{\text{mean}} \le [\text{TDS}_{\text{target}} + 50\text{ ppm}]$.
-  - Dispatches MQTT command `{ "cmd_id": "...", "type": "START_BATCH", "batch_id": "...", "recipe_id": "...", "target_tds_ppm": 1250, "tank_pair_id": "PAIR_1", "timestamp": ... }` over QoS 1.
+  - Dispatches MQTT command `{ "cmd_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", "type": "START_BATCH", "batch_id": 1042, "recipe_id": 2, "target_tds_ppm": 1250, "tank_pair_id": 1, "timestamp": 1775807100 }` over QoS 1.
 
 ### TR-02: 12-State FSM Engine, Deterministic Cycle Timing & Safety Interlocks
 - **Subsystem:** Firmware (ESP32-S3 Core 1)
@@ -253,14 +253,14 @@ Each Technical Requirement directly satisfies and enforces its corresponding Pro
 ### TR-06: High-Resolution Batch Event Journaling & Telemetry Correlation
 - **Subsystem:** Backend (FastAPI) & PostgreSQL
 - **Specification:**
-  - Every batch execution logs discrete transition events into table `batch_events`: `event_id`, `batch_id`, `from_state`, `to_state`, `timestamp`, `drum2_volume_l`, `tds_ppm`, and `metadata_json`.
+  - Every batch execution logs discrete transition events into table `batch_events`: `id` (BIGSERIAL PK), `batch_id` (BIGINT FK), `ts`, `state` (12 FSM states or PAUSED_INSPECTION), `event_type` ('state_enter', 'state_exit', 'gate', 'fault', 'command', 'topup', 'pause', 'resume', 'note'), and `payload JSONB`.
   - High-frequency telemetry during active batches is tagged with `batch_id`.
   - Frontend renders the interactive chronological step timeline with timestamp deltas, transition durations, and anomaly flags.
 
 ### TR-07: Batch Traceability, Detail Query Optimization & Indexed Storage
 - **Subsystem:** PostgreSQL & Backend
 - **Specification:**
-  - Table `batches` maintains composite index `(created_at DESC, status)`.
+  - Table `batches` maintains composite index `(started_at DESC, status)`.
   - Query endpoint `GET /api/v1/batches/:id` returns composite payload: batch summary, exact start/end timestamps, recipe snapshot, cumulative concentrate consumed, full event log, and downsampled TDS/Level curve in $< 100\text{ ms}$ (p95).
 
 ### TR-08: High-Performance Canvas Time-Series Rendering & Downsampled Telemetry
@@ -395,8 +395,8 @@ Each Technical Requirement directly satisfies and enforces its corresponding Pro
 ### TR-22: Offline Telegram Store-and-Forward Queue with WAN Liveness Detection
 - **Subsystem:** Backend (FastAPI Background Worker)
 - **Specification:**
-  - Table `alert_queue` stores pending external notifications: `alert_id`, `severity`, `title`, `message`, `status` (`PENDING`, `SENT`, `FAILED`), `retry_count`, `created_at`.
-  - When 4G WAN drops, alerts are saved as `PENDING`.
+  - Table `alert_queue` stores pending external notifications: `id` (BIGSERIAL PK), `notification_id` (BIGINT FK to notifications.id), `severity` ('critical', 'warning'), `title`, `message`, `status` ('pending', 'sent', 'failed'), `retry_count`, `created_at`, and `sent_at`.
+  - When 4G WAN drops, alerts are saved as `pending`.
   - Liveness worker probes `https://api.telegram.org` every $30\text{ s}$.
   - Upon reconnection, alerts are transmitted in chronological order with original event timestamps and inline action buttons. Rate-limited to max 20 messages/minute to satisfy Telegram API throttling.
 
@@ -551,141 +551,14 @@ desanomia/gh1/
 
 PostgreSQL 16 Alpine berjalan di container Docker Compose dengan host timezone `Asia/Jakarta` (UTC+7) dan hardware RTC UTC:
 
-```sql
--- 1. Tabel Resep Fertigasi
-CREATE TABLE recipes (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(50) NOT NULL UNIQUE,
-    target_tds_ppm INTEGER NOT NULL,
-    gate_min_ppm INTEGER NOT NULL,
-    gate_max_ppm INTEGER NOT NULL,
-    description TEXT,
-    is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
--- 2. Tabel Jadwal Fertigasi (D-024, D-038, D-040)
-CREATE TABLE schedules (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    recipe_id UUID NOT NULL REFERENCES recipes(id),
-    tank_pair_id VARCHAR(10) NOT NULL DEFAULT 'PAIR_1',
-    cron_expression VARCHAR(50),
-    scheduled_time TIME NOT NULL,
-    is_enabled BOOLEAN DEFAULT true,
-    last_run_at TIMESTAMPTZ,
-    next_run_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
--- 3. Tabel Batch Fertigasi
-CREATE TABLE batches (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    batch_number VARCHAR(30) NOT NULL UNIQUE,
-    recipe_id UUID NOT NULL REFERENCES recipes(id),
-    recipe_snapshot_name VARCHAR(50) NOT NULL,
-    recipe_snapshot_target_tds INTEGER NOT NULL,
-    tank_pair_id VARCHAR(10) NOT NULL DEFAULT 'PAIR_1',
-    status VARCHAR(30) NOT NULL,
-    trigger_source VARCHAR(20) NOT NULL, -- 'SCHEDULED', 'AD_HOC', 'MANUAL_OVERRIDE'
-    is_same_day_override BOOLEAN DEFAULT false,
-    water_volume_filled_l NUMERIC(5, 2),
-    concentrate_volume_dosed_ml NUMERIC(6, 2),
-    baseline_water_tds_ppm NUMERIC(6, 2),
-    final_mixed_tds_ppm NUMERIC(6, 2),
-    started_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    completed_at TIMESTAMPTZ,
-    error_message TEXT
-);
-
--- 4. Tabel Telemetri Raw (Range Partitioning Bulanan)
-CREATE TABLE telemetry_raw (
-    id BIGSERIAL,
-    timestamp TIMESTAMPTZ NOT NULL,
-    drum2_volume_l NUMERIC(5, 2) NOT NULL,
-    tds_ppm NUMERIC(6, 2) NOT NULL,
-    water_temp_c NUMERIC(4, 1),
-    fsm_state VARCHAR(30) NOT NULL,
-    relay_fill_valve BOOLEAN NOT NULL,
-    relay_dosing_pump BOOLEAN NOT NULL,
-    relay_mixing_pump BOOLEAN NOT NULL,
-    relay_dist_pump BOOLEAN NOT NULL,
-    hw_estop_pressed BOOLEAN NOT NULL,
-    active_fault VARCHAR(50),
-    PRIMARY KEY (id, timestamp)
-) PARTITION BY RANGE (timestamp);
-
--- 5. Tabel Telemetri Agregasi 1 Menit
-CREATE TABLE telemetry_1min_rollup (
-    bucket TIMESTAMPTZ PRIMARY KEY,
-    avg_drum2_volume_l NUMERIC(5, 2),
-    min_drum2_volume_l NUMERIC(5, 2),
-    max_drum2_volume_l NUMERIC(5, 2),
-    avg_tds_ppm NUMERIC(6, 2),
-    min_tds_ppm NUMERIC(6, 2),
-    max_tds_ppm NUMERIC(6, 2),
-    avg_water_temp_c NUMERIC(4, 1),
-    sample_count INTEGER NOT NULL
-);
-
--- 6. Tabel Ledger Stok Konsentrat Drum 1 (D-022, D-025)
-CREATE TABLE concentrate_stock_ledger (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tank_id VARCHAR(10) NOT NULL DEFAULT 'K1',
-    transaction_type VARCHAR(20) NOT NULL, -- 'REFILL', 'DOSING_CONSUMPTION', 'CALIBRATION_ADJUST'
-    volume_change_ml NUMERIC(8, 2) NOT NULL,
-    balance_ml NUMERIC(8, 2) NOT NULL,
-    batch_id UUID REFERENCES batches(id),
-    recorded_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
--- 7. Tabel Event Kalibrasi Sensor (D-036)
-CREATE TABLE sensor_calibration_events (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    sensor_type VARCHAR(20) NOT NULL, -- 'ANALOG_TDS', 'FMCW_RADAR'
-    buffer_reference_value NUMERIC(8, 2) NOT NULL, -- e.g. 1413.0
-    measured_raw_adc INTEGER NOT NULL,
-    calibrated_k_cell NUMERIC(8, 4) NOT NULL,
-    baseline_water_offset_ppm NUMERIC(6, 2) NOT NULL,
-    operator_username VARCHAR(50) NOT NULL,
-    calibrated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
--- 8. Tabel Notifikasi In-App (D-025)
-CREATE TABLE notifications (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    severity VARCHAR(15) NOT NULL, -- 'CRITICAL', 'WARNING', 'INFO', 'SUCCESS'
-    title VARCHAR(100) NOT NULL,
-    message TEXT NOT NULL,
-    who VARCHAR(50) NOT NULL,
-    what VARCHAR(50) NOT NULL,
-    where_location VARCHAR(50) NOT NULL,
-    action_button_payload JSONB,
-    is_dismissed BOOLEAN DEFAULT false,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
--- 9. Tabel Audit Trail Kriptografis (D-039, K-15)
-CREATE TABLE audit_logs (
-    id BIGSERIAL PRIMARY KEY,
-    timestamp TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id UUID,
-    username VARCHAR(50) NOT NULL,
-    user_role VARCHAR(20) NOT NULL,
-    action_type VARCHAR(50) NOT NULL,
-    target_resource VARCHAR(50) NOT NULL,
-    payload_snapshot JSONB NOT NULL,
-    prev_hash VARCHAR(64) NOT NULL,
-    row_hash VARCHAR(64) NOT NULL
-);
-```
+> **Schema authority:** The full PostgreSQL 16 DDL (tables, types, indexes, constraints) lives exclusively in [06_DATA_MODEL.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/06_DATA_MODEL.md). That file is the single source of truth for table names (e.g. `telemetry`, `telemetry_1m`, `concentrate_stock`), primary-key types (`batches.id` is `BIGSERIAL`), and nullability (`audit_logs.prev_hash` is nullable for the genesis row). This TRD does not duplicate DDL; any schema change must be made in `06_DATA_MODEL.md`.
 
 ### 6.2 Telemetry Ingestion & NVMe Wear Leveling
 
 - **In-Memory Write Buffering:** FastAPI buffers incoming MQTT telemetry frames in RAM and performs asynchronous bulk inserts every **5.0 seconds** (`executemany` with unnested arrays), reducing NVMe write IOPS by over 80% compared to single-row inserts.
-- **Declarative Monthly Partitioning:** Table `telemetry_raw` uses PostgreSQL native range partitioning by `timestamp` (monthly tables `telemetry_raw_y2026m10`, etc.).
-- **90–120 Day Retention Cycle:** Dropping data occurs per complete monthly partition. Raw data retention effectively spans **90 to 120 days**. A daily background task verifies that 1-minute aggregations for the target month are 100% complete before executing a zero-cost `DROP TABLE telemetry_raw_yYYYYmMM`, completely eliminating table bloat and `VACUUM FULL` overhead.
-- **2-Year Aggregate Rollups:** Table `telemetry_1min_rollup` stores downsampled metrics retained for 2 years.
+- **Declarative Monthly Partitioning:** Table `telemetry` uses PostgreSQL native range partitioning by `ts` (monthly tables `telemetry_y2026m10`, etc.).
+- **90–120 Day Retention Cycle:** Dropping data occurs per complete monthly partition. Raw data retention effectively spans **90 to 120 days**. A daily background task verifies that 1-minute aggregations for the target month are 100% complete before executing a zero-cost `DROP TABLE telemetry_yYYYYmMM`, completely eliminating table bloat and `VACUUM FULL` overhead.
+- **2-Year Aggregate Rollups:** Table `telemetry_1m` stores downsampled metrics retained for 2 years.
 
 ### 6.3 Dual-Target Automated Backup Strategy
 

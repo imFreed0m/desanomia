@@ -26,7 +26,7 @@ Admin: full access including user management. Operator: control batches, schedul
 ## Goals
 
 1. Run a full batch (fill, dose, mix, stabilize, measure, gate, distribute, including single-pass top-up recovery if under-dosed) with one protected start action. [SPEC]
-2. Never distribute a batch outside 1200 to 1300 ppm TDS (target 1250 ppm for a 140.0 L batch). [SPEC]
+2. Never distribute a batch outside the recipe gate band [Target − 50 ppm, Target + 50 ppm] (1200 to 1300 ppm for the default 1250 ppm recipe, 140.0 L batch). [SPEC]
 3. Show live process state, TDS, and Drum 2 level on the Primary HMI Touchscreen kiosk without internet.
 4. Keep a complete batch history: events, TDS trace, gate result, who started it.
 5. Alert via Telegram on faults and gate failures.
@@ -42,7 +42,7 @@ Per-zone valve control, continuous multi-pass closed-loop dosing or PID tuning, 
 
 ## Success metrics [PROPOSED]
 
-1. Zero batches distributed outside the 1200–1300 ppm TDS gate band.
+1. Zero batches distributed outside the recipe TDS gate band [Target ± 50 ppm] (1200–1300 ppm for the default recipe).
 2. Emergency Stop cutoff latency: hardware NC trip de-energizes relays immediately; software E-stop executes relay cutoff on ESP32 in < 100 ms.
 3. Dry-run cutoff protection: Distribution pump shutoff triggered immediately upon radar frame reading level < 5.0 L (firmware execution < 50 ms after sensor frame ingestion; total physical response < 500 ms given UART update period), safely backed by the 5.0 L bottom suction sump buffer to prevent pump cavitation.
 4. Zero double-dispatch on hardware commands (enforced via Pessimistic UI button disabling and unique `cmd_id`).
@@ -55,4 +55,4 @@ Per-zone valve control, continuous multi-pass closed-loop dosing or PID tuning, 
 
 1. **Unattended Batch Scheduling:** Scheduled batches trigger autonomously without mandatory operator presence, strictly guarded by the 7 firmware safety interlocks (Distribution Drum level ≤ 5.0 L, clean water baseline within 50–350 ppm, no active faults, and ESP32 online).
 2. **Concentrate Drum (Drum 1) Sensing & Starvation Detection:** Concentrate Drum (Drum 1) has no hardware level sensor and is manually prepared (2 kg fertilizer dissolved in 20 L water). Liquid depletion is detected inferentially: the system calculates dosing based on empirical injection calibration (`DOSE_TEST_RESULT.md`). If the post-dosing TDS exhibits a significant negative anomaly (e.g., measuring ~1000 ppm instead of the expected ~1250 ppm, indicating partial or empty concentrate suction), the system triggers a warning alert prompting the operator to inspect Drum 1 for concentrate starvation.
-3. **Gate Failure & Recovery Protocol:** If measured TDS is outside the 1200–1300 ppm window after single-pass top-up recovery (or if initial TDS exceeds 1300 ppm), the distribution pump is locked OFF and `FAULT_PPM_OUT_OF_RANGE` is latched. Recovery requires physical drainage via the manual gravity drain valve to ≤ 5.0 L before the UI unlocks the "Reset Fault" button (Gated Fault Reset protocol).
+3. **Gate Failure & Recovery Protocol:** If measured TDS is outside the [Target ± 50 ppm] gate band (1200–1300 ppm for the default recipe) after single-pass top-up recovery (or if initial TDS exceeds Target + 50 ppm), the distribution pump is locked OFF and `FAULT_PPM_OUT_OF_RANGE` is latched. Recovery requires physical drainage via the manual gravity drain valve to ≤ 5.0 L before the UI unlocks the "Reset Fault" button (Gated Fault Reset protocol).

@@ -27,11 +27,11 @@ A firmware-enforced physical hardware safeguard executed autonomously on the ESP
 _Avoid_: Software guard, Interlock flag, UI lock
 
 **TDS Gate**:
-A strict one-way quality validation threshold (1200–1300 ppm) that must be satisfied before the distribution pump is permitted to energize.
+A strict one-way quality validation threshold `[Target − 50 ppm, Target + 50 ppm]` (e.g. 1200–1300 ppm for the default 1250 ppm recipe) that must be satisfied before the distribution pump is permitted to energize.
 _Avoid_: PPM check, EC filter, Quality loop
 
 **Single-Pass Top-Up Recovery**:
-An automated single-attempt corrective addition of concentrate (capped at 300 mL) triggered only when post-mix solution tests below 1200 ppm.
+An automated single-attempt corrective addition of concentrate (capped at 300 mL) triggered only when post-mix TDS falls in `[Target − 250 ppm, Target − 50 ppm)`.
 _Avoid_: Closed-loop auto-dosing, Iterative top-up, Continuous PID dosing
 
 **Gated Fault Reset**:
