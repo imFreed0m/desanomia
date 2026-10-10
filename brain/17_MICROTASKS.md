@@ -1,74 +1,124 @@
-# 17 Microtasks
+# 17 Microtasks Roadmap & Execution Plan
 
-Do one task at a time, in order within a milestone. Each line: id, task, done when. Update 19_CHANGELOG after each.
+> **Authority Notice:** Single Source of Truth (SOTT) for Desanomia's microtask decomposition, implementation ordering, and completion criteria across Milestones M0 through M7. Tasks must be executed in order within each milestone. Update [19_CHANGELOG.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/19_CHANGELOG.md) after completing each microtask. Governed by [00_MASTER_RULES.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/00_MASTER_RULES.md), [01_PRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/01_PRD.md), [04_TRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/04_TRD.md), [05_ARCHITECTURE.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/05_ARCHITECTURE.md), [06_DATA_MODEL.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/06_DATA_MODEL.md), [07_DATA_SOURCES.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/07_DATA_SOURCES.md), [08_SECURITY.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/08_SECURITY.md), [09_ERROR_HANDLING.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/09_ERROR_HANDLING.md), [10_FIRMWARE_SPEC.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/10_FIRMWARE_SPEC.md), [11_API_CONTRACT.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/11_API_CONTRACT.md), [12_UI_SPEC.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/12_UI_SPEC.md), [13_TESTING.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/13_TESTING.md), [14_GITHUB_ACTIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/14_GITHUB_ACTIONS.md), [15_DEPLOYMENT.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/15_DEPLOYMENT.md), [16_PRODUCTION_CHECKLIST.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/16_PRODUCTION_CHECKLIST.md), and [18_DECISIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md).
 
-## M0 Repo and docs
+---
 
-T-001 Create monorepo folders (firmware, backend, frontend, deploy, simulator, docs, brain). Done when: folders committed with READMEs.
-T-002 Copy SPEC.md to docs/ and resolve every [VERIFY] tag in brain/. Done when: no [VERIFY] remain or each is logged in 18.
-T-003 Add .gitignore, .editorconfig, pre-commit (ruff, prettier). Done when: pre-commit runs clean.
+## Milestone M0: Repository Infrastructure, Documentation & Pre-Commit Tooling
 
-## M1 Backend
+- [ ] **T-001 Monorepo Structure & Domain Isolation:** Create root monorepo directory hierarchy (`firmware/`, `backend/`, `frontend/`, `simulator/`, `deploy/`, `docs/`, `brain/`). Done when: Directory layout committed with initial READMEs establishing domain boundaries per Master Rule 3.
+- [ ] **T-002 Specification Alignment & Invariant Audit:** Reconcile all historical specifications in `docs/` against `brain/` SOTT. Done when: Zero unresolved `[VERIFY]` tags remain and all empirical constants match `docs/SPEC.md`.
+- [ ] **T-003 Pre-Commit Tooling & Linting Hooks:** Configure `.gitignore`, `.editorconfig`, and pre-commit hooks for Ruff (Python), ESLint/Prettier (TypeScript/CSS), and Clang-Format (C++). Done when: Running `pre-commit run --all-files` exits with code 0.
+- [ ] **T-004 Environment Variable Templates:** Commit `backend/.env.example`, `frontend/.env.example`, and `deploy/.env.example` defining all required configuration keys. Done when: Template files committed with zero plaintext production secrets.
+- [ ] **T-005 GitHub Repository Secrets & Permissions Setup:** Configure GitHub Actions repository secrets (`GHCR_TOKEN`, `TELEGRAM_BOT_TOKEN`, `ALERT_CHAT_ID`) and branch protection rules on `main`. Done when: Branch protection requires linear history and signed commits.
 
-T-010 FastAPI skeleton with /health, config via env. Done when: container starts, /health 200.
-T-011 SQLAlchemy models and first Alembic migration from 06. Done when: migration up and down works on empty DB.
-T-012 Session auth and RBAC dependency. Done when: tests prove viewer gets 403 on command routes.
-T-013 User management endpoints (Admin) and first-admin CLI with forced password change. Done when: create, role change, deactivate, first-login password change tested.
-T-014 aiomqtt subscriber persisting telemetry, state, events, device status. Done when: published messages appear in DB.
-T-015 WebSocket endpoint with snapshot and live fan-out. Done when: client receives snapshot then updates.
-T-016 Command publishing with cmd_id, ack handling, timeout. Done when: accepted, rejected, timeout paths tested.
-T-017 Batch, event, fault, telemetry read endpoints. Done when: pagination and filters tested.
-T-018 Schedules CRUD and scheduler that issues start commands. Done when: schedule fires against simulator.
-T-019 Telegram alerts with dedupe and retry queue. Done when: fault alert received, offline queue flushes.
-T-020 Audit log on every state-changing route and login. Done when: test asserts a row per action.
-T-021 Retention and rollup jobs. Done when: old telemetry rolled up and removed.
+---
 
-## M2 Simulator
+## Milestone M1: Core Edge Backend Services (FastAPI & PostgreSQL 16)
 
-T-030 Simulator implementing 05 topics and the 10-state FSM with configurable timings. Done when: full batch runs end to end.
-T-031 Fault injection (sensor range, gate fail, offline, interlock trip). Done when: each produces the expected fault.
+- [ ] **T-010 FastAPI Service Skeleton & Health Endpoint:** Initialize FastAPI application with CORS middleware, structured logging, and base routes (`GET /api/v1/health` and `GET /api/v1/system/status`). Done when: Container starts and `/api/v1/health` returns HTTP 200 with JSON status `healthy`.
+- [ ] **T-011 PostgreSQL 16 Schema & Alembic Migration Engine:** Implement SQLAlchemy 2.0 async models and Alembic migrations from `06_DATA_MODEL.md` featuring native monthly range partitioning on `telemetry`. Done when: `alembic upgrade head` and downgrade work cleanly on an empty database.
+- [ ] **T-012 Tier-Differentiated Authentication & RBAC Dependencies:** Implement Argon2id password hashing, JWT token issuer, Kiosk loopback Operator auto-auth, 15-minute temporary Admin step-up elevation, and `require_role(...)` FastAPI dependencies. Done when: Automated tests prove `Viewer` receives HTTP 403 on mutating command routes.
+- [ ] **T-013 User Management Endpoints & CLI Bootstrapper:** Implement `/api/v1/users` CRUD endpoints (Admin elevated) and CLI utility `python -m backend.app.cli seed-admin` forcing password change on first login. Done when: Admin user creation, role assignment, and password reset verified via integration tests.
+- [ ] **T-014 MQTT Ingestion Bridge & 5-Second RAM Buffer Flush (D-044):** Implement `aiomqtt` client connecting to Mosquitto (`192.168.10.1:1883`) on `ETH0`, consuming `desanomia/gh1/telemetry`, and buffering writes in memory for 5 seconds before batch insertion into PostgreSQL partitions. Done when: 1.0 Hz telemetry frames are ingested without packet loss and disk write frequency is capped to 0.2 Hz.
+- [ ] **T-015 WebSocket Real-Time Telemetry Broadcaster (`/ws/telemetry`):** Implement WebSocket hub providing initial snapshot hydration ($< 500\text{ ms}$) followed by 1.0 Hz pushed telemetry, FSM states, and command result frames. Done when: Connected WebSocket client receives complete snapshot immediately upon connect and 1.0 Hz streaming updates.
+- [ ] **T-016 Command-Query Separation (CQS) Handshake & Idempotency Engine (D-045):** Implement `/api/v1/commands/*` routes generating UUID `cmd_id`, dispatching MQTT QoS 1 to `desanomia/gh1/cmd`, returning HTTP 202 Accepted, and awaiting ACK receipt within 3.0 seconds. Done when: Re-transmitting identical `cmd_id` returns `ALREADY_EXECUTED` without relay toggle.
+- [ ] **T-017 Historical Query Endpoints & Pagination:** Implement paginated, filterable read routes: `/api/v1/batches`, `/api/v1/batches/:id`, `/api/v1/telemetry`, and `/api/v1/faults`. Done when: Date range, recipe preset, and evaluation status filters pass integration tests.
+- [ ] **T-018 Unified Schedule-First Engine & Zero-Conflict Validator (D-038, D-040):** Implement `/api/v1/schedules` CRUD, non-overlapping calendar overlap validator across 5 tank pairs, and AsyncIO background scheduler issuing batch start commands. Done when: Overlapping schedule submissions are rejected with HTTP 422, and scheduled batch fires against simulator.
+- [ ] **T-019 In-App Notification Hub & Offline Telegram Alert Queue (D-025, TR-22):** Implement notification service storing 4-tier alerts in `notifications` table, paired with `alert_queue` store-and-forward table syncing to Telegram bot when WAN is online. Done when: Critical fault triggers local notification and queues Telegram message.
+- [ ] **T-020 Cryptographic Audit Trail Hash Chaining (D-039):** Implement SHA-256 hash chaining formula (`row_hash = SHA256(prev_hash + ...)`) on `audit_logs` table, enforced by PL/pgSQL append-only triggers. Done when: Test asserts every state mutation creates a verifiable chained row and `UPDATE`/`DELETE` queries are rejected.
+- [ ] **T-021 Database Partition Maintenance & Rollup Cron Job (D-044):** Implement background task aggregating 1-minute historical metrics into `telemetry_1m` (retained 2 years) and dropping raw partitions older than 120 days. Done when: Rollups compute accurately and obsolete partitions drop cleanly without locks.
+- [ ] **T-022 Named Recipe Presets Library Service (D-037):** Implement `/api/v1/recipes` CRUD managing presets (Vegetatif 1100, Generatif 1250, Panen 1050), validating target range ($500\text{ to }1800\text{ ppm}$), and snapshotting immutable recipe parameters on batch start. Done when: Editing active recipe does not mutate historical batch records.
+- [ ] **T-023 Multi-Tank 5-Pair Virtual Stock & Refill Gate (D-022, D-040):** Implement `/api/v1/tanks` tracking 5 tank pairs, inferential virtual stock decrement for Concentrate Drum 1 (20.0 L capacity), low-stock warning ($\le 3000\text{ mL}$), and Refill Confirmation Gate. Done when: Dosing decrements stock and Refill Gate resets stock to 20.0 L.
+- [ ] **T-024 Same-Day Double Distribution Protection (UX-FR-17, D-039):** Implement backend validation checking if distribution ran today on target tank pair; reject ad-hoc requests with HTTP 409 Conflict unless `SAME_DAY_FORCE_OVERRIDE` flag is provided. Done when: Secondary run rejected without override and logged to audit trail with override.
+- [ ] **T-025 Guided Sensor Calibration Service (D-036):** Implement `/api/v1/sensors/calibrate/tds` and `/radar` coordinating multi-step calibration wizard, water drainage check ($\le 5.0\text{ L}$), raw ADC sampling, and NVS parameter commit. Done when: Calibration values persist in database and push to ESP32.
+- [ ] **T-026 Backend Test Suite Coverage Verification:** Execute full pytest suite with `pytest-asyncio` and `pytest-cov`. Done when: Overall backend statement coverage is $\ge 85\%$ and all security/safety tests pass.
 
-## M3 Frontend
+---
 
-T-040 Vite, TypeScript, Tailwind, shadcn/ui, router, self-hosted fonts. Done when: build has no external origins.
-T-041 Login page, session handling, route guards, 403 and 404, return-to-path after expiry per 02. Done when: viewer, operator, admin routes guarded and expiry returns to the saved path.
-T-042 WebSocket store with reconnect and stale state. Done when: unplugging backend shows stale banner.
-T-043 UI-01 FSM status card, UI-02 TDS gauge, UI-03 Drum 2 tank. Done when: values update live from simulator.
-T-044 UI-04 actuator panel, UI-05 timeline, UI-07 connectivity indicator. Done when: match simulator data.
-T-045 UI-08 Mulai Batch and UI-09 Reset Fault with confirmation and result states. Done when: accepted, rejected, timeout shown.
-T-046 UI-06 TDS history chart and UI-10 batch history with detail page. Done when: gate band shaded, filters work.
-T-047 UI-11 manual controls, UI-12 schedules, UI-14 user management. Done when: role restrictions verified.
-T-048 Kiosk mode and offline-origin CI check. Done when: dashboard fits 1920x1080, CI fails on external origin.
-T-049 Implement 03 design tokens (CSS variables, Tailwind config, ECharts theme) and light and dark themes. Done when: both themes render, contrast checked.
+## Milestone M2: Hardware Simulator & Test Bench Harness (`simulator/`)
 
-## M4 Firmware
+- [ ] **T-030 Python MQTT Hardware Simulator Core:** Implement `simulator/` using `aiomqtt` connecting to Mosquitto on `ETH0`, subscribing to `desanomia/gh1/cmd`, and publishing `desanomia/gh1/telemetry` at 1.0 Hz. Done when: Simulator connects, authenticates as `esp32_gateway`, and exchanges heartbeat frames.
+- [ ] **T-031 Deterministic 12-State FSM Engine Simulation:** Implement complete 12-state fertigation finite state machine progression in Python simulator with configurable acceleration factors (e.g. 10x real-time). Done when: Simulator autonomously executes full cycle from `IDLE` through `BATCH_DEPLETED`.
+- [ ] **T-032 Sensor DSP & Fluid Hydrodynamics Modeling:** Model virtual water inflow (SV1), peristaltic dosing (PP1), high-shear mixing, temperature compensation, and radar distance-to-volume curves with 5.0 L sump offset. Done when: Simulated TDS and volume respond physically to virtual actuator commands.
+- [ ] **T-033 Interactive HTTP Fault Injection API:** Implement lightweight FastAPI control port on simulator (`localhost:9099`) with endpoints to inject radar silence (`/inject/radar-timeout`), dry-run water drop (`/inject/dry-run`), and physical E-stop opening (`/inject/estop-trip`). Done when: Fault injection immediately triggers simulated safety faults.
+- [ ] **T-034 Mid-Batch Power Outage & Deficit Math Simulation:** Implement simulator restart during mixing stage to test NVS cold-boot entry into `BATCH_PAUSED_INSPECTION` and dynamic deficit concentrate calculation. Done when: Simulator boots into paused inspection and accepts deficit resume command.
+- [ ] **T-035 Command Idempotency Verification:** Verify that simulator tracks last 32 `cmd_id` UUIDs in memory and rejects re-transmissions with `ALREADY_EXECUTED` ACK. Done when: Duplicate command test passes without duplicate actuator state changes.
 
-T-060 PlatformIO project, FreeRTOS task skeleton, watchdog. Done when: boots and runs idle tasks.
-T-061 Sensor drivers with filtering and range validation. Done when: bench values match reference within agreed tolerance.
-T-062 Actuator HAL as the single output owner. Done when: no other code writes outputs.
-T-063 Interlock module with the 5 SPEC interlocks and native tests. Done when: each trips and cannot be overridden.
-T-064 FSM and gate with native tests per 13. Done when: all must-have firmware tests green.
-T-065 MQTT client, Last Will, command handling, ack. Done when: works against simulator-tested backend.
-T-066 NVS config with cmd/config/set. Done when: values persist across reboot and respect hard limits.
-T-067 Boot recovery, connectivity-loss behavior, event buffering. Done when: tests 5 and 6 in 13 pass.
-T-068 Signed OTA with rollback. Done when: update and forced rollback both work.
+---
 
-## M5 Integration and CI
+## Milestone M3: Frontend Industrial Cockpit Dashboard (`frontend/`)
 
-T-080 Docker Compose stack with Mosquitto, ACLs, Postgres, backend, frontend. Done when: one command brings up everything.
-T-081 GitHub Actions per 14. Done when: all required checks green on a PR.
-T-082 Playwright E2E against stack plus simulator. Done when: login, batch, fault, role tests pass.
+- [ ] **T-040 Vite React 18/19 SPA Setup & 100% Offline Asset Bundling:** Scaffold React SPA with TypeScript, Tailwind CSS, shadcn/ui, and self-hosted variable fonts (Space Grotesk, Geist Sans, Geist Mono) in `frontend/public/fonts/`. Done when: Production build outputs zero external CDN references and CI grep test passes.
+- [ ] **T-041 Authentication Views & On-Screen Touch Numpad (UI-13):** Implement `/login` page with PIN/password entry, integrated on-screen touch numpad ($72 \times 72\text{ px}$ keys), session handling, and route guards (`/403`, `/404`). Done when: Numpad operates smoothly via touch without summoning native OS virtual keyboard.
+- [ ] **T-042 Zustand Telemetry Store & Selector Discipline:** Implement `useTelemetryStore` with fine-grained atomic selectors and WebSocket client with exponential backoff and stale-state dimming. Done when: 1.0 Hz telemetry updates re-render only active metric components without full-page re-renders.
+- [ ] **T-043 FSM Status Card (UI-01):** Implement UI-01 displaying 12 lifecycle states, active `batch_id`, elapsed duration stopwatch (`font-mono tabular-nums`), and pulsating fault alert banner. Done when: Card renders emerald for normal processing, amber for pause, and red for faults.
+- [ ] **T-044 Live TDS Gauge & Tolerance Gate Card (UI-02):** Implement UI-02 displaying Space Grotesk 64 px hero TDS readout, dynamic tolerance gate bands ($[ \text{Target} \pm 50\text{ ppm} ]$), deficit amber band, and raw water baseline reference. Done when: Gauge styling matches tolerance bands with accessible text mirrors.
+- [ ] **T-045 Multi-Tank 5-Pair Visualizer & Fluid Physics (UI-03, D-040, D-046):** Implement UI-03 rendering 5 tank pairs (Pair 1 active, Pairs 2–5 standby) with HTML5 Canvas 2D sine-wave fluid physics at 60 FPS and accessible `<div role="meter">` mirrors. Done when: Canvas renders physical waves reflecting FSM states at $< 5\%$ CPU utilization.
+- [ ] **T-046 Actuator Status Panel & Test Bench (UI-04):** Implement UI-04 displaying 5 active-LOW relays, source badges (`[FSM]`, `[Manual]`, `[Interlock]`), and verbatim firmware rejection text flyouts. Done when: Relays show accurate state and locked actuators display interlock IDs.
+- [ ] **T-047 Batch Event Timeline & Audit Log (UI-05):** Implement UI-05 rendering live chronological audit log of state transitions, dosing injections, and gate evaluation snapshots. Done when: Transitions append smoothly in real time.
+- [ ] **T-048 Interactive TDS History Chart (UI-06):** Implement UI-06 using Apache ECharts with downsampled canvas rendering, 1h/6h/24h/7d range pills, shaded tolerance gate bands, and baseline reference line. Done when: Chart scrubs at 60 FPS without layout shift.
+- [ ] **T-049 ESP32 Connectivity Indicator (UI-07):** Implement UI-07 three-state semaphore (Online, Stale, Offline) with heartbeat counter and hardware vitals flyout (SRAM, PSRAM, uptime). Done when: Simulating socket loss dims dashboard and displays warning banner.
+- [ ] **T-050 Jadwalkan / Mulai Batch Unified Setup Modal (UI-08):** Implement UI-08 unified workflow modal (recipe picker, timing choice, tank pair selection) with autonomous transition to DISTRIBUTING upon TDS pass. Done when: Starting batch executes without requiring a second confirmation click.
+- [ ] **T-051 Reset Fault Button & Dual Preconditions Lock (UI-09):** Implement UI-09 locked button requiring both `hw_estop_pressed == false` and Drum 2 volume $\le 5.0\text{ L}$ before unlocking confirmation modal. Done when: Button is disabled with warning text when conditions are unmet.
+- [ ] **T-052 Batch History Table & CSV Export (UI-10):** Implement UI-10 on `/batches` with sortable columns, date/recipe filters, pass/fail badges, and client-side CSV export. Done when: Historical batches display correctly and CSV download generates valid data.
+- [ ] **T-053 Fine-Grained Manual Actuator Controls (UI-11):** Implement UI-11 on `/manual` featuring +10 mL peristaltic dosing bumps, 10s mixer runs, and 5s valve jogs with interlock rejection toasts. Done when: Manual commands dispatch CQS requests and display verbatim hardware feedback.
+- [ ] **T-054 Schedule Management Dialog & Timetable (UI-12):** Implement UI-12 on `/schedules` managing weekly timetable across 5 tank pairs with zero-conflict validation feedback. Done when: Schedules can be created, toggled, and verified against conflict rules.
+- [ ] **T-055 User Management & Kiosk Admin Step-Up Elevation (UI-14):** Implement UI-14 on `/users` and persistent top header banner showing 15-minute Admin elevation countdown with manual lock button. Done when: Elevation grants access to Admin controls and reverts after 15 minutes.
+- [ ] **T-056 Dashboard Schedule Calendar & Timeline Widget (UI-15):** Implement UI-15 horizontal 24-hour timeline on main dashboard showing completed, running, and scheduled batches across 5 tank pairs. Done when: Timeline displays non-overlapping blocks with countdown timers.
+- [ ] **T-057 Same-Day Hard Confirmation Modal (UI-16, UX-FR-17):** Implement UI-16 high-friction modal intervening when attempting secondary same-day distribution, featuring 3-second button countdown lock. Done when: Confirmation button is disabled for 3 seconds before allowing click.
+- [ ] **T-058 In-App Notification Hub & Frosted Glass Drawer (UI-17, D-025):** Implement UI-17 persistent header bell, unread badge counter, slide-out frosted glass history drawer, interactive action toasts, and Kiosk audio chimes. Done when: Alerts display with 1-tap actions and drawer slides out smoothly.
+- [ ] **T-059 Pipeline Stepper Component (UI-18, D-042):** Implement UI-18 Apple-style horizontal 12-state process stepper mounted above active tank card with node halos and step timers. Done when: Nodes illuminate to reflect current active FSM lifecycle step.
 
-## M6 Bench and hardware
+---
 
-T-090 Bench wiring and actuator tests with water. Done when: every actuator verified.
-T-091 Sensor calibration and record. Done when: calibration table committed to docs/.
-T-092 Interlock trigger tests on hardware. Done when: all 5 observed safe.
-T-093 Full water-only batch. Done when: gate evaluates, distribution runs, batch closes.
+## Milestone M4: ESP32-S3 FreeRTOS Embedded Firmware (`firmware/`)
 
-## M7 Production
+- [ ] **T-060 PlatformIO Architecture & FreeRTOS Dual-Core Allocation:** Scaffold PlatformIO project for ESP32-S3 N16R8, pinning Core 1 (240 MHz) to 20 Hz FSM control and Core 0 (240 MHz) to W5500 SPI Ethernet and MQTT networking. Done when: Microcontroller boots, initializes static tasks, and services watchdog.
+- [ ] **T-061 Zero-Heap Static Allocation Discipline:** Configure FreeRTOS with static task control blocks (`xTaskCreateStaticPinnedToCore`), static queues, and fixed pre-allocated buffers. Done when: Control loops execute with zero dynamic heap allocation calls.
+- [ ] **T-062 Conflict-Free GPIO Pinout & Active-LOW Relay HAL:** Implement HAL configuring GPIO 4–7 for active-LOW relays, GPIO 2–3 for panel alarms, GPIO 19/20 for USB-JTAG, and protecting Octal PSRAM lines (GPIO 35–37). Done when: Hardware register-level mutual exclusion lockouts prevent simultaneous invalid actuations.
+- [ ] **T-063 Sensor Conditioning & DSP Filtering Chains:** Implement 10-sample moving trimmed median filter on ADC1_CH0 (GPIO 1), 27.0°C baseline ATC formula, 60 GHz radar UART1 binary parser with 5.0 L sump offset, and pulse flow counter. Done when: Filtered readings match physical test inputs within $\pm 1.0\%$.
+- [ ] **T-064 The Seven Safety Interlocks Module (IL-01 to IL-07):** Implement `safety_interlocks.cpp` evaluating the 7 interlocks synchronously every 50 ms on Core 1. Done when: Native host tests achieve **100% branch coverage** and every interlock trips correctly.
+- [ ] **T-065 Authoritative 12-State FSM Engine:** Implement state machine executing `IDLE`, `FILLING_WATER`, `CHECK_BASE`, `DOSING`, `MIXING`, `STABILIZING`, `MEASURING_TDS`, `GATE_EVALUATE`, `TOPUP_DOSING`, `RECOVERY_MIX_EVALUATE`, `DISTRIBUTING`, and `BATCH_DEPLETED`. Done when: State progression, state timeouts, and error transitions pass unit tests.
+- [ ] **T-066 Semi-Closed Loop Dosing Engine & Deficit Math:** Implement feedforward dosing formula ($V_{\text{mL}} \times 0.107\text{ s/mL}$) and single-pass top-up recovery strictly capped at $\le 300\text{ mL}$. Done when: Single-pass recovery executes once and secondary top-up is rejected.
+- [ ] **T-067 W5500 SPI Ethernet & MQTT QoS 1 Handshake Engine:** Implement W5500 Ethernet driver (`192.168.10.20`), MQTT client with LWT status, command subscription, and correlated QoS 1 ACK generation. Done when: Microcontroller establishes stable connection to Mosquitto and exchanges telemetry.
+- [ ] **T-068 Command Idempotency & NVS Boot Recovery (D-045):** Implement 32-slot circular RAM cache and commit `last_executed_cmd_id` to NVS flash. Done when: Duplicate `cmd_id` returns `ALREADY_EXECUTED` without relay toggling, even after a reboot.
+- [ ] **T-069 Mid-Batch Outage Journaling & Pause Mode Recovery (D-013):** Implement NVS state journaling before actuator state transitions; upon cold boot with active journal, enter `BATCH_PAUSED_INSPECTION` with dynamic deficit calculation. Done when: Power cut mid-batch cold-boots into paused inspection.
+- [ ] **T-070 Gated Fault Reset & Physical Preconditions Handler:** Implement `RESET_FAULT` command logic enforcing `hw_estop_pressed == false` and Drum 2 volume $\le 5.0\text{ L}$. Done when: Reset command rejects when switch is depressed or tank is full.
+- [ ] **T-071 Dual-Circuit Physical E-Stop Interrupt Handler:** Configure GPIO 21 falling/rising edge interrupt connected to mushroom switch auxiliary contact; de-energize relays in 0 ms and latch `FAULT_ESTOP`. Done when: Pressing mushroom switch trips interrupt and de-energizes relays.
+- [ ] **T-072 Guided Sensor Calibration NVS Commit:** Implement calibration handler receiving slope/offset parameters over MQTT and committing to `calib_tds` NVS namespace. Done when: New calibration survives power cycle.
+- [ ] **T-073 Dual-Partition OTA Rollback Architecture:** Configure 2-MB dual OTA partitions (`app0`, `app1`); verify new image validation and automatic rollback to previous partition upon boot crash. Done when: Flashing corrupted image rolls back to working partition automatically.
 
-T-100 Deploy to Beelink EQ12 Mini PC, auto-start, backups, restore test. Done when: 16 operations section ticked.
-T-101 Tailscale ACLs and port scan. Done when: security section of 16 ticked.
-T-102 Control-room kiosk with internet unplugged. Done when: dashboard fully functional.
-T-103 Supervised first fertilizer batch, then 7-day review. Done when: 16 first runs ticked.
+---
+
+## Milestone M5: Integration, Full-Stack E2E Simulation & CI Pipelines
+
+- [ ] **T-080 Docker Compose Production Stack (`deploy/docker-compose.yml`):** Compose stack orchestrating Mosquitto 2.0 (bound to OT fieldbus), PostgreSQL 16 (monthly partitions), FastAPI backend, and Nginx (tri-listener). Done when: `docker compose up -d` launches healthy stack on local workstation.
+- [ ] **T-081 GitHub Actions Monorepo CI Pipeline Matrix:** Implement `firmware.yml`, `backend.yml`, `frontend.yml`, `e2e.yml`, and `release.yml` workflows with path filters. Done when: All workflows execute and pass on pull request.
+- [ ] **T-082 Playwright E2E Test Suite Execution:** Implement full-stack Playwright tests running against Docker Compose stack with Python simulator. Done when: Nominal batch lifecycle and fault injection/recovery tests pass cleanly.
+- [ ] **T-083 100% Offline Asset Integrity Gate Script:** Implement automated verification script auditing `frontend/dist/` for remote URL references. Done when: Build fails if external origins are detected.
+- [ ] **T-084 Multi-Arch Docker Buildx Packaging:** Configure automated build of `linux/amd64` container images targeting Beelink EQ12 Intel N100 and push to GitHub Container Registry (GHCR). Done when: Signed release images appear in GHCR package repository.
+
+---
+
+## Milestone M6: Physical Hardware Bench & Two-Stage Commissioning
+
+- [ ] **T-090 Physical Electrical Wiring & Relay Bench Validation:** Wire 4 optoisolated relays, pilot lamp, buzzer, and power supplies on industrial DIN-rail panel. Done when: Visual inspection confirms active-LOW NO wiring and zero floating pins.
+- [ ] **T-091 Dual-Circuit Physical Mushroom E-Stop Switch Bench Validation:** Wire and test dual-circuit switch. Done when: Depressing switch physically drops 24V coil power bus in 0 ms and generates GPIO 21 interrupt.
+- [ ] **T-092 Sensor Signal Bench Calibration:** Calibrate DFRobot TDS probe against 1413 µS/cm buffer solution; record slope in NVS. Calibrate 60 GHz radar distance curve against measured water depths. Done when: Recorded readings match calibration references.
+- [ ] **T-093 Physical Bench Tripping of The Seven Safety Interlocks:** Individually trip each interlock (`IL-01` to `IL-07`) on the bench. Done when: Every interlock de-energizes relays, illuminates red lamp, sounds buzzer, and latches fault.
+- [ ] **T-094 Stage 1: Water-Only Commissioning Run:** Fill Distribution Drum 2 with 140.0 L municipal water; run complete cycle. Done when: Zero plumbing leaks observed, flow meter measures 140.0 L within $\pm 1.5\%$, and dry-run pump cutoff triggers at $\le 5.0\text{ L}$.
+- [ ] **T-095 Stage 2: Supervised First Nutrient Run:** Prime Concentrate Drum 1 with A+B fertilizer; run automated batch with Generatif 1250 ppm recipe. Done when: In-line TDS lands within $[ 1200, 1300\text{ ppm} ]$, verified against independent handheld meter within $\pm 25\text{ ppm}$.
+- [ ] **T-096 Seven-Day Supervised Pilot Operational Sign-Off:** Conduct 7 consecutive days of daily supervised batches. Done when: All 7 days complete with zero unhandled faults and agronomist signs off on root health.
+
+---
+
+## Milestone M7: Edge Host Deployment & Production Operations
+
+- [ ] **T-100 Beelink EQ12 Mini PC Host Provisioning:** Install Debian 12 Bookworm Minimal, configure BIOS AMI `Restore on AC Power Loss: Always On`, install Docker Engine 26+, and configure systemd. Done when: Host auto-boots to shell on power restoration.
+- [ ] **T-101 Dual-NIC Hardware Air-Gap & Firewall Configuration (D-043):** Configure `enp1s0` (`192.168.10.1/24` OT) and `enp2s0` (`192.168.1.10/24` IT). Configure `net.ipv4.ip_forward = 0` and apply `nftables` forward drop rules. Done when: Port scan confirms zero WAN exposure and zero cross-interface routing.
+- [ ] **T-102 Local Time Synchronization Authority Provisioning (D-020):** Configure CMOS RTC `/dev/rtc0` cold-boot restoration and Chrony local Stratum-10 NTP server on `192.168.10.1:123`. Done when: Host and ESP32-S3 maintain synchronized time with WAN cable disconnected.
+- [ ] **T-103 Control-Room HMI Kiosk Provisioning (Cage + Chromium):** Configure UPERFECT 15.6" touchscreen, Cage Wayland compositor, and systemd `kiosk.service`. Done when: Kiosk boots directly into fullscreen dashboard on `http://127.0.0.1:8080`.
+- [ ] **T-104 Secondary Gazebo Display Provisioning (Xiaomi TV A 43"):** Configure Fully Kiosk Browser on Google TV pointing to `https://192.168.1.10` over wired LAN. Done when: Display shows 24/7 passive mirror with hidden controls.
+- [ ] **T-105 Database Partition Retention Cron & Dual-Target Zstandard Backups (D-044):** Configure nightly cron job for 1-minute rollups, 120-day partition drops, and dual-target `pg_dump | zstd` backups (local NVMe + Tailscale rsync to Host 2). Done when: Test backup successfully restores on secondary machine.
+- [ ] **T-106 Final Operational Runbook Rehearsal & Go-Live Acceptance:** Rehearse Zero-Downtime Application Update, Instant Rollback, and Cold-Boot Recovery per `15_DEPLOYMENT.md`. Done when: Operations Director signs off on `16_PRODUCTION_CHECKLIST.md` for unattended production fertigation.
