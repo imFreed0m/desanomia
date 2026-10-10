@@ -515,5 +515,5 @@ All REST HTTP 4xx and 5xx responses strictly adhere to the unified JSON error en
 1. **Zero Secret Leakage:** HTTP responses, logs, and WebSockets never leak Argon2id password hashes, session tokens, or raw database connection strings.
 2. **Immutable Audit Trail:** Every state-changing mutation endpoint (`POST`, `PUT`, `DELETE`) immutably appends a record to the PostgreSQL `audit_logs` table:
    - Captures `user_id`, `action`, `entity_type`, `entity_id`, `payload_json`, and `client_ip`.
-   - Computes SHA-256 cryptographic hash chaining (`prev_hash` $\to$ `row_hash`), protected by database append-only triggers (`TR-16`, `D-039`).
+   - Protected by PostgreSQL PL/pgSQL append-only triggers (`trg_audit_logs_immutability`) against UPDATE/DELETE and verified via daily automated offsite backups (`TR-16`, `D-039`, `D-044`, `08_SECURITY.md`).
 3. **Pessimistic UI Gating:** Disabled buttons on the UI are always mirrored by backend role checks (`Depends(require_role)`). UI hiding is purely cosmetic.

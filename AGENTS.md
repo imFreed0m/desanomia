@@ -9,7 +9,6 @@ Research greenhouse IoT system spanning ESP32 firmware, backend/edge services, a
 - `backend/**` — API, edge services, infrastructure.
 - `frontend/**` — Dashboard UI.
 - `hardware/**` — Hardware schematics and BOM.
-- `docs/**` — Test logs and working notes (source of frozen constants in `docs/SPEC.md`).
 - `.agents/**` — Project rules and skills.
 
 <important if="you are receiving, planning, or executing any task">
@@ -20,7 +19,7 @@ Research greenhouse IoT system spanning ESP32 firmware, backend/edge services, a
 <important if="you are designing, implementing, modifying, or reviewing code or architecture">
 - Safety Critical: Never weaken, bypass, or remove safety interlocks, actuator guards, sensor conditioning, or data-integrity controls.
 - Forbidden Regressions: Do NOT reintroduce rejected architectures.
-- System Authority: `brain/00_MASTER_RULES.md` and `brain/18_DECISIONS.md` govern system invariants; `docs/SPEC.md` governs frozen constants (`[SPEC]`).
+- System Authority: `brain/00_MASTER_RULES.md` and `brain/18_DECISIONS.md` govern system invariants.
 - Domain Isolation: Keep changes inside the relevant domain directory. Cross-domain edits require an explicit integration task.
 - Self-Protection: Do not alter `AGENTS.md` or `brain/00_MASTER_RULES.md` from autonomous loops.
 </important>

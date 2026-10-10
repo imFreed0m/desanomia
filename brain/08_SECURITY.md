@@ -87,8 +87,8 @@ flowchart TD
         ETH1["NIC 1: ETH1 (2.5 GbE)\nIP: 192.168.1.10/24"]:::it
         TS0["Virtual: tailscale0\nIP: 100.x.y.z/32"]:::vpn
         
-        Mosq["Mosquitto MQTT Broker\n(192.168.10.1:1883 ONLY)\nIsolated from ETH1 & TS0"]:::ot
-        Nginx["Nginx Reverse Proxy\n(Ports 80, 443, 8080)"]:::it
+        Mosq["Mosquitto MQTT Broker\n(Docker: 192.168.10.1:1883:1883)\nIsolated from ETH1 & TS0"]:::ot
+        Nginx["Nginx Reverse Proxy\n(Ports 80, 443; Kiosk: 127.0.0.1:8080)"]:::it
         App["FastAPI Backend & PostgreSQL 16\n(Docker Bridge: 172.18.0.0/16)"]:::edge
     end
 
@@ -124,26 +124,24 @@ flowchart TD
 
 | Interface | Network Domain | Subnet / CIDR | Assigned Static IPs | Allowed Protocols & Ports | Physical Medium |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`eth0`** | OT Fieldbus | `192.168.10.0/24` | `192.168.10.1` (Beelink Host)<br>`192.168.10.20` (ESP32-S3) | MQTT: 1883 TCP (Mosquitto)<br>NTP: 123 UDP (Chrony Stratum-10) | Unmanaged DIN rail industrial switch, shielded Cat6. Air-gapped from IT. |
+| **`eth0`** | OT Fieldbus | `192.168.10.0/24` | `192.168.10.1` (Beelink Host)<br>`192.168.10.20` (ESP32-S3) | MQTT: 1883 TCP (Mosquitto container published to `192.168.10.1:1883`)<br>NTP: 123 UDP (Chrony Stratum-10) | Unmanaged DIN rail industrial switch, shielded Cat6. Air-gapped from IT. |
 | **`eth1`** | IT / WAN Uplink | `192.168.1.0/24` | `192.168.1.10` (Beelink Host)<br>`192.168.1.1` (Orbit 4G Gateway)<br>`192.168.1.50` (Tenda O1 / Xiaomi TV) | HTTP: 80 TCP (301 Redirect to 443)<br>HTTPS: 443 TCP (TLS 1.3 Nginx)<br>WSS: 443 TCP (WebSocket Telemetry) | Cat6 to Orbit Star H2; 5 GHz PTP Wireless Bridge to Gazebo. |
-| **`lo`** | Local Kiosk | `127.0.0.1/8` | `127.0.0.1` (Beelink Local Display) | HTTP: 8080 TCP (Nginx static bundle & FastAPI proxy without TLS overhead) | HDMI + USB Touchscreen loopback (`UPERFECT BE156PF`). |
-| **`tailscale0`** | Secure Remote Mesh | `100.64.0.0/10` (CGNAT) | Assigned Tailscale IP (`100.x.y.z`) | HTTPS: 443 TCP<br>SSH: 22 TCP (Tailscale SSH keys only)<br>rsync: 873 TCP (Encrypted backup) | WireGuard encrypted peer-to-peer overlay network. Zero open WAN ports. |
+| **`lo`** | Local Kiosk | `127.0.0.1/8` | `127.0.0.1` (Beelink Local Display) | HTTP: 8080 TCP (Nginx static bundle & FastAPI proxy bound strictly to `127.0.0.1:8080`) | HDMI + USB Touchscreen loopback (`UPERFECT BE156PF`). |
+| **`tailscale0`** | Secure Remote Mesh | `100.64.0.0/10` (CGNAT) | Assigned Tailscale IP (`100.x.y.z`) | HTTPS: 443 TCP<br>SSH: 22 TCP (Tailscale SSH keys only)<br>*(Backups pushed outbound over Tailscale SSH; no inbound port)* | WireGuard encrypted peer-to-peer overlay network. Zero open WAN ports. |
 
 ### 3.2 Linux Kernel Isolation & Firewall Drop Rules
-The host OS drops all forwarding between interfaces, strictly preventing network routing from IT/WAN into the microcontroller fieldbus:
+The host OS enables IPv4 forwarding solely to support Docker bridge networking, while `nftables` strictly drops all packet forwarding across physical interfaces (`eth0` $\leftrightarrow$ `eth1`), preventing any routing from the IT network into the OT microcontroller fieldbus:
 
 ```bash
 # /etc/sysctl.d/99-desanomia-networking.conf
-net.ipv4.ip_forward = 0
-net.ipv4.conf.all.forwarding = 0
-net.ipv4.conf.eth0.forwarding = 0
-net.ipv4.conf.eth1.forwarding = 0
+# Required for Docker bridge container networking and internal service routing
+net.ipv4.ip_forward = 1
 net.ipv4.conf.all.send_redirects = 0
 net.ipv4.conf.all.accept_redirects = 0
 net.ipv4.conf.all.accept_source_route = 0
 ```
 
-`nftables` rules enforce unidirectional boundaries and lock down service binding:
+`nftables` rules enforce unidirectional boundaries, isolate Docker containers, and lock down service binding:
 
 ```nftables
 table inet desanomia_firewall {
@@ -168,10 +166,25 @@ table inet desanomia_firewall {
     }
 
     chain forward {
-        type filter hook forward priority 0; policy drop;        # Strict Zero-Bridging
+        type filter hook forward priority 0;
+
+        # Strictly prevent bridging/routing between OT Fieldbus and IT/WAN
+        iifname "eth0" oifname "eth1" drop
+        iifname "eth1" oifname "eth0" drop
+
+        # Allow Docker container bridge traffic
+        iifname "docker0" accept
+        oifname "docker0" accept
     }
 }
 ```
+
+> [!NOTE] OT Fieldbus Unreachability Verification
+> Isolation between IT and OT rests on the explicit bind address plus the `nftables` input/forward chains. Verify from any device on the IT network (`192.168.1.0/24`) that Mosquitto is completely unreachable:
+> ```bash
+> nc -zv -w 2 192.168.1.10 1883
+> # Expected: Connection timed out or connection refused (0 bytes transferred)
+> ```
 
 ---
 
@@ -211,6 +224,11 @@ classDiagram
 
 ### 4.1 Tier 1: Primary HMI Kiosk (15.6" Touchscreen on Standing Kiosk)
 - **Zero-Barrier Operator Mode:** The primary physical terminal operates via loopback (`127.0.0.1:8080`). It maintains a persistent, un-expiring `Operator` session. In agricultural emergencies, the operator must never be blocked by a login screen or session timeout to trigger an emergency stop, silence an alarm, or pause a batch.
+- **Strict Loopback Binding & Port Isolation:** The passwordless Operator session is safe from remote exploitation *only* if Nginx binds strictly to the loopback interface (`listen 127.0.0.1:8080;`) and never wildcard `0.0.0.0:8080`. Verify during deployment:
+  ```bash
+  ss -tlnp | grep 8080
+  # Expected: LISTEN 127.0.0.1:8080 (NEVER 0.0.0.0:8080 or :::8080)
+  ```
 - **Administrative Step-Up Elevation (`is_elevated = true`):**
   - Accessing administrative routes (`/settings`, `/users`, recipe preset calibration defaults, or sensor calibration wizard `/manual`) triggers a modal requesting an Admin password.
   - Upon successful verification, the session issues a signed temporary elevation token granting Admin privileges for **exactly 15 minutes**.
@@ -267,12 +285,31 @@ Every FastAPI backend endpoint enforces role verification via dependency injecti
 
 ## 6. MQTT Broker Infrastructure & Transport Hardening (D-015, D-017, D-043, D-045)
 
-The Eclipse Mosquitto broker acts as the low-latency message bus between the edge backend and the ESP32-S3 microcontroller. It runs in Docker on the Beelink EQ12, strictly bound to the physical `ETH0` interface.
+The Eclipse Mosquitto broker acts as the low-latency message bus between the edge backend and the ESP32-S3 microcontroller. It runs in Docker on the Beelink EQ12, with its external port mapped exclusively to the physical `ETH0` interface (`192.168.10.1`).
 
-### 6.1 Broker Configuration (`mosquitto.conf`)
+### 6.1 Broker Configuration (`mosquitto.conf`) & Docker Compose Binding
+Inside the container, Mosquitto listens on standard port 1883. Docker Compose publishes port 1883 strictly to the OT IP `192.168.10.1`, while internal Docker containers (FastAPI backend) connect over the bridge network via service DNS (`mosquitto:1883`):
+
+```yaml
+# docker-compose.yml snippet
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    restart: unless-stopped
+    ports:
+      # Bound strictly to OT Fieldbus NIC (eth0); unreachable from eth1 (IT) or tailscale0
+      - "192.168.10.1:1883:1883"
+    volumes:
+      - ./config/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./config/mosquitto/passwd:/etc/mosquitto/passwd:ro
+      - ./config/mosquitto/acl:/etc/mosquitto/acl:ro
+    networks:
+      - desanomia_net
+```
+
 ```ini
 # /etc/mosquitto/mosquitto.conf
-listener 1883 192.168.10.1
+listener 1883
 allow_anonymous false
 password_file /etc/mosquitto/passwd
 acl_file /etc/mosquitto/acl
@@ -345,29 +382,26 @@ flowchart LR
 - **PSRAM Memory Bus Protection:** Internal Octal PSRAM data and clock lines (GPIO 35, 36, and 37) are strictly protected in firmware source code and board definitions (`platformio.ini`) to prevent assignment as general-purpose I/O.
 - **OTA Verification:** Firmware updates delivered over the OT network require SHA-256 binary digest verification against the build manifest. OTA flashing is rejected if the FSM is in any active operational state (`FILLING`, `DOSING`, `MIXING`, `DISTRIBUTING`), enforcing execution strictly when the system is in `IDLE`.
 
-### 7.2 Phase 2 Lockdown Roadmap
-Prior to multi-site commercial deployment, the edge controller undergoes irreversible hardware lockdown:
+### 7.2 Phase 2 Lockdown Roadmap (Off-Premise Commercial Manufacturing Only)
+
+> [!CAUTION] Hardware Safety Invariant: Do NOT Burn Physical eFuses on Greenhouse Hardware
+> Burning eFuses (`FLASH_CRYPT_KEY`, `DIS_PAD_JTAG`, `DIS_USB_JTAG`, `DIS_DOWNLOAD_MODE`) is completely irreversible and permanently disables hardware native USB Serial/JTAG debugging.
+> On this research installation, **Phase 1 (unburned eFuses + active USB-JTAG + physical cabinet lock + air-gapped OT fieldbus switch)** is the permanent, authoritative operational standard.
+> Phase 2 is an optional off-premise commercial manufacturing concept only and MUST NOT be applied to greenhouse field controllers.
+
+Prior to hypothetical multi-site commercial manufacturing, edge microcontrollers could undergo irreversible hardware lockdown:
 1. **Secure Boot v2:** Burns the SHA-256 digest of an RSA-3072 public key into BLK0 eFuses, verifying the second-stage bootloader and application binary on every hardware reset.
 2. **Flash Encryption:** Burns an internally generated AES-256-XTS key into eFuse BLOCK4 (`FLASH_CRYPT_KEY`), permanently encrypting SPI flash contents.
 3. **Hardware JTAG Disablement:** Irreversibly sets `DIS_PAD_JTAG`, `DIS_USB_JTAG`, and `DIS_DOWNLOAD_MODE` eFuses, preventing physical chip extraction or firmware readout.
 
 ---
 
-## 8. Cryptographic Audit Trail & Data Integrity (D-039, D-044, TR-16, TR-32)
+## 8. Audit Trail Immutability & Data Integrity (D-039, D-044, TR-16, TR-32)
 
-Every state-changing operation (batch initiation, manual actuator jog, safety fault reset, recipe modification, sensor calibration, and elevation grant) is immutably committed to the PostgreSQL `audit_logs` table with cryptographic hash chaining.
+Every state-changing operation (batch initiation, manual actuator jog, safety fault reset, recipe modification, sensor calibration, and elevation grant) is immutably committed to the PostgreSQL `audit_logs` table.
 
-### 8.1 SHA-256 Cryptographic Hash Chaining Formula
-Each audit log row computes an immutable digest that cryptographically binds it to the entire prior history of the system:
-
-$$\text{row\_hash} = \text{SHA256}(\text{prev\_hash} \mathbin{\Vert} \text{timestamp} \mathbin{\Vert} \text{user\_id} \mathbin{\Vert} \text{action} \mathbin{\Vert} \text{entity\_type} \mathbin{\Vert} \text{entity\_id} \mathbin{\Vert} \text{payload\_json} \mathbin{\Vert} \text{client\_ip})$$
-
-- **Genesis Record:** The initial record inserted at database migration initializes with:  
-  `prev_hash = '0000000000000000000000000000000000000000000000000000000000000000'`
-- **Continuous Linkage:** Every subsequent record reads the `row_hash` of record $N-1$ and stores it as its `prev_hash`.
-
-### 8.2 Database Append-Only Trigger Protection
-A PostgreSQL PL/pgSQL trigger protects the `audit_logs` table against retroactive tampering or deletion:
+### 8.1 Database Append-Only Trigger Protection
+To eliminate the write-lock serialization bottlenecks and operational failure modes of blockchain-style hash chaining on a single-node edge database, immutability is enforced directly at the database engine level. A PostgreSQL PL/pgSQL trigger protects the `audit_logs` table against retroactive tampering or deletion:
 
 ```sql
 CREATE OR REPLACE FUNCTION enforce_audit_logs_immutability()
@@ -387,14 +421,27 @@ BEFORE UPDATE OR DELETE ON audit_logs
 FOR EACH ROW EXECUTE FUNCTION enforce_audit_logs_immutability();
 ```
 
-### 8.3 Chain Verification & Tamper Detection
-- A nightly background task reads all audit records in sequential order, re-computes each $\text{row\_hash}$, and compares it to the stored digest.
-- Any discrepancy, sequence break, or missing row triggers an immediate **Critical Security Alert** via Telegram Bot (`TAMPER_EVIDENT_BREACH`) and forces an intrusive red security warning on the HMI Kiosk and web dashboard.
+### 8.2 Audit Log Record Structure
+Audit log entries record the full operational context of every system mutation:
+- `id`: Auto-incrementing bigserial identifier.
+- `timestamp`: UTC ISO-8601 timestamp generated at database write time (`TIMESTAMPTZ DEFAULT clock_timestamp()`).
+- `user_id`: Authenticated user or service account identifier (`esp32_gateway`, `backend_service`, or user UUID).
+- `client_ip`: Originating IP address (`127.0.0.1` for Kiosk, `100.x.y.z` for remote Tailscale, `192.168.10.20` for ESP32).
+- `action`: State machine mutation or configuration event (`START_BATCH`, `EMERGENCY_STOP`, `RESET_FAULT`, `UPDATE_RECIPE`).
+- `entity_type`: Target domain object (`batch`, `fault`, `recipe`, `actuator`, `user`).
+- `entity_id`: Specific target identifier.
+- `payload_json`: Full command parameters and state context.
+- `status`: Execution status (`SUCCESS`, `REJECTED_INTERLOCK`, `FAILED`).
 
-### 8.4 Dual-Target Backup Architecture (D-044)
-Telemetry and audit data are preserved through a dual-target strategy:
+### 8.3 Automated Nightly Backup & Integrity Verification (D-044)
+Data preservation and disaster recovery are maintained via dual-target automated backups:
 1. **Target 1 (Local NVMe):** Daily compressed database dump (`pg_dump -Fc`) stored locally on the Beelink NVMe drive (`/var/backups/desanomia/`), retained for 30 days.
-2. **Target 2 (Off-Device Remote Server):** Nightly automated rsync of encrypted backups executed over Tailscale to Host 2 `lenovo-latop` (`100.125.131.95`), retaining 90 days of complete archives.
+2. **Target 2 (Off-Device Remote Server):** Nightly automated rsync of encrypted backups executed over Tailscale SSH to Host 2 `lenovo-latop` (`100.125.131.95`), retaining 90 days of complete archives.
+3. **Automated Verification:** A nightly background cron executes:
+   ```bash
+   python -m backend.cli verify-backup-integrity
+   ```
+   This validates the readability and restore integrity of the latest `pg_dump` snapshot. Discrepancies or backup failures immediately dispatch a Telegram alert (`BACKUP_INTEGRITY_FAILURE`).
 
 ---
 
@@ -407,7 +454,7 @@ Desanomia strictly prohibits external third-party CDN dependencies, Google Fonts
 
 ```nginx
 # /etc/nginx/conf.d/security_headers.conf
-add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' wss://192.168.1.10 wss://100.*:*; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" always;
+add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" always;
 
 add_header X-Frame-Options "DENY" always;
 add_header X-Content-Type-Options "nosniff" always;
@@ -458,9 +505,10 @@ In the event of a suspected cyber compromise, unauthorized remote commands, or n
   4. Restarts Docker services and re-syncs MQTT credentials to ESP32 NVS via USB cable.
 
 [STEP 4: AUDIT INTEGRITY CHECK]
-  1. Run the audit log verification script:
-       python -m backend.cli verify-audit-chain
-  2. Inspect the output for sequence breaks or hash discrepancies to identify the blast radius.
+  1. Run the database backup integrity verification script:
+       python -m backend.cli verify-backup-integrity
+  2. Inspect recent audit logs for unauthorized batch triggers or state mutations to identify blast radius:
+       python -m backend.cli dump-audit-log --last 1h
 ```
 
 ### 10.3 Secret Rotation Standard Operating Procedure

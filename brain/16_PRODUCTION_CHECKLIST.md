@@ -51,8 +51,8 @@
 - [ ] **Physical Bench Verification of The Seven Safety Interlocks (`IL-01` to `IL-07`):**
   - [ ] **`IL-01` Dynamic Tolerance Gate:** Distribution pump physically inhibited when TDS is 1199 ppm or 1301 ppm (Target 1250 ppm); enabled strictly within $[ 1200, 1300 ]\text{ ppm}$.
   - [ ] **`IL-02` Dry-Run Cutoff Guard:** Distribution pump P1 de-energizes within $< 50\text{ ms}$ when Drum 2 level drops below 5.0 L; latches `FAULT_DRY_RUN`.
-  - [ ] **`IL-03` Batch Depletion Guard:** Starting a batch with $> 5.0\text{ L}$ in Drum 2 is rejected with `FAULT_BATCH_REJECTED`.
-  - [ ] **`IL-04` Dual-Stage Fill Guard:** Early rise timeout ($< 1.0\text{ L}$ rise in 90s) trips `FAULT_NO_WATER_SUPPLY`; total fill timeout ($> 20\text{ min}$) trips `FAULT_FILL_TIMEOUT`. Non-draining `RESUME_FILL` recovers fill safely.
+  - [ ] **`IL-03` Batch Depletion Guard:** Starting a batch with $> 5.0\text{ L}$ in Drum 2 is rejected with `FAULT_BATCH_REJECTED` (Tier 1B precondition rejection: FSM remains `IDLE`, zero buzzer, zero NVS latch).
+  - [ ] **`IL-04` Dual-Stage Fill Guard:** Early rise timeout ($< 1.0\text{ L}$ rise in 90s) trips `PAUSED_FILL_NO_WATER`; total fill timeout ($> 20\text{ min}$) trips `PAUSED_FILL_TIMEOUT`. Non-draining `RESUME_FILL` recovers fill safely (max 3 resumes, cumulative 20 min watchdog).
   - [ ] **`IL-05` Water Baseline & Plausibility Guard:** Clean water TDS $< 50\text{ ppm}$ or $> 2000\text{ ppm}$ trips `FAULT_TDS_INVALID`; baseline $\ge 350\text{ ppm}$ trips `FAULT_BASE_TDS_HIGH`.
   - [ ] **`IL-06` Radar Watchdog Guard:** Disconnecting radar UART trips `FAULT_RADAR_OFFLINE` within $3.0\text{ s}$ and de-energizes all relays.
   - [ ] **`IL-07` Emergency Stop Guard:** Depressing physical mushroom switch severs relay power in $0\text{ ms}$ and latches `FAULT_ESTOP`.
@@ -62,7 +62,7 @@
   - [ ] Reset command succeeds, clears fault latch, and transitions FSM to `IDLE` strictly when switch is twist-released AND Drum 2 is drained to $\le 5.0\text{ L}$.
 - [ ] **Mid-Batch Power Outage Recovery (`D-013`):**
   - [ ] Unplugged AC mains during active mixing stage; verified that upon cold boot, ESP32-S3 reads NVS state journal and enters **`BATCH_PAUSED_INSPECTION`**.
-  - [ ] Verified dynamic deficit concentrate dosing formula: $[(\text{TDS}_{\text{target}} - \text{TDS}_{\text{meas}}) \times V_{\text{vol}}] / 1.07 \le 300\text{ mL}$.
+  - [ ] Verified dynamic deficit concentrate dosing formula: $[(\text{TDS}_{\text{target}} - \text{TDS}_{\text{meas}}) \times V_{\text{vol}}] / 107.0 \le 300\text{ mL}$.
 - [ ] **Command Idempotency & Replay Protection (`D-045`):**
   - [ ] Sent identical UUID `cmd_id` twice over MQTT QoS 1; verified second transmission returns `ALREADY_EXECUTED` without re-toggling physical relays.
   - [ ] Verified that `last_executed_cmd_id` persists across microcontroller reboots via NVS flash.

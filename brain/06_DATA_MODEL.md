@@ -334,10 +334,12 @@ CREATE TABLE alert_queue (
     id BIGSERIAL PRIMARY KEY,
     notification_id BIGINT NULL REFERENCES notifications(id) ON DELETE SET NULL,
     severity TEXT NOT NULL CHECK (severity IN ('critical', 'warning')),
+    alert_code TEXT NOT NULL,                        -- e.g. 'FAULT_ESTOP', 'STARVATION_SUSPECTED' for 10-min dedup
     title TEXT NOT NULL,
     message TEXT NOT NULL,
     status TEXT NOT NULL CHECK (status IN ('pending', 'sent', 'failed')),
     retry_count INT NOT NULL DEFAULT 0,
+    max_retries INT NOT NULL DEFAULT 5,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     sent_at TIMESTAMPTZ NULL
 );
@@ -347,10 +349,11 @@ CREATE INDEX idx_alert_queue_pending ON alert_queue(status, created_at ASC) WHER
 
 ---
 
-### 2.8 Tamper-Evident Cryptographic Audit Logging & System Settings
+### 2.8 Append-Only Audit Logging & System Settings
 
 ```sql
--- Cryptographic Hash-Chained System Audit Log (TRD TR-16, D-039)
+-- Database Append-Only System Audit Log (TRD TR-16, D-039, D-044, 08_SECURITY.md)
+-- Protected by PostgreSQL PL/pgSQL trigger trg_audit_logs_immutability against UPDATE/DELETE
 CREATE TABLE audit_logs (
     id BIGSERIAL PRIMARY KEY,
     ts TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -360,8 +363,6 @@ CREATE TABLE audit_logs (
     action_type TEXT NOT NULL,                       -- 'SAME_DAY_FORCE_OVERRIDE', 'CONCENTRATE_REFILLED', etc.
     target_resource TEXT NOT NULL,                   -- 'batches', 'schedules', 'firmware', 'users'
     payload_snapshot JSONB NOT NULL,
-    prev_hash TEXT NULL,                             -- SHA-256 hash of preceding row (NULL on Genesis block)
-    row_hash TEXT NOT NULL,                          -- SHA-256(prev_hash || ts || user_id || action_type || target_resource || payload_snapshot)
     ip INET NULL,
     user_agent TEXT NULL
 );

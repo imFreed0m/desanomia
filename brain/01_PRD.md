@@ -34,7 +34,120 @@ Admin: full access including user management. Operator: control batches, schedul
 
 ## Functional requirements
 
-FR-01 Start batch (Operator+, confirmation required). FR-02 Live FSM state across 12 states (IDLE, FILLING_WATER, CHECK_BASE, DOSING, MIXING, STABILIZING, MEASURING_TDS, GATE_EVALUATE, TOPUP_DOSING, RECOVERY_MIX_EVALUATE, DISTRIBUTING, BATCH_DEPLETED). FR-03 Live TDS with color-coded gauge. FR-04 Drum 2 level and volume. FR-05 Actuator status panel. FR-06 Batch event timeline. FR-07 Batch history table with detail view. FR-08 TDS history chart. FR-09 ESP32 connectivity indicator. FR-10 Reset Fault (Operator+, confirmation required, enforced by Gated Fault Reset protocol locked while Drum 2 level > 5.0 L). FR-11 Manual actuator control (Operator+, fine-grained manual dosing in +10 mL increments and timed mixer run per-second on /manual; strictly subject to the 7 firmware safety interlocks; disabled during active batch FSM). FR-12 Schedule management. FR-13 Login with session auth. FR-14 User management (Admin only). FR-15 Telegram alerts. FR-16 Audit trail of every command. FR-17 Emergency Stop (Operator+, Dual E-Stop UX: instant 1-tap min 56×56 px without modal on local kiosk; confirmation dialog with aria-modal="true" on remote web; immediately de-energizes all 4 relays via ESP32 FAULT_ESTOP). FR-18 Concentrate Virtual Stock Tracking (Operator records initial refill of 20 L / 2 kg NPK fertilizer; system tracks remaining stock by deducting actual batch injection history after each distribution run; alerts operator when estimated remaining stock ≤ 2 batches). FR-19 Resume Fill Control (Operator+, available during FAULT_NO_WATER_SUPPLY or FAULT_FILL_TIMEOUT to re-open fill valve once water supply is restored without aborting or draining the batch). FR-20 Unified Schedule-First Distribution & Single Upfront Confirmation (Operator selects recipe, sets timing ['Now' or 'Later'], and targets tank pair in one unified dialog; batch preparation executes and, upon gate PASS, distributes **100% automatically** without secondary manual confirmation; scheduled batches execute unattended at planned time). FR-21 Local Panel Alarms (Firmware drives physical buzzer and red pilot lamp on panel box door for immediate acoustic and visual signaling upon any FAULT state transition, independent of network or server connectivity). FR-22 Offline Alert Store-and-Forward (Persistent queue in backend buffers critical Telegram alerts during internet outages and flushes them in chronological order with original event timestamps upon reconnection). FR-23 Guided Sensor Calibration Wizard (Operator+, accessible on /manual; guides step-by-step TDS probe detaching, requiring Drum 2 ≤ 5.0 L drained hold, real-time ADC stability reading, 1413 µS/cm buffer immersion, baseline raw water PPM calculation, and committing calibrated slope/offset to ESP32 NVS with audit logging). FR-24 Named Recipe Presets Library (Operator+, accessible on /recipes; enables managing named crop growth phase presets such as Vegetatif, Generatif, and Panen, modifying default targets, and archiving presets; starting a batch allows 1-click preset selection or custom target entry; permanently snapshots preset name and target band to PostgreSQL batch records for agricultural traceability). FR-25 Multi-Tank 5-Pair Visualization & Management (Operator+, Dashboard visualizes all 5 pairs of tanks: 5 Concentrate Drums K1–K5 and 5 Distribution Drums D1–D5 with differentiated viscous vs wave fluid animations; in Phase 1, Pair 1 is actively plumbed while Pairs 2–5 display distinct Standby/Unassigned status; batch setup supports selecting the target tank). FR-26 Same-Day Double Distribution Protection (System interlocks secondary fertigation on any day where distribution already ran; requires an explicit high-friction Hard Confirmation Dialog with root rot and EC salinity hazard warnings, logging `SAME_DAY_FORCE_OVERRIDE` in audit trail). FR-27 Dynamic Baseline Reference & Preemption (Invoking an ad-hoc batch 'Now' automatically deletes/suppresses conflicting later schedules for that day to prevent over-irrigation, and dynamically sets the execution timestamp as the new baseline reference for the subsequent autonomous recurrence interval). FR-28 Dashboard Schedule Calendar & Zero Conflict Invariant (Dashboard provides visual calendar/timeline of scheduled runs by tank, recipe, and time; validates and prevents overlapping irrigation slots to enforce hydraulic pipe sharing safety). FR-29 In-App Notification Hub & 5W1H Operational Alert Matrix (Operator+, delivers notifications via an Apple-style minimalist glassmorphic interface featuring a persistent header bell with unread counter, slide-out frosted glass drawer, and floating interactive toasts with 1-tap action buttons; enforces a 4-tier severity model [Critical, Warning, Success, Info] with selective subtle UI audio chimes on HMI Kiosk for Critical/Warning and silent execution for Success/Info; concurrent with outbound Telegram alerts). FR-30 Dual Visual Hierarchy for 12 FSM Lifecycle States (Visualizes every FSM lifecycle state across two synchronized layers: an Apple-style minimalist horizontal Pipeline Stepper bar displaying active step, completed ticks, and live timers, paired with dynamic modular fluid surface physics inside the drum canvas [rising wave, rotational vortex, glassy calm, probe neon glow, draining wave, red fault pulse, and amber pause wave]). UI items map to SPEC FE-01 to FE-18, see 12_UI_SPEC. [SPEC, FR numbering PROPOSED]
+> **Traceability & UI Mapping:** All 30 functional requirements (`FR-01` to `FR-30`) map directly to Technical Requirements (`TR-01` to `TR-30` in [04_TRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/04_TRD.md)), UI functional items (`FE-01` to `FE-18` in [docs/SPEC.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/docs/SPEC.md)), and component registry items (`UI-01` to `UI-18` in [12_UI_SPEC.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/12_UI_SPEC.md)). [SPEC, FR numbering PROPOSED]
+
+### Quick-Reference Summary Matrix
+
+| ID | Functional Requirement | Domain / Subsystem | Role Access | Key Mechanism & Behavior Summary |
+| :--- | :--- | :--- | :--- | :--- |
+| **FR-01** | Start Batch | Batch Automation | `Operator+` | Single protected start action; confirmation required; pre-flight gated |
+| **FR-02** | 12-State FSM Lifecycle | Batch Automation | `Viewer+` | Live progression across 12 deterministic states (`IDLE` to `BATCH_DEPLETED`) |
+| **FR-03** | Live TDS Gauge | Sensing & Telemetry | `Viewer+` | Real-time analog TDS/EC reading with color-coded recipe gate bands |
+| **FR-04** | Drum 2 Level & Volume | Sensing & Telemetry | `Viewer+` | 60 GHz radar tank level in mm, volume in liters, and fill percentage |
+| **FR-05** | Actuator Status Panel | Sensing & Telemetry | `Viewer+` | Real-time ON/OFF state indicators for all 4 physical relays |
+| **FR-06** | Batch Event Timeline | Event & History | `Viewer+` | Chronological transition log and milestones for current/latest batch |
+| **FR-07** | Batch History Table | Event & History | `Viewer+` | Paginated records with final TDS, volume, duration, status, and detail view |
+| **FR-08** | TDS History Chart | Event & History | `Viewer+` | Interactive Apache ECharts time-series telemetry per batch |
+| **FR-09** | ESP32 Connectivity Indicator | Sensing & Telemetry | `Viewer+` | Online/Offline status badge with last-seen heartbeat timestamp |
+| **FR-10** | Reset Fault (Gated Recovery) | Safety & Faults | `Operator+` | Clears latched faults; locked while Drum 2 level > 5.0 L (manual drain gate) |
+| **FR-11** | Manual Actuator Control | Safety & Control | `Operator+` | Fine-grained dosing (+10 mL) and mixer timing; 7 safety interlocks |
+| **FR-12** | Schedule Management | Scheduling | `Operator+` | Full CRUD for autonomous fertigation schedules |
+| **FR-13** | Session Authentication & Login | Security & Auth | `All Roles` | Session login with role verification and kiosk touch PIN numpad |
+| **FR-14** | User Management | Security & Auth | `Admin only` | Administrative CRUD for user accounts and role assignments |
+| **FR-15** | Telegram Alerts | Alerts & Comms | `System` | Immediate push alerts for faults, gate failures, and completions |
+| **FR-16** | Command Audit Trail | Security & Audit | `Admin` | Immutable cryptographic audit log of all operator and system actions |
+| **FR-17** | Emergency Stop (Dual E-Stop UX) | Safety & Control | `Operator+` | Dual UX: 1-tap local kiosk (56×56 px); confirmed remote modal |
+| **FR-18** | Virtual Stock Tracking | Inventory | `Operator+` | Deducts concentrate per batch; alerts when remaining stock ≤ 2 batches |
+| **FR-19** | Resume Fill Control | Batch Automation | `Operator+` | Re-opens fill valve during fill timeout without aborting/draining batch |
+| **FR-20** | Unified Schedule-First Distribution | Batch Automation | `Operator+` | Single upfront modal; autonomous distribution on gate PASS |
+| **FR-21** | Local Panel Alarms | Safety & Hardware | `Firmware` | Hardwired buzzer and red pilot lamp on panel door for fault transitions |
+| **FR-22** | Offline Alert Store-and-Forward | Alerts & Comms | `System` | Persistent backend queue buffers Telegram alerts during outages |
+| **FR-23** | Sensor Calibration Wizard | Calibration | `Operator+` | Step-by-step guided TDS calibration committing to ESP32 NVS |
+| **FR-24** | Named Recipe Presets Library | Recipes | `Operator+` | Presets (*Vegetatif*, *Generatif*, *Panen*) with batch record snapshots |
+| **FR-25** | Multi-Tank 5-Pair Visualization | Sensing & Telemetry | `Operator+` | 5 concentrate + 5 distribution drums with fluid animations |
+| **FR-26** | Same-Day Double Distribution Lock | Safety & Agronomy | `Operator Override` | Hard confirmation dialog with root rot warnings and audit logging |
+| **FR-27** | Dynamic Baseline & Preemption | Scheduling | `System` | Ad-hoc run suppresses same-day schedules and shifts recurrence |
+| **FR-28** | Schedule Calendar & Conflict Invariant | Scheduling | `Viewer+` | Visual timeline preventing overlapping hydraulic irrigation slots |
+| **FR-29** | In-App Notification Hub | Alerts & UI | `Operator+` | Glassmorphic drawer, 4-tier alert toasts, and HMI audio chimes |
+| **FR-30** | Dual Visual Hierarchy for 12 FSM States | Visualization | `Viewer+` | Pipeline Stepper bar paired with 60 FPS fluid surface canvas waves |
+
+---
+
+### Detailed Functional Requirements
+
+#### 1. Batch Automation & State Machine Lifecycle
+- **FR-01: Start Batch** `[Operator+]`  
+  Initiate batch sequence with mandatory confirmation dialog. Gated by pre-flight checks: disabled if FSM is not `IDLE`, Drum 2 level > 5.0 L, or ESP32 is offline.
+- **FR-02: Live FSM State Across 12 Lifecycle States** `[Viewer+]`  
+  Real-time tracking and visualization across all 12 discrete states: `IDLE` → `FILLING_WATER` → `CHECK_BASE` → `DOSING` → `MIXING` → `STABILIZING` → `MEASURING_TDS` → `GATE_EVALUATE` → `TOPUP_DOSING` → `RECOVERY_MIX_EVALUATE` → `DISTRIBUTING` → `BATCH_DEPLETED`.
+- **FR-19: Resume Fill Control** `[Operator+]`  
+  Available during `FAULT_NO_WATER_SUPPLY` or `FAULT_FILL_TIMEOUT` to re-open the water fill valve once water supply is restored, without aborting or draining the batch.
+- **FR-20: Unified Schedule-First Distribution & Single Upfront Confirmation** `[Operator+]`  
+  Operator selects recipe, sets timing (`'Now'` or `'Later'`), and targets tank pair in one unified dialog; batch preparation executes and, upon gate PASS, distributes **100% automatically** without secondary manual confirmation; scheduled batches execute unattended at planned time.
+- **FR-30: Dual Visual Hierarchy for 12 FSM Lifecycle States** `[Viewer+]`  
+  Visualizes every FSM lifecycle state across two synchronized layers: an Apple-style minimalist horizontal Pipeline Stepper bar displaying active step, completed ticks, and live timers, paired with dynamic modular fluid surface physics inside the drum canvas (`rising wave`, `rotational vortex`, `glassy calm`, `probe neon glow`, `draining wave`, `red fault pulse`, and `amber pause wave`).
+
+#### 2. Safety Interlocks, Alarms & Fault Management
+- **FR-10: Reset Fault & Gated Recovery** `[Operator+]`  
+  Clears latched faults (confirmation required). Enforced by Gated Fault Reset protocol locked while Drum 2 level > 5.0 L to ensure out-of-range solution is physically drained via manual gravity valve before clearing.
+- **FR-11: Manual Actuator Control** `[Operator+]`  
+  Fine-grained manual dosing in +10 mL increments and timed mixer run per-second on `/manual`; strictly subject to the 7 firmware safety interlocks; disabled during active batch FSM.
+- **FR-17: Emergency Stop (Dual E-Stop UX)** `[Operator+]`  
+  Dual E-Stop UX: instant 1-tap (min 56×56 px without modal) on local kiosk; confirmation dialog with `aria-modal="true"` on remote web; immediately de-energizes all 4 relays via ESP32 `FAULT_ESTOP`.
+- **FR-21: Local Panel Alarms** `[Firmware / System]`  
+  Firmware drives physical buzzer and red pilot lamp on panel box door for immediate acoustic and visual signaling upon any `FAULT` state transition, independent of network or server connectivity.
+- **FR-26: Same-Day Double Distribution Protection** `[System / Operator Override]`  
+  System interlocks secondary fertigation on any day where distribution already ran; requires an explicit high-friction Hard Confirmation Dialog with root rot and EC salinity hazard warnings, logging `SAME_DAY_FORCE_OVERRIDE` in audit trail.
+
+#### 3. Sensing, Telemetry & Cockpit Visualization
+- **FR-03: Live TDS with Color-Coded Gauge** `[Viewer+]`  
+  Real-time analog TDS/EC sensor readings displayed with a color-coded gauge reflecting recipe gate bands.
+- **FR-04: Drum 2 Level and Volume** `[Viewer+]`  
+  Real-time 60 GHz radar tank level in millimeters, calculated volume in liters, and fill percentage for Distribution Drum (Drum 2).
+- **FR-05: Actuator Status Panel** `[Viewer+]`  
+  Real-time ON/OFF state indicators for all 4 physical actuators (Clean Water Solenoid, Dosing Pump, Mixing Pump, Distribution Pump) with firmware command rejection reasons.
+- **FR-09: ESP32 Connectivity Indicator** `[Viewer+]`  
+  Microcontroller heartbeat and connection liveness status (Online/Offline) with last-seen timestamp; displays prominent visual warning on stale data.
+- **FR-25: Multi-Tank 5-Pair Visualization & Management** `[Operator+]`  
+  Dashboard visualizes all 5 pairs of tanks: 5 Concentrate Drums (K1–K5) and 5 Distribution Drums (D1–D5) with differentiated viscous vs. wave fluid animations; in Phase 1, Pair 1 is actively plumbed while Pairs 2–5 display distinct Standby/Unassigned status; batch setup supports selecting the target tank.
+
+#### 4. Scheduling & Hydraulic Conflict Prevention
+- **FR-12: Schedule Management** `[Operator+]`  
+  Full CRUD management for autonomous fertigation schedules (days of week, target times, recipes, and target tanks).
+- **FR-27: Dynamic Baseline Reference & Preemption** `[System]`  
+  Invoking an ad-hoc batch `'Now'` automatically deletes/suppresses conflicting later schedules for that day to prevent over-irrigation, and dynamically sets the execution timestamp as the new baseline reference for the subsequent autonomous recurrence interval.
+- **FR-28: Dashboard Schedule Calendar & Zero Conflict Invariant** `[Viewer+]`  
+  Dashboard provides visual calendar/timeline of scheduled runs by tank, recipe, and time; validates and prevents overlapping irrigation slots to enforce hydraulic pipe sharing safety.
+
+#### 5. Agronomic Recipes, Stock & Calibration
+- **FR-18: Concentrate Virtual Stock Tracking** `[Operator+]`  
+  Operator records initial refill of 20 L / 2 kg NPK fertilizer; system tracks remaining stock by deducting actual batch injection history after each distribution run; alerts operator when estimated remaining stock ≤ 2 batches.
+- **FR-23: Guided Sensor Calibration Wizard** `[Operator+]`  
+  Accessible on `/manual`; guides step-by-step TDS probe detaching, requiring Drum 2 ≤ 5.0 L drained hold, real-time ADC stability reading, 1413 µS/cm buffer immersion, baseline raw water PPM calculation, and committing calibrated slope/offset to ESP32 NVS with audit logging.
+- **FR-24: Named Recipe Presets Library** `[Operator+]`  
+  Accessible on `/recipes`; enables managing named crop growth phase presets such as *Vegetatif*, *Generatif*, and *Panen*, modifying default targets, and archiving presets; starting a batch allows 1-click preset selection or custom target entry; permanently snapshots preset name and target band to PostgreSQL batch records for agricultural traceability.
+
+#### 6. Event Journaling, Historical Analytics & Auditing
+- **FR-06: Batch Event Timeline** `[Viewer+]`  
+  Real-time event journal logging all state transitions, timing, and system events for the current or latest batch run.
+- **FR-07: Batch History Table with Detail View** `[Viewer+]`  
+  Searchable, paginated table of past batches with summary metrics (final TDS, volume, duration, status, operator) and in-depth detail inspection modal.
+- **FR-08: TDS History Chart** `[Viewer+]`  
+  Interactive time-series telemetry chart (Apache ECharts) rendering historical TDS readings per batch.
+- **FR-16: Tamper-Evident Command Audit Trail** `[Admin]`  
+  Immutable cryptographic audit log capturing every operator command and automated system action with actor metadata, parameters, and timestamps.
+
+#### 7. Access Control, Notifications & Alarms
+- **FR-13: Session Authentication & Login** `[All Roles]`  
+  Secure login with session authentication, cookie management, role validation, and on-screen PIN numpad for touch kiosk environments.
+- **FR-14: User Management** `[Admin only]`  
+  Administrative CRUD management for user accounts, credentials, and role assignments (`Admin`, `Operator`, `Viewer`).
+- **FR-15: Telegram Alerts** `[System]`  
+  Push notification alerts to operator Telegram group for critical faults, gate failures, and batch completions.
+- **FR-22: Offline Alert Store-and-Forward** `[System]`  
+  Persistent queue in backend buffers critical Telegram alerts during internet outages and flushes them in chronological order with original event timestamps upon reconnection.
+- **FR-29: In-App Notification Hub & 5W1H Operational Alert Matrix** `[Operator+]`  
+  Delivers notifications via an Apple-style minimalist glassmorphic interface featuring a persistent header bell with unread counter, slide-out frosted glass drawer, and floating interactive toasts with 1-tap action buttons; enforces a 4-tier severity model (`[Critical, Warning, Success, Info]`) with selective subtle UI audio chimes on HMI Kiosk for Critical/Warning and silent execution for Success/Info; concurrent with outbound Telegram alerts.
 
 ## Non-goals (Phase 1) [SPEC]
 

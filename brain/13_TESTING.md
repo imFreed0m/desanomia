@@ -285,7 +285,7 @@ TEST(FSMSuite, MidBatchPowerOutage_RecoversIntoPausedInspection) {
     
     // Verify dynamic deficit calculation: measured 1100 ppm, target 1250 ppm, volume 140 L
     float deficit_ml = fsm.CalculateDeficitDose(/*measured_ppm=*/1100.0f);
-    // Formula: [(1250 - 1100) * 140] / 1.07 = 196.26 mL -> Must be <= 300 mL cap
+    // Formula: [(1250 - 1100) * 140] / 107.0 = 196.26 mL -> Must be <= 300 mL cap
     EXPECT_NEAR(deficit_ml, 196.26f, 0.5f);
     EXPECT_LE(deficit_ml, 300.0f);
 }
