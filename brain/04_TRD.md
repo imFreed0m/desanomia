@@ -71,29 +71,7 @@ flowchart TD
 
 ### 1.3 ESP32-S3 Conflict-Free GPIO Pin Allocation Table [SPEC]
 
-To prevent catastrophic pin conflicts with the native USB Serial/JTAG controller and internal memory buses, the hardware GPIO mapping is strictly frozen as follows:
-
-| Pin ESP32-S3 | Fungsi Perangkat Keras | Tipe Logika / Sirkuit | Catatan Keamanan Rekayasa |
-| :--- | :--- | :--- | :--- |
-| **GPIO 1** | Analog TDS Probe Input | ADC1_CH0 (0–3.3V) | Terhubung ke AFE Conditioner board |
-| **GPIO 2** | Acoustic Buzzer (DC 12V Driver) | Output (Active HIGH via NPN) | **Dipindahkan dari GPIO 20** (Bebas dari USB) |
-| **GPIO 3** | Red Industrial Pilot Lamp (DC 12V) | Output (Active HIGH via NPN) | **Dipindahkan dari GPIO 19** (Bebas dari USB) |
-| **GPIO 4** | Relay 1: Fill Solenoid Valve (AC 220V) | Output (Active LOW Optoisolated) | Interlock IL-04 & IL-05 Cutoff |
-| **GPIO 5** | Relay 2: Peristaltic Dosing Pump (DC 12V) | Output (Active LOW Optoisolated) | Interlock Dosing Protection |
-| **GPIO 6** | Relay 3: Submersible Mixing Pump (AC 220V) | Output (Active LOW Optoisolated) | Sirkulasi homogenisasi 120 detik |
-| **GPIO 7** | Relay 4: High-Pressure Distribution Pump | Output (Active LOW Optoisolated) | Interlock IL-01, IL-02, IL-07 Cutoff |
-| **GPIO 10** | W5500 SPI CS (Chip Select) | Output SPI Bus | Jalur komunikasi Ethernet kabel OT |
-| **GPIO 11** | W5500 SPI MOSI | Output SPI Bus | Jalur komunikasi Ethernet kabel OT |
-| **GPIO 12** | W5500 SPI MISO | Input SPI Bus | Jalur komunikasi Ethernet kabel OT |
-| **GPIO 13** | W5500 SPI SCK | Output SPI Clock | Jalur komunikasi Ethernet kabel OT |
-| **GPIO 14** | W5500 Hardware Reset (RST) | Output Active LOW | Pengendali reset kontroler W5500 |
-| **GPIO 15** | W5500 Interrupt (INT) | Input External Interrupt | Notifikasi paket frame Ethernet masuk |
-| **GPIO 17** | 60 GHz Radar UART1 TX | Output UART (115200 bps) | Konfigurasi FMCW radar sensor |
-| **GPIO 18** | 60 GHz Radar UART1 RX | Input UART (115200 bps) | Pembacaan frame level cairan (10 Hz) |
-| **GPIO 19** | **ESP32-S3 Native USB D-** | **Dedicated USB-JTAG Serial** | **DILINDUNGI KHUSUS FLASHING/DEBUG (D-027)** |
-| **GPIO 20** | **ESP32-S3 Native USB D+** | **Dedicated USB-JTAG Serial** | **DILINDUNGI KHUSUS FLASHING/DEBUG (D-027)** |
-| **GPIO 21** | Emergency Stop Sensing Contact | Input Pulled-Up (RC Filter $\le 1\text{ ms}$) | Secondary NC Contact Hardware Sensing (D-019) |
-| **GPIO 35–37**| **Internal Octal PSRAM Bus** | **Reserved Memory Bus** | **TERLARANG UNTUK GPIO EXTERNAL (N16R8)** |
+To prevent catastrophic pin conflicts with the native USB Serial/JTAG controller and internal memory buses, the hardware GPIO mapping is strictly governed by [10_FIRMWARE_SPEC.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/10_FIRMWARE_SPEC.md#pinout--gpio-allocation-spec). Refer to that document for the authoritative hardware pin assignments, electrical logic levels, and engineering safety constraints.
 
 ---
 
@@ -593,98 +571,12 @@ flowchart LR
 
 ## 8. Host OS, Kiosk Runner & Docker Container Orchestration (TR-34)
 
-### 8.1 Host OS Configuration
-
-- **Distribution:** Debian 12 Bookworm Minimal (64-bit x86_64).
-- **Kernel:** Linux 6.6+ with Intel DRM GPU drivers enabled for N100 hardware acceleration.
-- **Desktop Environment:** None. Headless base with no X11/GNOME/KDE bloat.
-- **Systemd Kiosk Service (`kiosk.service`):**
-  - Runs under unprivileged user `kiosk`.
-  - Launches `cage -- chromium --kiosk --app=http://127.0.0.1:8080 --touch-events=enabled --disable-pinch --disable-features=TranslateUI --noerrdialogs`.
-  - Conditioned with `After=docker.service` and waits for local healthcheck `http://127.0.0.1:8080/health`.
-
-### 8.2 Docker Compose Stack (`docker-compose.yml`)
-
-```yaml
-version: "3.8"
-
-services:
-  mosquitto:
-    image: eclipse-mosquitto:2.0-alpine
-    container_name: desanomia_mosquitto
-    restart: unless-stopped
-    ports:
-      - "192.168.10.1:1883:1883"
-    volumes:
-      - ./mosquitto/config:/mosquitto/config
-      - mosquitto_data:/mosquitto/data
-    healthcheck:
-      test: ["CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-u", "healthcheck", "-P", "${HEALTH_PASS}"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  postgres:
-    image: postgres:16-alpine
-    container_name: desanomia_postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: desanomia
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d desanomia"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
-  backend:
-    build: ./backend
-    container_name: desanomia_backend
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-      mosquitto:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql+asyncpg://${DB_USER}:${DB_PASS}@postgres:5432/desanomia
-      MQTT_HOST: mosquitto   # Menggunakan DNS internal Docker compose!
-      MQTT_PORT: 1883
-    volumes:
-      - ./backend:/app
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  nginx:
-    image: nginx:alpine
-    container_name: desanomia_nginx
-    restart: unless-stopped
-    ports:
-      - "192.168.1.10:80:80"       # IT LAN HTTP (Redirect to HTTPS)
-      - "192.168.1.10:443:443"     # IT LAN HTTPS (Gazebo TV & Mobile PWA)
-      - "127.0.0.1:8080:80"        # Kiosk Dedicated Local Loopback Listener
-    depends_on:
-      - backend
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/certs:/etc/nginx/certs:ro
-      - ./frontend/dist:/usr/share/nginx/html:ro
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:80/health"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-
-volumes:
-  postgres_data:
-  mosquitto_data:
-```
+- **Subsystem:** Edge Platform Infrastructure & Kiosk Runner
+- **Specification:**
+  - The edge host operates on Debian 12 Bookworm Minimal (x86_64) running a headless environment with Intel DRM GPU acceleration.
+  - The touch kiosk is driven by a systemd unit (`kiosk.service`) launching the Cage Wayland compositor running Chromium in locked kiosk mode with touch events enabled.
+  - Multi-service orchestration is handled by Docker Compose (`deploy/docker-compose.yml`), managing `mosquitto`, `postgres`, `backend`, and `frontend` (Nginx) with isolated network bindings and health checks.
+  - Authoritative service definitions, environment configurations, and host systemd scripts live exclusively in [15_DEPLOYMENT.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/15_DEPLOYMENT.md#compose-stack-deploydocker-composeyml).
 
 ### 8.3 Arsitektur TLS/HTTPS & PWA Service Worker (K-06)
 

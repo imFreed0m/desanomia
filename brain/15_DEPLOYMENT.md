@@ -13,6 +13,89 @@ Docker Compose on Beelink EQ12 Mini PC (Intel N100, x86_64, 16GB DDR5, 500GB NVM
 
 Tailscale mesh VPN runs on the Beelink EQ12 host OS (binding to `ETH1`). Compose file `deploy/docker-compose.yml`, environment variables in `deploy/.env` (not committed to git), `deploy/.env.example` committed.
 
+## Compose Stack (`deploy/docker-compose.yml`)
+
+```yaml
+version: "3.8"
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0-alpine
+    container_name: desanomia_mosquitto
+    restart: unless-stopped
+    ports:
+      - "192.168.10.1:1883:1883"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - mosquitto_data:/mosquitto/data
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-u", "healthcheck", "-P", "${HEALTH_PASS}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: desanomia_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: desanomia
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d desanomia"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: desanomia_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${DB_USER}:${DB_PASS}@postgres:5432/desanomia
+      MQTT_HOST: mosquitto
+      MQTT_PORT: 1883
+    volumes:
+      - ./backend:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  nginx:
+    image: nginx:alpine
+    container_name: desanomia_nginx
+    restart: unless-stopped
+    ports:
+      - "192.168.1.10:80:80"       # IT LAN HTTP (Redirect to HTTPS)
+      - "192.168.1.10:443:443"     # IT LAN HTTPS (Gazebo TV & Mobile PWA)
+      - "127.0.0.1:8080:80"        # Kiosk Dedicated Local Loopback Listener
+    depends_on:
+      - backend
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./frontend/dist:/usr/share/nginx/html:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:80/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  postgres_data:
+  mosquitto_data:
+```
+
 ## Edge Hardware & Network Topology (D-043)
 
 - **Host Machine:** Beelink EQ12 Mini PC (Intel N100 Alder Lake-N, 4 cores @ 3.4GHz, 16GB DDR5, 500GB NVMe SSD, Dual Intel i225-V/i226-V 2.5 GbE NICs).
@@ -23,7 +106,12 @@ Tailscale mesh VPN runs on the Beelink EQ12 host OS (binding to `ETH1`). Compose
 
 ## Control-Room Kiosk Screen (Tier 1)
 
-UPERFECT BE156PF 15.6" FHD IPS touchscreen mounted on 90 cm standing kiosk in the control room, connected via HDMI 2.0 and USB-C touch data directly to the Beelink EQ12. Runs on Debian 12 Minimal with Cage Wayland compositor auto-launching Chromium in GPU-accelerated kiosk mode (`http://127.0.0.1:8080`). 100% offline-first operation with zero internet dependency, persistent local Operator session, and 1-tap Emergency Stop.
+UPERFECT BE156PF 15.6" FHD IPS touchscreen mounted on 90 cm standing kiosk in the control room, connected via HDMI 2.0 and USB-C touch data directly to the Beelink EQ12. Runs on Debian 12 Minimal with Cage Wayland compositor auto-launching Chromium in GPU-accelerated kiosk mode (`http://127.0.0.1:8080`). 100% offline-first operation with zero internet dependency, persistent local Operator session, and 1-tap Emergency Stop:
+- **Host OS:** Debian 12 Bookworm Minimal (64-bit x86_64, Linux 6.6+ with Intel DRM GPU drivers for N100 UHD acceleration, zero desktop/X11 bloat).
+- **Systemd Kiosk Service (`kiosk.service`):**
+  - Runs under unprivileged user `kiosk`.
+  - Command: `cage -- chromium --kiosk --app=http://127.0.0.1:8080 --touch-events=enabled --disable-pinch --disable-features=TranslateUI --noerrdialogs`.
+  - Conditioned with `After=docker.service` and waits for local healthcheck `http://127.0.0.1:8080/health`.
 
 ## Time Synchronization (D-020)
 

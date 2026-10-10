@@ -15,6 +15,32 @@ ESP32-S3 N16R8 with FreeRTOS dual-core asymmetric task allocation, PlatformIO pr
   - `psram_spooler_task` (Priority 1): Spools discrete FSM state transitions and fault trips into an 8MB Octal PSRAM ring buffer (capacity 500 events) during network loss and flushes chronologically to `desanomia/gh1/events` upon reconnection.
   - Watchdog timer supervising all tasks.
 
+## Pinout & GPIO Allocation [SPEC]
+
+To prevent pin conflicts with the native USB Serial/JTAG controller and internal memory buses on the ESP32-S3 N16R8, the hardware GPIO mapping is strictly frozen as follows:
+
+| Pin ESP32-S3 | Hardware Function | Logic / Circuit Type | Engineering Safety Notes |
+| :--- | :--- | :--- | :--- |
+| **GPIO 1** | Analog TDS Probe Input | ADC1_CH0 (0–3.3V) | Connected to AFE Conditioner board |
+| **GPIO 2** | Acoustic Buzzer (DC 12V Driver) | Output (Active HIGH via NPN) | Error annunciation; moved from GPIO 20 (USB isolated) |
+| **GPIO 3** | Red Industrial Pilot Lamp (DC 12V) | Output (Active HIGH via NPN) | Latched fault indicator; moved from GPIO 19 (USB isolated) |
+| **GPIO 4** | Relay 1: Fill Solenoid Valve (AC 220V) | Output (Active LOW Optoisolated) | Interlock IL-04 & IL-05 Cutoff |
+| **GPIO 5** | Relay 2: Peristaltic Dosing Pump (DC 12V) | Output (Active LOW Optoisolated) | Dosing runtime protection |
+| **GPIO 6** | Relay 3: Submersible Mixing Pump (AC 220V) | Output (Active LOW Optoisolated) | Circulation & homogenization (120 s) |
+| **GPIO 7** | Relay 4: High-Pressure Distribution Pump | Output (Active LOW Optoisolated) | Interlock IL-01, IL-02, IL-07 Cutoff |
+| **GPIO 10** | W5500 SPI CS (Chip Select) | Output SPI Bus | OT LAN Ethernet communication |
+| **GPIO 11** | W5500 SPI MOSI | Output SPI Bus | OT LAN Ethernet communication |
+| **GPIO 12** | W5500 SPI MISO | Input SPI Bus | OT LAN Ethernet communication |
+| **GPIO 13** | W5500 SPI SCK | Output SPI Clock | OT LAN Ethernet communication |
+| **GPIO 14** | W5500 Hardware Reset (RST) | Output Active LOW | Hardware reset controller for W5500 |
+| **GPIO 15** | W5500 Interrupt (INT) | Input External Interrupt | Incoming Ethernet frame notification |
+| **GPIO 17** | 60 GHz Radar UART1 TX | Output UART (115200 bps) | FMCW radar sensor configuration |
+| **GPIO 18** | 60 GHz Radar UART1 RX | Input UART (115200 bps) | Level reading binary frame parser (10 Hz) |
+| **GPIO 19** | **ESP32-S3 Native USB D-** | **Dedicated USB-JTAG Serial** | **Reserved for flashing/debugging (D-027)** |
+| **GPIO 20** | **ESP32-S3 Native USB D+** | **Dedicated USB-JTAG Serial** | **Reserved for flashing/debugging (D-027)** |
+| **GPIO 21** | Emergency Stop Sensing Contact | Input Pulled-Up (RC Filter $\le 1\text{ ms}$) | Secondary NC Contact hardware sensing (D-019) |
+| **GPIO 35–37**| **Internal Octal PSRAM Bus** | **Reserved Memory Bus** | **STRICTLY FORBIDDEN FOR EXTERNAL GPIO (N16R8)** |
+
 ## Interlocks [SPEC]
 
 Seven autonomous safety interlocks enforced in firmware, active in both AUTO and MANUAL mode, with zero software or UI bypass:

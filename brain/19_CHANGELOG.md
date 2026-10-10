@@ -36,6 +36,11 @@ Format: Keep a Changelog. Versions follow SemVer for the software, firmware has 
   - (9) Standardized 7 autonomous firmware safety interlocks (`IL-01` through `IL-07`) and 12-state FSM lifecycle across all documents (C-13, C-14, C-15, C-16, C-19);
   - (10) Standardized Gated Fault Reset preconditions (Drum 2 $\le 5.0\text{ L}$ and `hw_estop_pressed == false`) and offline timeouts (`STALE` at 12s, `OFFLINE` at 20s) (C-17);
   - (11) Enforced canonical vocabulary and MQTT command contracts (`POST /api/v1/batches`, `desanomia/gh1/cmd`, `tank_pair_id` mapping) (C-20, C-22).
+- Modularized domain boundaries across `brain/**` by directly relocating content to its authoritative domain home:
+  - Moved ESP32-S3 conflict-free GPIO pin allocation table from `04_TRD.md` to its authoritative home in `10_FIRMWARE_SPEC.md`;
+  - Consolidated wire-level MQTT topic hierarchies and JSON payload schemas (`cmd`, `ack`, `telemetry`, `events`, `status`) into `11_API_CONTRACT.md`, pruning duplicate payload blocks from `04_TRD.md` and `07_DATA_SOURCES.md`;
+  - Relocated Docker Compose stack (`deploy/docker-compose.yml`) and Cage Wayland systemd kiosk runner from `04_TRD.md` to `15_DEPLOYMENT.md`;
+  - Audited and verified `08_SECURITY.md` domain boundaries, ensuring it focuses exclusively on threat modeling, Dual-NIC firewalling (`nftables`), authentication tiers (D-026), RBAC, secrets management, and cryptographic audit security without premature leakage into subsequent files.
 
 ## Spec
 
