@@ -229,11 +229,12 @@ classDiagram
   ss -tlnp | grep 8080
   # Expected: LISTEN 127.0.0.1:8080 (NEVER 0.0.0.0:8080 or :::8080)
   ```
-- **Administrative Step-Up Elevation (`is_elevated = true`):**
-  - Accessing administrative routes (`/settings`, `/users`, recipe preset calibration defaults, or sensor calibration wizard `/manual`) triggers a modal requesting an Admin password.
-  - Upon successful verification, the session issues a signed temporary elevation token granting Admin privileges for **exactly 15 minutes**.
-  - A persistent amber glassmorphic countdown banner displays in the top navigation bar (`Elevasi Admin Aktif: 14:59`).
-  - Upon timer expiry, the session automatically and silently downgrades back to the un-elevated `Operator` role. The operator can explicitly click `[Kunci Kembali]` to terminate elevation immediately.
+- **Administrative Step-Up Elevation (`is_elevated = true`, D-026, D-050):**
+  - Accessing administrative routes (`/users`, recipe preset calibration defaults, or sensor calibration wizard `/manual`) triggers a modal requesting Admin credentials.
+  - On the Tier 1 Kiosk, elevation supports a 6-digit numeric Admin PIN (`kiosk_pin_hash`, Argon2id) entered via the tactile $72 \times 72\text{ px}$ on-screen numpad (restricted strictly to loopback `127.0.0.1:8080`), with a fallback option for full password entry (`D-050`).
+  - Upon successful verification, the session grants Admin privileges for **exactly 15 minutes** and records `elevated_by` in `audit_logs`.
+  - A persistent amber glassmorphic countdown banner displays in the top navigation bar (`Elevasi Admin: 14m 59s tersisa [Kunci]`).
+  - Upon timer expiry, the session automatically downgrades back to the un-elevated `Operator` role. The operator can explicitly click `[Kunci]` to terminate elevation immediately.
 
 ### 4.2 Tier 2: Secondary Gazebo Display (Xiaomi TV A 43" via PTP Bridge)
 - **Passive Read-Only Monitoring:** Located in the greenhouse gazebo across the 5 GHz wireless bridge (`192.168.1.50`), running Fully Kiosk Browser 24/7.

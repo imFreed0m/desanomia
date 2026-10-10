@@ -337,8 +337,8 @@ http {
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         }
 
-        # Real-time WebSocket Proxy
-        location /ws/ {
+        # Real-time WebSocket Proxy (/api/v1/ws/telemetry and legacy /ws/)
+        location ~ ^/(api/v1/ws/|ws/) {
             proxy_pass http://backend_api;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
@@ -384,7 +384,7 @@ http {
             proxy_set_header X-Forwarded-Proto https;
         }
 
-        location /ws/ {
+        location ~ ^/(api/v1/ws/|ws/) {
             proxy_pass http://backend_api;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;

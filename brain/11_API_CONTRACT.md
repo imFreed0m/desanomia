@@ -105,7 +105,7 @@ To prevent HTTP gateway timeouts caused by physical FreeRTOS task scheduling or 
 | `POST /auth/login` | None | `200 OK` | Authenticates username & password (Argon2id), issues session cookie. Rate-limited (5/min). |
 | `POST /auth/logout` | `V` | `204 No Content`| Revokes session in PostgreSQL `user_sessions`, clears cookie. |
 | `GET /auth/me` | `V` | `200 OK` | Returns active user profile, assigned role, `is_elevated`, and elevation timer remaining. |
-| `POST /auth/elevate` | `O` | `200 OK` | Kiosk step-up authentication. Validates Admin password, grants 15-min temporary elevation. Restricted strictly to loopback listener (`127.0.0.1:8080`), records `elevated_by` in `audit_logs`. |
+| `POST /auth/elevate` | `O` | `200 OK` | Kiosk step-up authentication. Validates Admin password or 6-digit Argon2id Kiosk PIN, grants 15-min temporary elevation. Restricted strictly to loopback listener (`127.0.0.1:8080`), records `elevated_by` in `audit_logs` (`D-050`). |
 | `POST /auth/elevate/demote` | `O` | `204 No Content`| Operator manually revokes active Kiosk Admin elevation. |
 | **System State, Safety & Health (`/system`, `/health`)** | | | |
 | `GET /health` | None | `200 OK` | Public health probe: returns minimal `{ "status": "ok" \| "degraded" }` checking backend, PostgreSQL 16, Mosquitto broker, and ESP32 telemetry age (> 15 s = offline). |
@@ -213,7 +213,15 @@ class FaultResetRequest(BaseModel):
     confirm: bool = Field(..., description="Operator acknowledgment of physical clearance")
 ```
 
-#### 4. Sensor Calibration Commit
+#### 4. Kiosk Admin Step-Up Elevation Request
+```python
+# POST /api/v1/auth/elevate
+class AdminElevationRequest(BaseModel):
+    pin: str | None = Field(default=None, min_length=6, max_length=6, pattern=r"^\d{6}$", description="6-digit Argon2id Kiosk Step-Up PIN (numpad entry on loopback)")
+    password: str | None = Field(default=None, min_length=12, description="Admin password fallback")
+```
+
+#### 5. Sensor Calibration Commit
 ```python
 # POST /api/v1/sensors/calibrate/tds
 class TDSCalibrationRequest(BaseModel):

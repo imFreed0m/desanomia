@@ -2,30 +2,35 @@
 
 Visual design language, component tokens, SVG/Canvas fluid rendering, and per-screen layout specifications for Desanomia. This document establishes the definitive visual and architectural authority, ensuring pixel-perfect, accessible, and high-performance interfaces across all display tiers. Functional behavior is detailed in `12_UI_SPEC`, and navigation flows are specified in `02_APPFLOW`.
 
+> [!IMPORTANT] Theme & Modal Architecture Authority (D-029, D-050)
+> Under Architectural Decisions **D-029** and **D-050**, the **Dark Slate Industrial Cockpit** (`#020617` foundation, `#0F172A` cards, `#1E293B` borders) is the authoritative primary theme across all physical greenhouse displays (Tier 1 Kiosk and Tier 2 Gazebo TV), formally superseding early light-mode "Clean Laboratory Minimal" draft explorations. 
+> Furthermore, per **D-050**, modal architecture standardizes on accessible Radix UI / shadcn dialog primitives with a persistent `z-[100]` Master E-Stop header bar mounted outside modal backdrops, replacing HTML5 native `<dialog>.showModal()` to eliminate top-layer inert traps.
+> All production component implementations, tokens, and contrast ratios are governed by [`brain/12_UI_SPEC.md`](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/12_UI_SPEC.md).
+
 ---
 
-## 1. Design Philosophy: "Clean Laboratory Minimal"
+## 1. Design Philosophy: Industrial Cockpit & Scientific Ergonomics
 
-Desanomia breaks decisively from dark, cluttered, hobbyist IoT boards and generic SaaS templates. It establishes a dedicated aesthetic stance: **Clean Laboratory Minimal**—an ultra-crisp, high-craft scientific cockpit combining horticultural biology with precision laboratory instrumentation.
+Desanomia breaks decisively from cluttered, hobbyist IoT boards and generic SaaS templates. It establishes a dedicated aesthetic stance: **Dark Slate Industrial Cockpit**—an ultra-crisp, high-craft scientific cockpit combining horticultural biology with precision laboratory instrumentation.
 
 ### 1.1 Core Aesthetic Mandates
 
-1. **Intentional Aesthetic Direction ("Clean Laboratory Minimal"):**
-   - High-key, natural, and airy atmosphere inspired by modern plant biology laboratories and precision research facilities.
-   - Pure white panels (`#FFFFFF`) floating on warm, subtle off-white foundations (`#F5F7FA` and `#F9FAFB`) with delicate, airy drop shadows and crisp micro-borders.
+1. **Intentional Aesthetic Direction (Dark Slate Industrial Cockpit, D-029, D-050):**
+   - High-contrast, glare-resistant dark atmosphere designed for 24/7 readability under variable greenhouse and panel room lighting.
+   - Deep slate foundation (`#020617`) with elevated Bento cards (`#0F172A`), crisp architectural micro-borders (`#1E293B`), and WCAG AAA compliant text contrast (`#F8FAFC` primary, `#CBD5E1` secondary, `#94A3B8` muted at 7.3:1).
 2. **Differentiation Anchor:**
    > *"If this interface were screenshotted with the logo and title removed, an engineer or researcher would immediately recognize it by the dual glass fluid vessels with real-time procedural wave physics, volumetric Liters calibrations, Space Grotesk scientific telemetry numerals, and the asymmetric horticultural Bento grid."*
 3. **Status Semantics Over Decorative Color:**
    - Color is strictly reserved for process meaning (OK, Warning, Danger, Idle).
    - Interactive primary buttons use vibrant Royal Blue (`#2563EB`) so they are never conflated with operational green status indicators.
-4. **Touch-First Panel Ergonomics (Panel Room Cockpit):**
-   - Minimum interactive tap target of **56×56 CSS px** on the HMI Kiosk (exceeding standard 44 px).
-   - Integrated On-Screen Touch Numpad for all numeric entries—completely eliminating awkward operating system virtual keyboards in the panel room.
+4. **Touch-First Panel Ergonomics (Panel Room Cockpit, D-050):**
+   - Uniform minimum interactive tap target of **56×56 CSS px** on the HMI Kiosk (with **64×64 CSS px** for Master E-Stop and batch initiation) for reliable operation with nitrile gloves.
+   - Integrated On-Screen Touch Numpad ($72 \times 72\text{ px}$ keys) for numeric entries and 6-digit Kiosk PIN elevation—completely eliminating awkward operating system virtual keyboards in the panel room.
 5. **Lightweight Fluid Web Experience:**
    - Real-time fluid vessels rendered with SVG/Canvas wave physics at 60 FPS (D-046) to run cool (< 45°C) and stably 24/7 on embedded hardware (Beelink EQ12 Intel N100 and Xiaomi TV A Mali-G52 GPU).
 6. **Modern Web Standards & Complete Offline Autonomy:**
    - CSS Container Queries (`@container`) for intrinsic component responsiveness.
-   - Native HTML5 `<dialog>` for rock-solid focus trapping and modal isolation.
+   - Accessible Radix UI Dialog primitives (`D-050`) with persistent `z-[100]` Master E-Stop header bar to eliminate native `<dialog>` top-layer inert traps.
    - 100% bundled local assets (variable fonts, Lucide SVG icons) with zero external CDN dependencies.
 
 ### 1.2 Design Feasibility & Impact Index (DFII)
@@ -46,38 +51,40 @@ $$\text{DFII} = (\text{Impact} + \text{Fit} + \text{Feasibility} + \text{Perform
 
 Colors are specified in both standard hex codes and perceptual `oklch()` color spaces to guarantee uniform visual weight and smooth gradient interpolation without muddy gray transitions.
 
-### 2.1 Color Token Palette
+### 2.1 Color Token Palette (Authoritative: Dark Slate Industrial Cockpit, D-050)
 
 ```css
 :root {
   /* Foundations & Surfaces */
-  --background: #F5F7FA;              /* oklch(97.2% 0.005 240) */
-  --background-subtle: #F9FAFB;       /* oklch(98.5% 0.003 240) */
-  --surface: #FFFFFF;                 /* oklch(100% 0 0) */
-  --surface-hover: #F1F5F9;           /* oklch(96.1% 0.008 240) */
-  --border-subtle: #E2E8F0;           /* oklch(92.8% 0.012 240) */
-  --border-focus: #2563EB;            /* oklch(54.6% 0.215 258) */
+  --background: #020617;              /* Slate 950 - Main viewport foundation */
+  --background-subtle: #090D1A;       /* Deep Slate - Subtle inset foundation */
+  --surface: #0F172A;                 /* Slate 900 - Bento cards & panels */
+  --surface-hover: #1E293B;           /* Slate 800 - Card hover / elevated */
+  --border-subtle: #1E293B;           /* Slate 800 - Standard card dividers */
+  --border-focus: #3B82F6;            /* Blue 500 - Focus rings & active states */
 
-  /* Typography */
-  --text-primary: #1E293B;            /* oklch(27.8% 0.033 256) - Contrast 13.6:1 (AAA) */
-  --text-secondary: #64748B;          /* oklch(55.4% 0.046 257) - Contrast 4.9:1 (AA) */
-  --text-muted: #94A3B8;              /* oklch(76.8% 0.038 255) */
+  /* Typography (WCAG AAA on #020617) */
+  --text-primary: #F8FAFC;            /* Slate 50 - Contrast 18.5:1 (AAA) */
+  --text-secondary: #CBD5E1;          /* Slate 300 - Contrast 11.6:1 (AAA) */
+  --text-muted: #94A3B8;              /* Slate 400 - Contrast 7.3:1 (AAA, D-050) */
 
   /* Interactive Non-Status */
-  --primary: #2563EB;                 /* oklch(54.6% 0.215 258) - Royal Blue CTA */
-  --primary-hover: #1D4ED8;           /* oklch(47.8% 0.218 258) */
-  --primary-subtle: #EFF6FF;          /* oklch(96.9% 0.021 254) */
+  --primary: #2563EB;                 /* Blue 600 - Royal Blue CTA */
+  --primary-hover: #1D4ED8;           /* Blue 700 */
+  --primary-subtle: rgba(37, 99, 235, 0.15);
 
   /* Process Status Semaphores */
-  --status-ok: #10B981;               /* oklch(69.6% 0.170 162) - Emerald Green */
-  --status-ok-bg: #ECFDF5;            /* oklch(97.8% 0.022 162) */
-  --status-warn: #F97316;             /* oklch(69.8% 0.185 48)  - Coral/Amber */
-  --status-warn-bg: #FFF7ED;          /* oklch(97.9% 0.020 60) */
-  --status-danger: #EF4444;           /* oklch(63.7% 0.222 25)  - Vivid Crimson */
-  --status-danger-bg: #FEF2F2;        /* oklch(96.8% 0.019 25) */
-  --status-idle: #94A3B8;             /* oklch(76.8% 0.038 255) - Neutral Standby */
+  --status-ok: #10B981;               /* Emerald 500 - Nominal operational */
+  --status-ok-bg: rgba(16, 185, 129, 0.12);
+  --status-warn: #F59E0B;             /* Amber 500 - Caution / pending */
+  --status-warn-bg: rgba(245, 158, 11, 0.12);
+  --status-danger: #EF4444;           /* Red 500 - Safety faults & emergency */
+  --status-danger-bg: rgba(239, 68, 68, 0.15);
+  --status-idle: #64748B;             /* Slate 500 - Neutral standby */
 }
 ```
+
+> *Note: Legacy high-key "Clean Laboratory Minimal" light tokens (`--background: #F5F7FA`, `--surface: #FFFFFF`) documented in early concept drafts remain archived for secondary administrative export views only; all active greenhouse runtimes strictly enforce the Dark Slate tokens above per D-029 and D-050.*
 
 ### 2.2 Elevation, Shadows & Glassmorphism
 
@@ -224,8 +231,8 @@ Per `UX-FR-01`, `TR-30`, and decision D-046, drums are rendered as **Industrial 
 | +---------------------------------------------+ | +-----------------------------------+ +-----------------------------+ |
 | | Greenhouse Ambient Visual / Bay Camera Feed | | | ACTIVE PROCESS STATE              | | HERO TDS PPM (Glanceable 3m)| |
 | | High-key, bright daylight natural setting   | | | [BADGE: BATCH ID #1042]           | |                             | |
-| +---------------------------------------------+ | | PREPARING: DOSING NPK             | |       612 ppm               | |
-|                                                 | | Target: 600 ppm | Step 3 of 6      | |  Target: [550 - 650 ppm]    | |
+| +---------------------------------------------+ | | DOSING (NPK CONCENTRATE)          | |       612 ppm               | |
+|                                                 | | Target: 600 ppm | Step 4 of 12     | |  Target: [550 - 650 ppm]    | |
 | +---------------------------------------------+ | +-----------------------------------+ +-----------------------------+ |
 | | DRUM CAROUSEL                            | |                                                                       |
 | | (Auto-cycles every 10s across Drum A, B,    | | +---------------------+ +---------------------+ +-----------------+ |
@@ -257,7 +264,7 @@ Per `UX-FR-01`, `TR-30`, and decision D-046, drums are rendered as **Industrial 
 | | State: IDLE                 | |        600 ppm              | |      18.4 L (92%)           | |      0.0 L (Empty)  | |
 | | Next: 06:00 (Vegetatif)     | | In Tolerance Band           | | Status: Healthy             | | Status: Ready Fill  | |
 | |                             | | [~~~~~~~~ Wave Chart ~~~~~] | | [ SVG/Canvas Drum Vessel ] | | [ SVG/Canvas Drum ] | |
-| | [JADWALKAN / MULAI BATCH]   | | Baseline Ref: 104 ppm       | | [Konfirmasi Isi Ulang (20L)]| | [Manual Drain]      | |
+| | [JADWALKAN / MULAI BATCH]   | | Baseline Ref: 104 ppm       | | [Konfirmasi Isi Ulang (20L)]| | [Kuras Manual Kran] | |
 | +-----------------------------+ +-----------------------------+ +-----------------------------+ +---------------------+ |
 |                                                                                                                         |
 | +-----------------------------------------------------------+ +-------------------------------------------------------+ |
@@ -275,7 +282,7 @@ Per `UX-FR-01`, `TR-30`, and decision D-046, drums are rendered as **Industrial 
 
 - **Zero Vertical Scrolling:** 1920×1080 canvas strictly locked (`overflow: hidden`).
 - **Touch Target Safeguards:** Every button is min 56×56 px; `Mulai Batch` is 64 px tall with full-width primary accent.
-- **Top Right Header E-Stop:** 64×64 px vibrant red pill button (`#EF4444`). 1-tap instant software trip (< 16 ms pessimistic latch) with zero confirmation modal on Kiosk.
+- **Top Right Header E-Stop:** 64×64 px vibrant red pill button (`#EF4444`). 1-tap instant software trip (< 16 ms UI lock, < 30 ms MQTT dispatch, hardware relay cutoff p95 < 100 ms) with zero confirmation modal on Kiosk.
 
 ---
 

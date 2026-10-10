@@ -265,16 +265,16 @@ Each Technical Requirement directly satisfies and enforces its corresponding Pro
 - **Subsystem:** Firmware (ESP32-S3 Core 1) & Backend
 - **Specification:**
   - On any safety interlock trigger, firmware latches the corresponding fault code (`FAULT_DRY_RUN`, `FAULT_PPM_OUT_OF_RANGE`, `FAULT_BATCH_REJECTED`, `FAULT_RADAR_OFFLINE`, `FAULT_NO_WATER_SUPPLY`, `FAULT_FILL_TIMEOUT`, `FAULT_ESTOP`, `FAULT_TDS_INVALID`, `FAULT_BASE_TDS_HIGH`), cuts all 4 relays, and writes fault state to NVS.
-  - **Gated Fault Reset Protocol:** Firmware rejects `RESET_FAULT` command if Drum 2 radar level reads $> 5.0\text{ L}$ (requiring operator to manually open gravity drain valve to waste ditch) or if physical NC E-Stop contacts remain open (`hw_estop_pressed == true`).
-  - **Mid-Batch Power Outage Recovery & Dynamic Deficit Dosing (D-013):**
-    - **Kondisi Boot:** ESP32 menyala dari cold-boot/power restoration, membaca NVS menemukan status batch aktif belum `DEPLETED`, dan sensor radar membaca volume Drum 2 $> 5.0\text{ L}$.
+  - **Gated Fault Reset Protocol:** Firmware rejects `RESET_FAULT` command if Drum 2 radar level reads $> 8.0\text{ L}$ (`D-048`), if physical NC E-Stop contacts remain open (`hw_estop_pressed == true`), or if radar UART communication is silent (`radar_online == false`, `09_ERROR_HANDLING.md` §3.1).
+  - **Mid-Batch Power Outage Recovery & Dynamic Deficit Dosing (D-013, D-047):**
+    - **Kondisi Boot:** ESP32 menyala dari cold-boot/power restoration, membaca NVS menemukan status batch aktif belum `DEPLETED`, dan sensor radar membaca volume Drum 2 $> 8.0\text{ L}$.
     - **Mode Hold:** FSM mengunci mode `BATCH_PAUSED_INSPECTION` (seluruh 4 relay terkunci OFF).
     - **Formula Defisit Konsentrat:**
-      $$V_{\text{deficit\_mL}} = \frac{(\text{TDS}_{\text{target}} - \text{TDS}_{\text{current\_measured}}) \times V_{\text{current\_drum2\_L}}}{94.68}$$
+      $$V_{\text{deficit\_mL}} = \frac{(\text{TDS}_{\text{target}} - \text{TDS}_{\text{current\_measured}}) \times V_{\text{current\_drum2\_L}}}{107.0}$$
     - **Ambang Batas Catastrophic Spike Anomaly:**
-      Jika $\text{TDS}_{\text{current\_measured}} > (\text{TDS}_{\text{target}} + 500\text{ ppm})$ (misal $> 1750\text{ ppm}$ untuk target 1250 ppm) atau terdeteksi kebocoran anomali level, sistem mengunci permanen opsi resume otomatis. Operator diwajibkan membuka keran manual pengurasan ke parit hingga volume $\le 5.0\text{ L}$.
+      Jika $\text{TDS}_{\text{current\_measured}} > (\text{TDS}_{\text{target}} + 500\text{ ppm})$ (misal $> 1750\text{ ppm}$ untuk target 1250 ppm) atau terdeteksi kebocoran anomali level, sistem mengunci permanen opsi resume otomatis. Operator diwajibkan membuka keran manual pengurasan ke parit hingga volume $\le 8.0\text{ L}$ (`D-048`).
     - **Mekanisme Dual Timer Auto-Resume (30 Menit / 1800 s):**
-      Timer software 30 menit ($1800\text{ s}$) dikelola oleh background worker FastAPI. Notifikasi alert dikirim ke HMI Kiosk dan Telegram dengan tombol `[Konfirmasi Pause Recovery]`. Jika operator tidak mengambil tindakan manual dalam 30 menit dan ketujuh interlock berstatus valid (tidak ada lonjakan katastropik), backend mendispatch perintah MQTT QoS 1:
+      ESP32 FreeRTOS Core 1 mengelola timer keselamatan 30 menit ($1800\text{ s}$) dan kalkulasi defisit lokal (`D-047`). Notifikasi alert dikirim ke HMI Kiosk dan Telegram dengan tombol `[Konfirmasi Pause Recovery]`. Jika operator tidak mengambil tindakan manual dalam 30 menit dan ketujuh interlock berstatus valid (defisit $\le 300\text{ mL}$ dan TDS $\le \text{Target} + 50\text{ ppm}$), backend mendispatch perintah MQTT QoS 1:
       ```json
       {
         "cmd_id": "c1f7a240-8b1a-4d2b-98f5-19e4823ab001",
@@ -317,7 +317,7 @@ Each Technical Requirement directly satisfies and enforces its corresponding Pro
     ```bash
     python -m backend.cli seed-admin
     ```
-  - On the HMI Kiosk, attempting an Admin action triggers a Step-Up Modal prompting for the Administrator password/PIN. On success, a temporary 15-minute elevation token is issued.
+  - On the HMI Kiosk, attempting an Admin action triggers a Step-Up Modal prompting for the Administrator password or 6-digit Argon2id Kiosk PIN on the tactile on-screen numpad (`D-050`). On success, a temporary 15-minute elevation session is issued.
 
 ### TR-15: Resilient Outbound Telegram Alerting with Interactive Callback Handlers
 - **Subsystem:** Backend (Telegram Bot Client)
@@ -342,7 +342,7 @@ Each Technical Requirement directly satisfies and enforces its corresponding Pro
   - **Software Sense:** Secondary NC contact on mushroom switch is wired to ESP32 GPIO 21 with internal pull-up and hardware debouncing ($\le 1\text{ ms}$ RC filter). Falling/Rising edge triggers FreeRTOS ISR, de-energizing GPIO outputs in $< 5\text{ ms}$ and setting telemetry `hw_estop_pressed = true`.
   - **Dry-Run Latency Budget:** Total physical latency $\le 200\text{ ms}$ dari surutnya cairan di sump hisap, dengan firmware cut-off $< 50\text{ ms}$ setelah frame UART radar diterima.
   - **Dual UX:**
-    - Local HMI Kiosk: Instant 1-tap E-Stop button (min $56 \times 56\text{ px}$) on screen header; zero modal confirmation; dispatches MQTT `ESTOP` immediately.
+    - Local HMI Kiosk: Instant 1-tap E-Stop button (min $64 \times 64\text{ px}$, `D-050`) on screen header; zero modal confirmation; dispatches MQTT `ESTOP` immediately.
     - Remote Web / Mobile: Requires two-step confirmation modal (`aria-modal="true"`) to prevent accidental pocket taps.
 
 ### TR-18: Inferential Concentrate Virtual Stock Tracking & Depletion Warning

@@ -497,7 +497,7 @@ import { renderHook, act } from '@testing-library/react';
 import { usePessimisticMutation } from '../../hooks/usePessimisticMutation';
 
 describe('usePessimisticMutation', () => {
-  it('disables button immediately on trigger and unlocks on timeout', async () => {
+  it('disables button immediately on trigger and enters OUTCOME_UNKNOWN on timeout', async () => {
     vi.useFakeTimers();
     const { result } = renderHook(() => usePessimisticMutation());
 
@@ -508,13 +508,15 @@ describe('usePessimisticMutation', () => {
     // Immediately enters loading state
     expect(result.current.isLoading).toBe(true);
 
-    // Fast-forward 3.0 seconds -> Times out and reverts to false
+    // Fast-forward 3.0 seconds -> Times out and enters OUTCOME_UNKNOWN (remains locked, D-047, D-049, D-050)
     act(() => {
       vi.advanceTimersByTime(3000);
     });
 
     expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBe('Hardware timeout: No ACK within 3.0s');
+    expect(result.current.isLocked).toBe(true);
+    expect(result.current.outcomeUnknown).toBe(true);
+    expect(result.current.error).toBe('Hardware timeout: No ACK within 3.0s — Menunggu Rekonsiliasi Telemetri');
     vi.useRealTimers();
   });
 });
@@ -541,7 +543,7 @@ describe('UI-02 Live TDS Gauge & Gate Card', () => {
 
   it('renders red out-of-band badge at 1350 ppm', () => {
     render(<LiveTDSGauge tdsPpm={1350} targetPpm={1250} />);
-    expect(screen.getByText('Melebihi Toleransi')).toHaveClass('text-red-500');
+    expect(screen.getByText('Melebihi Batas Toleransi')).toHaveClass('text-red-500');
   });
 });
 
@@ -628,20 +630,21 @@ test.describe('E2E Fertigation Lifecycle', () => {
   test('E2E-01: Full nominal batch execution from initiation to depletion', async ({ page }) => {
     // 1. Load Kiosk interface (Auto-authenticated Operator session)
     await page.goto('http://localhost:8080');
-    await expect(page.locator('[data-testid="fsm-status"]')).toContainText('IDLE');
+    await expect(page.locator('[data-testid="kiosk-fsm-pill"]')).toContainText('IDLE');
 
     // 2. Open Unified Setup Modal and click Mulai Sekarang
-    await page.click('button:has-text("Jadwalkan / Mulai Batch")');
+    await page.click('[data-testid="batch-start-btn"]');
     await page.selectOption('select#recipe', 'Generatif (1250 ppm)');
-    await page.click('button:has-text("Mulai Sekarang")');
+    await page.click('[data-testid="batch-modal-submit"]');
 
-    // 3. Verify autonomous FSM progression
-    await expect(page.locator('[data-testid="fsm-status"]')).toContainText('FILLING_WATER', { timeout: 5000 });
-    await expect(page.locator('[data-testid="fsm-status"]')).toContainText('PREPARING_DOSING', { timeout: 15000 });
-    await expect(page.locator('[data-testid="fsm-status"]')).toContainText('DISTRIBUTING', { timeout: 30000 });
+    // 3. Verify autonomous FSM progression (10_FIRMWARE_SPEC, 12_UI_SPEC)
+    await expect(page.locator('[data-testid="kiosk-fsm-pill"]')).toContainText('FILLING_WATER', { timeout: 5000 });
+    await expect(page.locator('[data-testid="kiosk-fsm-pill"]')).toContainText('CHECK_BASE', { timeout: 10000 });
+    await expect(page.locator('[data-testid="kiosk-fsm-pill"]')).toContainText('DOSING', { timeout: 15000 });
+    await expect(page.locator('[data-testid="kiosk-fsm-pill"]')).toContainText('DISTRIBUTING', { timeout: 30000 });
 
     // 4. Verify batch completes into DEPLETED
-    await expect(page.locator('[data-testid="fsm-status"]')).toContainText('BATCH_DEPLETED', { timeout: 45000 });
+    await expect(page.locator('[data-testid="kiosk-fsm-pill"]')).toContainText('BATCH_DEPLETED', { timeout: 45000 });
   });
 
   test('E2E-02: Safety interlock trip, drainage, and gated reset', async ({ page, request }) => {
@@ -651,20 +654,19 @@ test.describe('E2E Fertigation Lifecycle', () => {
     await request.post('http://localhost:9099/inject/estop-trip');
 
     // Verify UI enters critical fault state
-    await expect(page.locator('[data-testid="fault-banner"]')).toBeVisible();
-    await expect(page.locator('button:has-text("Reset Fault")')).toBeDisabled();
+    await expect(page.locator('[data-testid="fsm-status-card"]')).toBeVisible();
+    await expect(page.locator('[data-testid="fault-reset-btn"]')).toBeDisabled();
 
     // Release switch and clear volume via simulator
     await request.post('http://localhost:9099/inject/estop-release');
     await request.post('http://localhost:9099/inject/drain-drum2', { data: { volume_l: 2.0 } });
 
     // Reset button unlocks
-    await expect(page.locator('button:has-text("Reset Fault")')).toBeEnabled();
-    await page.click('button:has-text("Reset Fault")');
-    await page.click('button:has-text("Konfirmasi Reset")');
+    await expect(page.locator('[data-testid="fault-reset-btn"]')).toBeEnabled();
+    await page.click('[data-testid="fault-reset-btn"]');
 
     // Verify FSM returns to IDLE
-    await expect(page.locator('[data-testid="fsm-status"]')).toContainText('IDLE');
+    await expect(page.locator('[data-testid="kiosk-fsm-pill"]')).toContainText('IDLE');
   });
 });
 ```

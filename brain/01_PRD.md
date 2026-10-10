@@ -56,14 +56,14 @@ Admin: full access including user management. Operator: control batches, schedul
 | **FR-14** | User Management | Security & Auth | `Admin only` | Administrative CRUD for user accounts and role assignments |
 | **FR-15** | Telegram Alerts | Alerts & Comms | `System` | Immediate push alerts for faults, gate failures, and completions |
 | **FR-16** | Command Audit Trail | Security & Audit | `Admin` | Immutable cryptographic audit log of all operator and system actions |
-| **FR-17** | Emergency Stop (Dual E-Stop UX) | Safety & Control | `Operator+` | Dual UX: 1-tap local kiosk (56×56 px); confirmed remote modal |
+| **FR-17** | Emergency Stop (Dual E-Stop UX) | Safety & Control | `Operator+` | Dual UX: 1-tap local kiosk (64×64 px); confirmed remote modal |
 | **FR-18** | Virtual Stock Tracking | Inventory | `Operator+` | Deducts concentrate per batch; alerts when remaining stock ≤ 2 batches |
 | **FR-19** | Resume Fill Control | Batch Automation | `Operator+` | Re-opens fill valve during fill timeout without aborting/draining batch |
 | **FR-20** | Unified Schedule-First Distribution | Batch Automation | `Operator+` | Single upfront modal; autonomous distribution on gate PASS |
 | **FR-21** | Local Panel Alarms | Safety & Hardware | `Firmware` | Hardwired buzzer and red pilot lamp on panel door for fault transitions |
 | **FR-22** | Offline Alert Store-and-Forward | Alerts & Comms | `System` | Persistent backend queue buffers Telegram alerts during outages |
 | **FR-23** | Sensor Calibration Wizard | Calibration | `Operator+` | Step-by-step guided TDS calibration committing to ESP32 NVS |
-| **FR-24** | Named Recipe Presets Library | Recipes | `Operator+` | Presets (*Vegetatif*, *Generatif*, *Panen*) with batch record snapshots |
+| **FR-24** | Named Recipe Presets Library | Recipes | `Operator+ (edit Admin)` | Presets (*Vegetatif*, *Generatif*, *Panen*) with batch record snapshots |
 | **FR-25** | Multi-Tank 5-Pair Visualization | Sensing & Telemetry | `Operator+` | 5 concentrate + 5 distribution drums with fluid animations |
 | **FR-26** | Same-Day Double Distribution Lock | Safety & Agronomy | `Operator Override` | Hard confirmation dialog with root rot warnings and audit logging |
 | **FR-27** | Dynamic Baseline & Preemption | Scheduling | `System` | Ad-hoc run suppresses same-day schedules and shifts recurrence |
@@ -93,7 +93,7 @@ Admin: full access including user management. Operator: control batches, schedul
 - **FR-11: Manual Actuator Control** `[Operator+]`  
   Fine-grained manual dosing in +10 mL increments and timed mixer run per-second on `/manual`; strictly subject to the 7 firmware safety interlocks; disabled during active batch FSM.
 - **FR-17: Emergency Stop (Dual E-Stop UX)** `[Operator+]`  
-  Dual E-Stop UX: instant 1-tap (min 56×56 px without modal) on local kiosk; confirmation dialog with `aria-modal="true"` on remote web; immediately de-energizes all 4 relays via ESP32 `FAULT_ESTOP`.
+  Dual E-Stop UX: instant 1-tap (min 64×64 px without modal) on local kiosk; confirmation dialog with `aria-modal="true"` on remote web; immediately de-energizes all 4 relays via ESP32 `FAULT_ESTOP`.
 - **FR-21: Local Panel Alarms** `[Firmware / System]`  
   Firmware drives physical buzzer and red pilot lamp on panel box door for immediate acoustic and visual signaling upon any `FAULT` state transition, independent of network or server connectivity.
 - **FR-26: Same-Day Double Distribution Protection** `[System / Operator Override]`  
@@ -124,8 +124,8 @@ Admin: full access including user management. Operator: control batches, schedul
   Operator records initial refill of 20 L / 2 kg NPK fertilizer; system tracks remaining stock by deducting actual batch injection history after each distribution run; alerts operator when estimated remaining stock ≤ 2 batches.
 - **FR-23: Guided Sensor Calibration Wizard** `[Operator+]`  
   Accessible on `/manual`; guides step-by-step TDS probe detaching, requiring Drum 2 ≤ 8.0 L drained hold, real-time ADC stability reading, 1413 µS/cm buffer immersion, baseline raw water PPM calculation, and committing calibrated slope/offset to ESP32 NVS with audit logging.
-- **FR-24: Named Recipe Presets Library** `[Operator+]`  
-  Accessible on `/recipes`; enables managing named crop growth phase presets such as *Vegetatif*, *Generatif*, and *Panen*, modifying default targets, and archiving presets; starting a batch allows 1-click preset selection or custom target entry; permanently snapshots preset name and target band to PostgreSQL batch records for agricultural traceability.
+- **FR-24: Named Recipe Presets Library** `[Operator+ (edit Admin)]`  
+  Accessible on `/recipes`; enables managing named crop growth phase presets such as *Vegetatif*, *Generatif*, and *Panen*, modifying default targets, and archiving presets (Admin role required for mutations, accessible via Kiosk step-up elevation); starting a batch requires 1-click preset selection from the Named Presets Library (custom ad-hoc target inputs removed per D-050 to ensure agricultural traceability); permanently snapshots preset name and target band to PostgreSQL batch records.
 
 #### 6. Event Journaling, Historical Analytics & Auditing
 - **FR-06: Batch Event Timeline** `[Viewer+]`  

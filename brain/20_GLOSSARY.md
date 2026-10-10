@@ -115,7 +115,7 @@ The electrical circuit rule where power relays for all 4 physical actuators are 
 _Avoid_: Active-HIGH relay, Normally Closed actuator bus, Software-latched power
 
 **Gated Fault Reset**:
-The strict two-condition safety clearance protocol required to de-latch a critical firmware fault: (1) physical NC mushroom switch twist-released (`hw_estop_pressed == false`), and (2) Distribution Drum (Drum 2) manually drained via gravity to $\le 5.0\text{ L}$. Both conditions must hold before the `RESET_FAULT` command transitions the FSM to `IDLE`.
+The strict three-condition safety clearance protocol required to de-latch a critical firmware fault: (1) physical NC mushroom switch twist-released (`hw_estop_pressed == false`), (2) Distribution Drum (Drum 2) manually drained via gravity to $\le 8.0\text{ L}$ (`D-048`), and (3) FMCW radar level sensor actively online and communicating over UART (`radar_online == true`, `09_ERROR_HANDLING.md` §3.1). All three conditions must hold before the `RESET_FAULT` command transitions the FSM to `IDLE`.
 _Avoid_: Force reset, UI override, Clear error, Software unlatch
 
 ---
@@ -147,11 +147,11 @@ _Avoid_: Cloud font loading, CDN script injection, Online bundle dependency
 ## 5. UI/UX & Operator Cockpit Ergonomics
 
 **Industrial Cockpit Design System**:
-The visual and interaction design philosophy for the greenhouse control room: high-contrast dark theme (`bg-slate-950`, `bg-slate-900`, `border-slate-800`), Space Grotesk display headers, Geist Sans body copy, tabular monospace numbers (`font-mono tabular-nums`), WCAG 2.2 AA compliant contrast ($\ge 4.5:1$), and large touch targets ($\ge 56 \times 56\text{ px}$ for E-stop, $\ge 48 \times 48\text{ px}$ for routine controls).
+The visual and interaction design philosophy for the greenhouse control room: high-contrast dark theme (`bg-slate-950` foundation `#020617`, `bg-slate-900` cards `#0F172A`, `border-slate-800` borders `#1E293B`, `D-050`), Space Grotesk display headers, Geist Sans body copy, tabular numerals (`tabular-nums`), WCAG 2.2 AAA compliant contrast ($\ge 7:1$ text contrast, with `--text-muted` #94A3B8 on #020617 yielding 7.3:1), and large touch targets (uniform $\ge 56 \times 56\text{ CSS px}$ for routine interactive controls on Tier 1 Kiosk, $\ge 64 \times 64\text{ CSS px}$ for Master E-Stop and batch initiation buttons, `D-050`).
 _Avoid_: SaaS generic dashboard, Low-contrast gray, Light theme default, AI slop
 
 **Pessimistic UI Mutation Discipline**:
-The interaction pattern where clicking an actuator or state-changing button immediately disables the button, displays a pending spinner, and holds the interface state until hardware confirmation is returned over WebSocket/MQTT telemetry. If confirmation fails within 3.0 seconds, the mutation reverts and displays an error toast.
+The interaction pattern where clicking an actuator or state-changing button immediately disables the button, displays a pending spinner, and holds the interface state until hardware confirmation is returned over WebSocket/MQTT telemetry. If confirmation is not received within 3.0 seconds, the mutation enters `OUTCOME_UNKNOWN` (`D-047`, `D-050`): controls remain locked, an amber caution state is displayed, telemetry polling reconciles actual state, and any operator retry reuses the exact same `cmd_id` to prevent duplicate dosing.
 _Avoid_: Optimistic UI, Double-click action, Unconfirmed state update
 
 **Pipeline Stepper Component (UI-18)**:

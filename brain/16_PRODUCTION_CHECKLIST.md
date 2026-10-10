@@ -9,15 +9,15 @@
 - [ ] **Zero Unresolved Tags:** All historical `[VERIFY]` and `[PROPOSED]` items across `brain/00` to `brain/20` are formally reconciled against empirical constants and Master Invariants.
 - [ ] **Empirical Constants & Bounds Formally Reconciled:**
   - [ ] Dynamic TDS Tolerance Gate Band compiled as $[ \text{Target} - 50, \text{Target} + 50 ]\text{ ppm}$ (e.g. 1200–1300 ppm for default Generatif 1250 ppm recipe).
-  - [ ] Distribution Drum 2 Sump Threshold & Dry-Run Cutoff compiled strictly at $\le 5.0\text{ L}$.
+  - [ ] Distribution Drum 2 Volumetric Thresholds Separated (`D-048`): Normal distribution cutoff $\le 8.0\text{ L}$, dry-run safety cutoff $< 6.0\text{ L}$ (debounced $\le 200\text{ ms}$), and batch start $\le 8.0\text{ L}$ (with $5.0\text{ L}$ mechanical sump offset).
   - [ ] Concentrate Drum 1 Capacity compiled as $20.0\text{ L}$, with low-stock warning at $\le 3000\text{ mL}$ and batch lockout at $< 1500\text{ mL}$.
   - [ ] Feedforward dosing duration coefficient verified at $V_{\text{mL}} \times 0.107\text{ s/mL}$ ($9.35\text{ mL/s}$ peristaltic flow rate).
   - [ ] Semi-Closed Loop Single-Pass Top-Up dosing volume strictly capped at $\le 300.0\text{ mL}$ ($32.1\text{ s}$ run time).
   - [ ] Dual-Stage Fill Timeouts compiled: Early rise timeout ($< 1.0\text{ L}$ in $90\text{ s}$) and total fill timeout ($> 20\text{ min}$).
   - [ ] Clean water baseline range compiled: $50\text{ to }350\text{ ppm}$ acceptable; $\ge 350\text{ ppm}$ trips `FAULT_BASE_TDS_HIGH`.
   - [ ] 60 GHz radar millimeter-wave UART silence watchdog compiled at $3.0\text{ s}$.
-  - [ ] Same-day double distribution lockout enforced with 3-second button countdown delay on `SAME_DAY_FORCE_OVERRIDE`.
-- [ ] **Decision Log Completeness:** Decisions `D-001` through `D-046` in `brain/18_DECISIONS.md` are formally marked `Accepted`, with zero open architectural blockers.
+  - [ ] Same-day double distribution lockout enforced with dual friction barrier: mandatory agronomic risk checkbox + 3-second press-and-hold button on `SAME_DAY_FORCE_OVERRIDE` (`D-050`).
+- [ ] **Decision Log Completeness:** Decisions `D-001` through `D-050` in `brain/18_DECISIONS.md` are formally marked `Accepted`, with zero open architectural blockers.
 - [ ] **Canonical Terminology Compliance:** All documentation and code adheres strictly to `brain/20_GLOSSARY.md` (e.g. `Concentrate Drum 1`, `Distribution Drum 2`, `Gated Fault Reset`, `Pause Mode`).
 
 ---
@@ -50,16 +50,17 @@
 - [ ] **100% Branch Coverage on Safety Modules:** LCOV report certifies exactly **$100.0\%$ branch coverage** across `safety_interlocks.cpp`, `fsm_engine.cpp`, and `dosing_calculator.cpp`.
 - [ ] **Physical Bench Verification of The Seven Safety Interlocks (`IL-01` to `IL-07`):**
   - [ ] **`IL-01` Dynamic Tolerance Gate:** Distribution pump physically inhibited when TDS is 1199 ppm or 1301 ppm (Target 1250 ppm); enabled strictly within $[ 1200, 1300 ]\text{ ppm}$.
-  - [ ] **`IL-02` Dry-Run Cutoff Guard:** Distribution pump P1 de-energizes within $< 50\text{ ms}$ when Drum 2 level drops below 5.0 L; latches `FAULT_DRY_RUN`.
-  - [ ] **`IL-03` Batch Depletion Guard:** Starting a batch with $> 5.0\text{ L}$ in Drum 2 is rejected with `FAULT_BATCH_REJECTED` (Tier 1B precondition rejection: FSM remains `IDLE`, zero buzzer, zero NVS latch).
+  - [ ] **`IL-02` Dry-Run Cutoff Guard:** Distribution pump P1 de-energizes when Drum 2 level drops below 6.0 L (debounced over 2 frames, $\le 200\text{ ms}$, `D-048`); latches `FAULT_DRY_RUN`.
+  - [ ] **`IL-03` Batch Depletion Guard:** Starting a batch with $> 8.0\text{ L}$ in Drum 2 is rejected with `FAULT_BATCH_REJECTED` (`D-048`, Tier 1B precondition rejection: FSM remains `IDLE`, zero buzzer, zero NVS latch).
   - [ ] **`IL-04` Dual-Stage Fill Guard:** Early rise timeout ($< 1.0\text{ L}$ rise in 90s) trips `PAUSED_FILL_NO_WATER`; total fill timeout ($> 20\text{ min}$) trips `PAUSED_FILL_TIMEOUT`. Non-draining `RESUME_FILL` recovers fill safely (max 3 resumes, cumulative 20 min watchdog).
   - [ ] **`IL-05` Water Baseline & Plausibility Guard:** Clean water TDS $< 50\text{ ppm}$ or $> 2000\text{ ppm}$ trips `FAULT_TDS_INVALID`; baseline $\ge 350\text{ ppm}$ trips `FAULT_BASE_TDS_HIGH`.
   - [ ] **`IL-06` Radar Watchdog Guard:** Disconnecting radar UART trips `FAULT_RADAR_OFFLINE` within $3.0\text{ s}$ and de-energizes all relays.
   - [ ] **`IL-07` Emergency Stop Guard:** Depressing physical mushroom switch severs relay power in $0\text{ ms}$ and latches `FAULT_ESTOP`.
-- [ ] **Gated Fault Reset Protocol Dual Preconditions Verified (`TR-10`, `D-012`, `D-019`):**
+- [ ] **Gated Fault Reset Protocol Three Preconditions Verified (`TR-10`, `D-012`, `D-019`, `D-048`, `D-050`):**
   - [ ] Reset command is physically rejected and button disabled while mushroom switch is depressed (`hw_estop_pressed == true`).
-  - [ ] Reset command is physically rejected and button disabled while fluid remains in Drum 2 ($> 5.0\text{ L}$).
-  - [ ] Reset command succeeds, clears fault latch, and transitions FSM to `IDLE` strictly when switch is twist-released AND Drum 2 is drained to $\le 5.0\text{ L}$.
+  - [ ] Reset command is physically rejected and button disabled while fluid remains in Drum 2 ($> 8.0\text{ L}$, `D-048`).
+  - [ ] Reset command is physically rejected and button disabled if radar UART is offline (`radar_online == false`, `09_ERROR_HANDLING.md` §3.1).
+  - [ ] Reset command succeeds, clears fault latch, and transitions FSM to `IDLE` strictly when switch is twist-released, Drum 2 is drained to $\le 8.0\text{ L}$, and radar is online.
 - [ ] **Mid-Batch Power Outage Recovery (`D-013`):**
   - [ ] Unplugged AC mains during active mixing stage; verified that upon cold boot, ESP32-S3 reads NVS state journal and enters **`BATCH_PAUSED_INSPECTION`**.
   - [ ] Verified dynamic deficit concentrate dosing formula: $[(\text{TDS}_{\text{target}} - \text{TDS}_{\text{meas}}) \times V_{\text{vol}}] / 107.0 \le 300\text{ mL}$.

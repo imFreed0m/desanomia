@@ -291,7 +291,7 @@ sequenceDiagram
 - Every mutation published by the backend on `desanomia/gh1/cmd` carries a unique UUID `cmd_id`.
 - The ESP32-S3 maintains a 32-entry circular RAM cache of executed `cmd_id`s.
 - **Reboot Resilience (NVS Invariant):** To prevent duplicate relay actuation when the broker retransmits unacknowledged QoS 1 packets after an unexpected microcontroller reboot, the ESP32 writes `last_executed_cmd_id` to NVS flash upon execution. On reboot, matching commands are immediately acknowledged on `desanomia/gh1/ack` without re-triggering relays.
-- **ACK Timeout:** The backend enforces a strict **3.0-second ACK timeout**. If no ACK arrives on `desanomia/gh1/ack`, the backend surfaces a `COMMAND_TIMEOUT` toast to the operator.
+- **ACK Timeout & Double Dosing Protection:** The backend enforces a strict **3.0-second ACK timeout**. If no ACK arrives on `desanomia/gh1/ack`, the backend returns HTTP 504 `COMMAND_TIMEOUT` and the UI enters an `OUTCOME_UNKNOWN` reconciling state locking controls (`D-047`, `D-050`). Telemetry polling reconciles actual hardware state, and any operator retry must reuse the exact same `cmd_id`, ensuring the ESP32 32-slot circular RAM cache suppresses duplicate physical actuation.
 
 ### 5.2 Offline PSRAM Event Spooling
 

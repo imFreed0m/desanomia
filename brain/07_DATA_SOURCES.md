@@ -2,7 +2,7 @@
 
 > **System:** DESANOMIA Greenhouse Automated Fertigation System  
 > **Platform:** Beelink EQ12 Mini PC (Intel N100) + ESP32-S3 N16R8 Edge Microcontroller  
-> **Authority:** Aligned with [00_MASTER_RULES.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/00_MASTER_RULES.md), [01_PRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/01_PRD.md), [04_TRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/04_TRD.md), [05_ARCHITECTURE.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/05_ARCHITECTURE.md), [06_DATA_MODEL.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/06_DATA_MODEL.md), and [18_DECISIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md) (D-001 through D-045). [SPEC]
+> **Authority:** Aligned with [00_MASTER_RULES.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/00_MASTER_RULES.md), [01_PRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/01_PRD.md), [04_TRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/04_TRD.md), [05_ARCHITECTURE.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/05_ARCHITECTURE.md), [06_DATA_MODEL.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/06_DATA_MODEL.md), and [18_DECISIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md) (D-001 through D-050). [SPEC]
 
 ---
 
@@ -287,7 +287,7 @@ Every physical and virtual data event is persisted to PostgreSQL 16 Alpine:
 - `batches`: Immutable batch records with recipe preset snapshots and top-up metrics.
 - `batch_events`: Append-only high-resolution lifecycle state transition journal.
 - `actuator_logs`: Exact relay actuation logs with command UUID traceability.
-- `faults`: Latched fault history with Gated Fault Reset verification (`drum2_volume_at_clear <= 5.0`).
+- `faults`: Latched fault history with Gated Fault Reset verification (`drum2_volume_at_clear <= 8.0`).
 - `sensor_calibrations`: Audit log of all sensor calibration wizard commits.
 - `audit_logs`: SHA-256 cryptographically chained immutable audit log.
 

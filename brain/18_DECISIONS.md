@@ -133,6 +133,14 @@ Central Architectural Decision Records (ADR) for the DESANOMIA precision greenho
   6. *Authentication & Event-Driven Push:* Drops `?token=` from WebSocket URLs (Nginx injects upstream `Authorization: Bearer` for Gazebo TV; Kiosk and PWA use session cookies). Restricts `POST /auth/elevate` strictly to loopback (`127.0.0.1:8080`) recording `elevated_by` in `audit_logs`. Replaces redundant backend 1.0 Hz WebSocket push loop with event-driven broadcasting upon MQTT message receipt and FSM state changes plus connection hydration.
   7. *Phase 1 Scoping & Cleanups:* Restricts `POST /batches` to start-now only (scheduling managed exclusively via `/schedules`). Rejects `tank_pair_id != 1` with HTTP 422 until additional pairs are plumbed.
 
+- **D-050 (UI/UX Architecture, Kiosk Step-Up PIN, Non-Inert E-Stop & Theme Authority):**
+  1. *Theme & Design System Authority:* Confirms Dark Slate Industrial Cockpit (`#020617` foundation, `#0F172A` Bento cards, `#1E293B` elevated borders) as the sole authoritative primary theme across all displays, formally superseding legacy light-mode references in `03_UI_UX_BRIEF.md`. Corrects contrast tokens to meet WCAG AAA: `--text-primary: #F8FAFC` (18.5:1), `--text-secondary: #CBD5E1` (11.6:1), and `--text-muted: #94A3B8` (7.3:1 AAA on `#020617`).
+  2. *Modal Architecture & Non-Inert Master E-Stop:* Standardizes on shadcn/Radix UI accessible dialog primitives with a persistent `z-[100]` Master E-Stop header bar mounted outside modal backdrops, eliminating HTML5 native `<dialog>.showModal()` top-layer inert traps that disable the software E-stop during open dialogs. Redundant inline E-Stop buttons are embedded in full-screen blocking overlays (`UI-19 Pause Mode`, `UI-20 E-Stop Recovery`).
+  3. *Kiosk Step-Up Credential (Argon2id PIN):* Adds a dedicated `kiosk_pin_hash` column to the `users` table (hashed with Argon2id) allowing local 6-digit numeric step-up elevation on the Tier 1 Kiosk via the tactile $72 \times 72\text{ px}$ on-screen numpad, restricted strictly to loopback (`127.0.0.1:8080`) with fallback to full password entry.
+  4. *Touch Target Budget & Zero-Scroll Boundary:* Establishes a uniform $56 \times 56\text{ CSS px}$ minimum bounding box for all interactive controls on the Tier 1 Kiosk (with $64 \times 64\text{ px}$ for E-Stop and critical batch triggers) for reliable operation with nitrile gloves. Restricts the "Zero Vertical Scrolling" invariant strictly to the Dashboard Cockpit (`/`) within a 1080 px vertical budget (Header 64px, Stepper 56px, Bento grid 912px, Footer 48px), while enabling internal touch scrolling (`overflow-y-auto`) for data tables on `/batches`, `/users`, and `/recipes`.
+  5. *Recipe Presets & Agronomic Traceability:* Enforces that recipe definitions on `/recipes` are strictly Admin-gated (accessible to Kiosk operators via 15-minute step-up elevation). Eliminates ad-hoc arbitrary custom PPM inputs from the batch setup dialog (UI-08), requiring all batch executions to select from Named Recipe Presets to guarantee agronomic traceability and snapshotting.
+  6. *Same-Day Double Distribution Dual Friction (UI-16):* Enforces a dual friction barrier triggered exclusively upon receiving HTTP 409 `SAME_DAY_DOUBLE_DISTRIBUTION`: a mandatory agronomic risk checkbox acknowledging root asphyxiation and salinity toxicity, followed by a 3-second press-and-hold confirmation button committing `SAME_DAY_FORCE_OVERRIDE` to the audit log.
+
 ---
 
 ## Proposed Decisions
@@ -144,4 +152,5 @@ Central Architectural Decision Records (ADR) for the DESANOMIA precision greenho
 ## Open Decisions
 
 *None.* (All foundational system inquiries have been answered and codified in `brain/00` through `brain/17`).
+
 
