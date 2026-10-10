@@ -194,30 +194,37 @@ Each Technical Requirement directly satisfies and enforces its corresponding Pro
 
 | ID | Nama Interlock | Kondisi Pemicu (Sensor Input) | Kode Fault Latched | Respon Hardware ESP32 | Aturan Pembukaan Kunci (Reset Rule) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **IL-01** | **TDS Safety Gate** | TDS rata-rata $< (\text{Target}-50)$ atau $> (\text{Target}+50\text{ ppm})$ pasca evaluasi/recovery | `FAULT_PPM_OUT_OF_RANGE` | Pompa distribusi (GPIO 7) TERKUNCI MATI | Kuras manual tangki via gravity valve ke parit pembuangan hingga $\le 5.0\text{ L}$ |
-| **IL-02** | **Radar Dry-Run Cutoff** | Level radar Drum 2 $< 5.0\text{ L}$ saat pompa distribusi aktif | `FAULT_DRY_RUN` | Matikan relay pompa distribusi (GPIO 7) dalam $< 50\text{ ms}$ | FSM kembali ke IDLE / isi air kembali |
-| **IL-03** | **Batch Depletion Guard** | Perintah `START_BATCH` diterima saat volume Drum 2 $> 5.0\text{ L}$ | `FAULT_BATCH_REJECTED` | Tolak eksekusi batch, seluruh relay tetap mati | Kuras tangki hingga level $\le 5.0\text{ L}$ |
+| **IL-01** | **TDS Safety Gate** | TDS rata-rata $< (\text{Target}-50)$ atau $> (\text{Target}+50\text{ ppm})$ pasca evaluasi/recovery | `FAULT_PPM_OUT_OF_RANGE` | Pompa distribusi (GPIO 7) TERKUNCI MATI | Kuras manual tangki via gravity valve ke parit pembuangan hingga $\le 8.0\text{ L}$ (`D-012`, `D-048`) |
+| **IL-02** | **Radar Dry-Run Cutoff** | Level radar Drum 2 $< 6.0\text{ L}$ saat pompa distribusi aktif (debounced 2 frames, $\le 200\text{ ms}$) | `FAULT_DRY_RUN` | Matikan relay pompa distribusi (GPIO 7) dalam $\le 200\text{ ms}$ | FSM kembali ke IDLE; manual fault reset diizinkan (`D-003`, `D-048`) |
+| **IL-03** | **Batch Depletion Guard** | Perintah `START_BATCH` diterima saat volume Drum 2 $> 8.0\text{ L}$ | `FAULT_BATCH_REJECTED` | Tolak eksekusi batch, seluruh relay tetap mati | Kuras tangki hingga level $\le 8.0\text{ L}$ (`D-048`) |
 | **IL-04** | **Dual-Stage Fill Guard** | Level naik $< 1.0\text{ L}$ dalam $90\text{ s}$ atau total durasi pengisian $> 20\text{ min}$ | `FAULT_NO_WATER_SUPPLY` / `FAULT_FILL_TIMEOUT` | Tutup solenoid air bersih (GPIO 4) | Periksa pasokan air baku, tekan tombol `Resume Fill` di UI |
 | **IL-05** | **Water Baseline Plausibility** | TDS air baku $< 50\text{ ppm}$, $> 2000\text{ ppm}$, atau baseline $\ge 350\text{ ppm}$ | `FAULT_TDS_INVALID` / `FAULT_BASE_TDS_HIGH` | Tutup solenoid fill, hentikan batch seketika | Periksa kabel/konektor probe TDS atau sanitasi sumber air baku |
-| **IL-06** | **Radar Liveness Watchdog** | Frame UART radar hening / diskonek $> 3.0\text{ s}$ | `FAULT_RADAR_OFFLINE` | Matikan seluruh 4 relay seketika | Sambungkan kembali UART radar; auto-clear seketika saat frame valid diterima |
-| **IL-07** | **Emergency Stop Guard** | Kontak NC switch terbuka (GPIO 21 loop terputus) | `FAULT_ESTOP` | Putus daya koil relay mekanis ($0\text{ ms}$) + GPIO Low ($< 5\text{ ms}$) | Putar switch fisik NC (`hw_estop_pressed = false`) DAN level Drum 2 $\le 5.0\text{ L}$ |
+| **IL-06** | **Radar Liveness Watchdog** | Frame UART radar hening / diskonek $> 3.0\text{ s}$ | `FAULT_RADAR_OFFLINE` | Matikan seluruh 4 relay seketika; kunci latched fault | Sambungkan kembali UART radar; pulihkan via `RESET_FAULT` setelah frame stabil $\ge 3.0\text{ s}$ (tanpa kuras tangki, `D-048`) |
+| **IL-07** | **Emergency Stop Guard** | Kontak NC switch terbuka (GPIO 21 loop terputus) | `FAULT_ESTOP` | Putus daya koil relay mekanis ($0\text{ ms}$) + GPIO High IRAM ($< 1\text{ }\mu\text{s}$) | Putar switch fisik NC (`hw_estop_pressed = false`). Operator memilih Tiered Recovery: Re-verify TDS & Resume atau Abort & Drain ke $\le 8.0\text{ L}$ (`D-019`, `D-048`) |
 
-### TR-03: Multi-rate Analog TDS Signal Conditioning & Moving Trimmed Median Filter
+### TR-03: Multi-rate Analog TDS Signal Conditioning & Temperature-Compensated DSP
 - **Subsystem:** Firmware (ESP32-S3 Core 1)
-- **Hardware Interface:** Analog TDS Probe connected to ESP32-S3 ADC1_CH0 (GPIO 1), conditioned via analog front-end board.
+- **Hardware Interface:** Analog TDS Probe connected to ESP32-S3 ADC1_CH0 (GPIO 1) via AFE conditioner board; DS18B20 digital temperature sensor connected to GPIO 8 (OneWire bus with 4.7 kΩ pull-up).
 - **Specification:**
-  - Sensor acquisition task runs on Core 1, Priority 3.
-  - **Algoritma Filtering:** *Moving Window Trimmed Median Filter* 10-sampel dengan frekuensi sampling 10 Hz. Mengambil 10 pembacaan terakhir, membuang 2 nilai ekstrem (1 terendah dan 1 tertinggi), lalu menghitung median/rata-rata dari 8 sampel tersisa.
+  - Sensor acquisition task runs on Core 1, Priority 4 (10 Hz for ADC1_CH0, 1 Hz non-blocking for DS18B20).
+  - **Filtering Algorithm:** *Moving Window Trimmed Median Filter* 10-sample with 10 Hz sampling rate. Takes latest 10 readings, discards 2 extremes (1 lowest and 1 highest), averages remaining 8 samples to produce $V_{\text{raw}}$.
   - Telemetry publication frequency: **5.0 s** during standard states; accelerated to **1.0 s** during `MEASURING_TDS`, `GATE_EVALUATE`, and calibration wizard.
-  - Temperature compensation formula: $\text{TDS}_{25} = \frac{\text{TDS}_{\text{raw}}}{1.0 + 0.02 \times (T_{\text{water}} - 25.0)}$. In Phase 1 without active water temp sensor, water temperature defaults to empirical baseline $27.0^\circ\text{C}$ ($T_{\text{comp}} = 1.04$).
-  - Calibration slope $K_{\text{cell}}$ and baseline offset $V_{\text{offset}}$ are loaded from ESP32 NVS namespace `calib_tds`.
+  - Temperature compensation & cubic polynomial curve-fitting formula (`D-048`):
+    $$V_{\text{compensation}} = \frac{V_{\text{raw}}}{1.0 + 0.02 \times (T_{\text{water}} - 25.0)}$$
+    $$\text{TDS}_{\text{ppm}} = (133.42 \times V_{\text{compensation}}^3 - 255.86 \times V_{\text{compensation}}^2 + 857.39 \times V_{\text{compensation}}) \times 0.5 \times K_{\text{cell}}$$
+    Where $T_{\text{water}}$ is live water temperature from DS18B20 on GPIO 8 (defaults to 25.0 °C if disconnected).
+  - Calibration slope $K_{\text{cell}}$ (default 1.00) and baseline offset $V_{\text{offset}}$ are loaded from ESP32 NVS namespace `calib_tds`.
 
 ### TR-04: 60 GHz Millimeter-Wave Radar Level Sensing & Tank Volumetrics
 - **Subsystem:** Firmware (ESP32-S3)
 - **Hardware Interface:** 60 GHz FMCW Radar Level Sensor connected via UART1 (GPIO 17 TX, GPIO 18 RX), baud rate 115200 bps, 8N1.
 - **Specification:**
-  - Frame parser validates binary header, payload checksum, and distance frame ($D_{\text{mm}}$) at 10 Hz (frame time 100 ms).
-  - Height-to-Volume conversion formula: $V_{\text{drum2}} = (H_{\text{total}} - D_{\text{mm}}) \times A_{\text{cross\_section}}$, with $5.0\text{ L}$ bottom suction sump offset.
+  - Frame parser validates binary header `0xAA 0x55`, payload checksum, and distance frame ($D_{\text{mm}}$) at 10 Hz (frame time 100 ms).
+  - Height-to-Volume conversion formula: $V_{\text{drum2}} = ((H_{\text{total}} - D_{\text{mm}}) / (H_{\text{total}} - H_{\text{sump}})) \times 140.0\text{ L} + 5.0\text{ L}$, with $5.0\text{ L}$ bottom suction sump offset.
+  - Formula floor threshold separation (`D-048`):
+    - Normal distribution cutoff: $\le 8.0\text{ L}$ transitions cleanly to `BATCH_DEPLETED`.
+    - Dry-run safety cutoff (`IL-02`): $< 6.0\text{ L}$ while pump commanded ON (debounced over 2 frames, $\le 200\text{ ms}$).
+    - Batch start precondition (`IL-03`): accepted when level is $\le 8.0\text{ L}$.
   - Watchdog timer: If valid UART radar frames cease for $> 3.0\text{ s}$, the firmware immediately latches `FAULT_RADAR_OFFLINE` (IL-06) and cuts all actuator relays.
 
 ### TR-05: Relay Output Actuation & Mutual Exclusion Hardware Interlocks

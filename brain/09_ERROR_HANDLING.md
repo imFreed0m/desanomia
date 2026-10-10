@@ -39,7 +39,7 @@ sequenceDiagram
         Backend->>Kiosk: Broadcast Fault Frame via 1 Hz WebSocket
         Backend->>TG: Queue Critical Alert (alert_queue)
     end
-    Note over Kiosk: Screen-Locking Fault Modal Displayed<br/>Reset Button Disabled (Volume > 5.0 L)
+    Note over Kiosk: Screen-Locking Fault Modal Displayed<br/>Reset Button Disabled (Volume > 8.0 L)
     TG-->>TG: Deliver Telegram Push with Deep Link to Web Dashboard
 ```
 
@@ -69,23 +69,23 @@ graph TD
 Firmware safety anomalies are raised synchronously by Core 1 when evaluating one of the 7 safety interlocks (`IL-01` to `IL-07`). To eliminate semantic ambiguity, Tier 1 is formally subdivided into three distinct behavioral categories based on latching behavior, acoustic alarms, and recovery mechanics:
 
 #### Tier 1A: Latched Hardware Safety Faults (Catastrophic / Emergency)
-These faults represent active hazards or out-of-spec chemical conditions. They immediately de-energize all actuator relays (coil power severed), latch into ESP32 NVS, sound the local DC 12V piezo buzzer (GPIO 2) and red pilot lamp (GPIO 3), and strictly require **Gated Fault Reset** (physical gravity drain to $\le 5.0\text{ L}$ and/or mushroom switch release) before the FSM can transition back to `IDLE`.
+These faults represent active hazards or out-of-spec chemical conditions. They immediately de-energize all actuator relays (coil power severed), latch into ESP32 NVS, sound the local DC 12V piezo buzzer (GPIO 2) and red pilot lamp (GPIO 3), and strictly require **Gated Fault Reset** (physical gravity drain to $\le 8.0\text{ L}$ and/or mushroom switch release / radar liveness recovery) before the FSM can transition back to `IDLE` (`D-048`).
 
 | Canonical Fault Code | Interlock ID | Trigger Condition | Immediate Firmware Reaction | Recovery Precondition |
 | :--- | :---: | :--- | :--- | :--- |
-| `FAULT_PPM_OUT_OF_RANGE` | `IL-01` | Post-mixing mean TDS outside $[\text{Target} \pm 50\text{ ppm}]$ after top-up, or initial TDS $> \text{Target} + 50\text{ ppm}$. | Distribution pump locked OFF; mixer and dosing de-energized; latched in NVS; buzzer & red lamp ON. | Manual gravity drain of Drum 2 to $\le 5.0\text{ L}$ via waste ditch valve (`D-012`). |
-| `FAULT_DRY_RUN` | `IL-02` | Drum 2 level $< 5.0\text{ L}$ while distribution pump is active. (Debounced with 5-sample median filter; normal batch end transitions to `BATCH_DEPLETED` without tripping). | Distribution pump instantly de-energized in $< 500\text{ ms}$; batch aborted; latched in NVS; buzzer & lamp ON. | Inspect plumbing and drippers; manual reset if batch was legitimately depleted (`D-003`). |
+| `FAULT_PPM_OUT_OF_RANGE` | `IL-01` | Post-mixing mean TDS outside $[\text{Target} \pm 50\text{ ppm}]$ after top-up, or initial TDS $> \text{Target} + 50\text{ ppm}$. | Distribution pump locked OFF; mixer and dosing de-energized; latched in NVS; buzzer & red lamp ON. | Manual gravity drain of Drum 2 to $\le 8.0\text{ L}$ via waste ditch valve (`D-012`, `D-048`). |
+| `FAULT_DRY_RUN` | `IL-02` | Drum 2 level $< 6.0\text{ L}$ while distribution pump is active (debounced over 2 frames, $\le 200\text{ ms}$; normal batch end transitions to `BATCH_DEPLETED` at $\le 8.0\text{ L}$ without tripping). | Distribution pump instantly de-energized in $\le 200\text{ ms}$; batch aborted; latched in NVS; buzzer & lamp ON. | Inspect plumbing and drippers; manual reset after inspection (`D-003`, `D-048`). |
 | `FAULT_TDS_INVALID` | `IL-05` | Clean water TDS reading $< 50\text{ ppm}$ (probe disconnected) or $> 2000\text{ ppm}$ (short circuit). | Batch aborted; fill solenoid closed; relays de-energized; latched in NVS; buzzer & lamp ON. | Inspect BNC connector, cable continuity, and probe submersion; run calibration wizard (`D-036`). |
 | `FAULT_BASE_TDS_HIGH` | `IL-05` | Raw water baseline TDS $\ge 350\text{ ppm}$ during `CHECK_BASE` state. | Batch aborted; fill solenoid closed; relays de-energized; latched in NVS; buzzer & lamp ON. | Inspect raw water source filtration; flush source line; drain contaminated Drum 2. |
-| `FAULT_RADAR_OFFLINE` | `IL-06` | FMCW radar UART1 silent or frame corrupted for $> 3.0\text{ seconds}$. | All active relays de-energized immediately; FSM halted; latched in NVS; buzzer & lamp ON. | Check UART1 wiring (GPIO 17/18), 5V power supply to radar, and cable integrity. `RESET_FAULT` rejected while radar is offline. |
-| `FAULT_ESTOP` | `IL-07` | Physical NC mushroom switch opened (`hw_estop_pressed == true`) or software E-stop triggered. | All relays de-energized in 0 ms (coil power cut) and $< 5\text{ ms}$ (GPIO 21 ISR); latched in NVS; buzzer & lamp ON. | Twist-release physical mushroom switch (`hw_estop_pressed: false`) and drain Drum 2 to $\le 5.0\text{ L}$ if contaminated (`D-019`). |
+| `FAULT_RADAR_OFFLINE` | `IL-06` | FMCW radar UART1 silent or frame corrupted for $> 3.0\text{ seconds}$. | All active relays de-energized immediately; FSM halted; latched in NVS; buzzer & lamp ON. | Check UART1 wiring (GPIO 17/18), 5V power supply to radar, and cable integrity. De-latched via `RESET_FAULT` once frames resume stably for $\ge 3.0\text{ s}$ without requiring tank drain (`D-048`). |
+| `FAULT_ESTOP` | `IL-07` | Physical NC mushroom switch opened (`hw_estop_pressed == true`) or software E-stop triggered. | All relays de-energized in 0 ms (coil power cut) and $< 1\text{ }\mu\text{s}$ (GPIO 4-7 register write in `IRAM_ATTR` ISR); latched in NVS; buzzer & lamp ON. | Twist-release physical mushroom switch (`hw_estop_pressed: false`). Operator selects **Tiered Recovery**: (a) Re-verify TDS & Resume (`STABILIZING` $\to$ `MEASURING_TDS` $\to$ `GATE_EVALUATE`), or (b) Abort & Drain to $\le 8.0\text{ L}$ (`D-019`, `D-048`). |
 
 #### Tier 1B: Transient Command Precondition Rejections (Non-Latched)
 Precondition rejections occur when an operator commands an action that violates safety invariants before execution begins. The FSM remains in its current state (`IDLE`), zero physical relays are energized, zero alarms sound, and nothing is latched to NVS.
 
 | Rejection Code | Interlock ID | Trigger Condition | Immediate Firmware Reaction | Backend & UI Reaction |
 | :--- | :---: | :--- | :--- | :--- |
-| `FAULT_BATCH_REJECTED` (`REJECT_DRUM_NOT_EMPTY`) | `IL-03` | `START_BATCH` command received while Drum 2 level $> 5.0\text{ L}$. | Command rejected over MQTT with QoS 1 ACK status `REJECTED`; FSM remains in `IDLE`; zero buzzer; zero NVS latch. | Backend maps to HTTP 409 `INTERLOCK_REJECTED`. UI displays amber toast: "Drum 2 Belum Kosong (Terukur: X L). Kuras drum terlebih dahulu". |
+| `FAULT_BATCH_REJECTED` (`REJECT_DRUM_NOT_EMPTY`) | `IL-03` | `START_BATCH` command received while Drum 2 level $> 8.0\text{ L}$. | Command rejected over MQTT with QoS 1 ACK status `REJECTED`; FSM remains in `IDLE`; zero buzzer; zero NVS latch. | Backend maps to HTTP 409 `INTERLOCK_REJECTED`. UI displays amber toast: "Drum 2 Belum Kosong (Terukur: X L). Kuras drum hingga $\le 8.0\text{ L}$". |
 
 #### Tier 1C: Resumable Hydraulic Pause States (Non-Draining)
 Hydraulic pauses protect water infrastructure during municipal supply disruptions. Because raw clean water in Drum 2 is uncontaminated, the system halts without discarding fluid. The 12V buzzer remains OFF (or emits a single intermittent chime), and the condition does NOT latch a fatal NVS lock.
@@ -107,7 +107,7 @@ Process warnings and agronomic gates represent agricultural anomalies, hydraulic
 | `OUT_OF_STOCK_CONCENTRATE` | **409** | Concentrate Drum 1 calculated virtual stock $< 1500\text{ mL}$ ($1.5\text{ L}$). | Backend locks batch initiation (`POST /api/v1/batches` returns 409 `OUT_OF_STOCK_CONCENTRATE`). | High-friction modal: "Stok Pupuk Habis — Isi Ulang Drum 1". Mandates Refill Confirmation Gate resetting stock to 20.0 L (`D-025`). |
 | `SCHEDULE_CONFLICT_IMMINENT` | **409** | Manual batch initiated while an automated schedule is imminent ($< 15\text{ minutes}$). | Batch setup dialog intercepts submission (`POST /api/v1/batches` returns 409 `SCHEDULE_CONFLICT_IMMINENT`). | Operator confirms whether to preempt schedule or cancel manual run (`D-024`). |
 | `SAME_DAY_DOUBLE_DISTRIBUTION`| **409** | Second fertigation batch initiated on the same calendar day. | Interlocked by default (`POST /api/v1/batches` returns 409 `SAME_DAY_DOUBLE_DISTRIBUTION`); requires Hard Confirmation. | Operator must check checkbox acknowledging root asphyxiation / salinity risk before override (`D-039`). |
-| `BATCH_PAUSED_INSPECTION` | — | Cold-boot / mid-batch recovery after power outage with Drum 2 level $> 5.0\text{ L}$. | ESP32 Core 1 initializes in unpowered paused mode, starts authoritative 30-min timer, and calculates deficit. | Screen-locking modal showing measured volume, PPM, and deficit mL with 30-min auto-resume countdown (`D-013`). |
+| `BATCH_PAUSED_INSPECTION` | — | Cold-boot / mid-batch recovery after power outage with Drum 2 level $> 8.0\text{ L}$. | ESP32 Core 1 initializes in unpowered paused mode, starts authoritative 30-min timer, and calculates deficit. | Screen-locking modal showing measured volume, PPM, and deficit mL with 30-min auto-resume countdown (`D-013`). |
 
 ---
 
@@ -138,7 +138,7 @@ All HTTP 4xx and 5xx API errors strictly adhere to the unified JSON error envelo
 | **`401 Unauthorized`** | `UNAUTHENTICATED` | Missing session cookie, expired token, or invalid Argon2id credentials. |
 | **`403 Forbidden`** | `FORBIDDEN` | Role authorization failure (e.g., Viewer on Gazebo TV attempting batch control). |
 | **`404 Not Found`** | `NOT_FOUND` | Referenced entity ID (`batch_id`, `recipe_id`, `schedule_id`) does not exist. |
-| **`409 Conflict`** | `INTERLOCK_REJECTED` | Hardware interlock rejects command (e.g. Drum 2 $> 5.0\text{ L}$ on `START_BATCH` or invalid gated reset). |
+| **`409 Conflict`** | `INTERLOCK_REJECTED` | Hardware interlock rejects command (e.g. Drum 2 $> 8.0\text{ L}$ on `START_BATCH` or invalid gated reset). |
 | **`409 Conflict`** | `INVALID_STATE` | Command incompatible with active FSM state (e.g. manual actuator jog during active batch). |
 | **`409 Conflict`** | `DEVICE_OFFLINE` | ESP32-S3 microcontroller is offline; command cannot be dispatched over MQTT. |
 | **`409 Conflict`** | `OUT_OF_STOCK_CONCENTRATE` | Drum 1 virtual stock $< 1500\text{ mL}$; batch start prohibited until refill confirmation (`D-025`). |
@@ -190,17 +190,17 @@ flowchart TD
     
     Inspection --> CheckEStop{"Is Physical NC E-Stop Mushroom Pressed?"}
     CheckEStop -- Yes --> TwistEStop["Operator Twists Mushroom Switch to Release\n(Telemetry updates: hw_estop_pressed = false)"]
-    CheckEStop -- No --> CheckFluid{"Is Drum 2 Level > 5.0 L?"}
+    CheckEStop -- No --> CheckFluid{"Is Drum 2 Level > 8.0 L?"}
     TwistEStop --> CheckFluid
     
     CheckFluid -- Yes --> OpenDrain["Open Manual Gravity Drain Valve at Drum 2 Base\n(Flush contaminated fluid directly to waste ditch)"]
-    OpenDrain --> RadarCheck["Radar Confirms Fluid Level <= 5.0 L"]
+    OpenDrain --> RadarCheck["Radar Confirms Fluid Level <= 8.0 L"]
     CheckFluid -- No --> RadarCheck
     
     RadarCheck --> UIAvailable["UI 'Reset Fault' Button Becomes Enabled\n(Disabled warning tooltips disappear)"]
     UIAvailable --> OperatorClick["Operator Taps 'Reset Fault' on HMI Kiosk / Web"]
     OperatorClick --> MQTTReset["Backend Dispatches RESET_FAULT Command (QoS 1)"]
-    MQTTReset --> FWValidate{"ESP32 Firmware Core 1 Validates:\nhw_estop_pressed == false AND volume <= 5.0 L\nAND radar is ONLINE"}
+    MQTTReset --> FWValidate{"ESP32 Firmware Core 1 Validates:\nhw_estop_pressed == false AND volume <= 8.0 L\nAND radar is ONLINE"}
     
     FWValidate -- Pass --> FMSIdle["Clear NVS Fault Latch\nDe-energize DC 12V Buzzer & Lamp\nTransition FSM to IDLE\nLog FAULT_CLEARED to audit_logs"]
     FWValidate -- Fail --> RejectCmd["Firmware Replies ACK REJECTED\nBackend Maps to 409 INTERLOCK_REJECTED\nKeep Relays Safe and Fault Latched"]
@@ -209,7 +209,7 @@ flowchart TD
 ### 3.1 Firmware Validation Rules
 The ESP32 FreeRTOS firmware evaluates three conditions atomically upon receiving a `RESET_FAULT` command:
 1. `hw_estop_pressed == false`: Physical NC mushroom contacts on GPIO 21 must be closed.
-2. `drum2_volume <= 5.0 L`: FMCW radar sensor must confirm volume is below the dry sump threshold ($5.0\text{ L}$).
+2. `drum2_volume <= 8.0 L`: FMCW radar sensor must confirm volume is below the depletion threshold ($8.0\text{ L}$, `D-048`).
 3. `radar_online == true`: FMCW radar UART communication must be active. If the radar is silent (`FAULT_RADAR_OFFLINE`), `RESET_FAULT` is strictly rejected because sump emptiness cannot be verified.
 
 If any condition fails, the firmware immediately returns an ACK packet with status `REJECTED` and the specific interlock reason code. The edge backend maps this rejection to HTTP 409 `INTERLOCK_REJECTED`.
@@ -219,7 +219,7 @@ The UI `Reset Fault` button dynamically reflects physical hardware state:
 - **Locked by Hardware E-Stop:** Button is disabled with an amber warning badge:  
   `Tombol E-Stop Fisik Masih Tertekan — Putar untuk Melepas`
 - **Locked by Contaminated Drum 2 Fluid:** Button is disabled with a red warning badge:  
-  `Kuras Drum Distribusi ke Parit hingga ≤ 5.0 L (Terukur: 138.4 L)`
+  `Kuras Drum Distribusi ke Parit hingga ≤ 8.0 L (Terukur: 138.4 L)`
 - **Both Conditions Clear:** Button enables with high-contrast emerald styling:  
   `[Reset Fault]` (1-tap execution on Kiosk, logging user ID and clearance volume to `audit_logs`).
 
@@ -234,10 +234,10 @@ flowchart TD
     PowerRestored["Mains Power Restored\nESP32 Boots & Cold-Starts FreeRTOS"] --> CheckNVS{"Check NVS Journal:\nWas Active Batch Running?"}
     
     CheckNVS -- No --> NormalBoot["Enter IDLE State Normally"]
-    CheckNVS -- Yes --> CheckLevel{"Check Radar Sensor:\nDrum 2 Level > 5.0 L?"}
+    CheckNVS -- Yes --> CheckLevel{"Check Radar Sensor:\nDrum 2 Level > 8.0 L?"}
     
-    CheckLevel -- No (<= 5.0 L) --> Depleted["Assume Batch Was Fully Distributed\nEnter IDLE & Log Outage Truncation"]
-    CheckLevel -- Yes (> 5.0 L) --> PausedMode["Enter BATCH_PAUSED_INSPECTION Mode\nRelays Remain OFF\nESP32 Core 1 Starts 30-Minute Auto-Resume Timer"]
+    CheckLevel -- No (<= 8.0 L) --> Depleted["Assume Batch Was Fully Distributed\nEnter IDLE & Log Outage Truncation"]
+    CheckLevel -- Yes (> 8.0 L) --> PausedMode["Enter BATCH_PAUSED_INSPECTION Mode\nRelays Remain OFF\nESP32 Core 1 Starts 30-Minute Auto-Resume Timer"]
     
     PausedMode --> BackendCalc["Backend/ESP32 Ingests Volume & Measures TDS\nCalculates Dynamic Deficit Concentrate mL"]
     BackendCalc --> UIModal["Display Intrusive Screen-Locking Modal on Kiosk\nSend Critical Alert to Telegram with Dashboard Deep Link"]
@@ -245,7 +245,7 @@ flowchart TD
     UIModal --> Decision{"Operator Action Within 30 Minutes?"}
     
     Decision -- "[Konfirmasi & Lanjutkan]" --> DeficitDose["Execute Calculated Deficit Concentrate Dose (mL)\nMix 120s -> Stabilize 15s -> Gate Evaluate"]
-    Decision -- "[Kuras Drum & Batalkan]" --> ManualAbort["Operator Drains Drum 2 to <= 5.0 L\nAborts Batch & Clears Fault"]
+    Decision -- "[Kuras Drum & Batalkan]" --> ManualAbort["Operator Drains Drum 2 to <= 8.0 L\nAborts Batch & Clears Fault"]
     Decision -- No Response (30 min timeout) --> AutoResumeCheck{"ESP32 Verifies Safety Preconditions:\n1. All 7 Interlocks Pass\n2. Calculated Deficit <= 300 mL\n3. Measured TDS <= Target + 50 ppm"}
     
     AutoResumeCheck -- Pass --> AutoResume["Auto-Execute Deficit Dose & Resume Batch"]
@@ -624,16 +624,16 @@ The master reference playbook detailing 15 concrete failure modes across firmwar
 
 | # | Trigger Event | Primary Detection Node | Immediate Firmware Reaction | Backend Reaction | UI / Kiosk UX | Operator Action & Recovery |
 | :-: | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1** | **TDS Out of Range at Gate** | ESP32 Core 1 (`GATE_EVALUATE`) | De-energizes distribution pump; latches `FAULT_PPM_OUT_OF_RANGE` in NVS; sounds 12V buzzer. | Records fault in DB; dispatches Critical alert to Telegram with deep link. | Intrusive red modal; `Reset Fault` button disabled (`volume > 5.0 L`). | Open manual gravity drain valve; flush Drum 2 to ditch $\le 5.0\text{ L}$; click `Reset Fault` (`D-012`). |
+| **1** | **TDS Out of Range at Gate** | ESP32 Core 1 (`GATE_EVALUATE`) | De-energizes distribution pump; latches `FAULT_PPM_OUT_OF_RANGE` in NVS; sounds 12V buzzer. | Records fault in DB; dispatches Critical alert to Telegram with deep link. | Intrusive red modal; `Reset Fault` button disabled (`volume > 8.0 L`). | Open manual gravity drain valve; flush Drum 2 to ditch $\le 8.0\text{ L}$; click `Reset Fault` (`D-012`). |
 | **2** | **Dry-Run During Distribution** | ESP32 Core 1 (`IL-02`) | Instantly de-energizes distribution pump in $< 500\text{ ms}$; latches `FAULT_DRY_RUN`; buzzer ON. (Debounced 5-sample median). | Records fault in DB; dispatches Critical alert. | Red dry-run banner; highlights tank card. | Verify dripper line discharge; click `Reset Fault` to return to `IDLE` (`D-003`). |
-| **3** | **Pre-Batch Drum 2 Not Empty** | ESP32 Core 1 (`IL-03`) | Rejects `START_BATCH` command; publishes QoS 1 ACK status `REJECTED`. FSM stays `IDLE`; zero buzzer; zero NVS latch. | Maps to 409 `INTERLOCK_REJECTED`. | Amber toast: "Drum 2 Belum Kosong (Terukur: X L). Kuras drum terlebih dahulu". | Drain residual liquid from Drum 2 via gravity valve until $\le 5.0\text{ L}$; re-trigger batch. |
+| **3** | **Pre-Batch Drum 2 Not Empty** | ESP32 Core 1 (`IL-03`) | Rejects `START_BATCH` command; publishes QoS 1 ACK status `REJECTED`. FSM stays `IDLE`; zero buzzer; zero NVS latch. | Maps to 409 `INTERLOCK_REJECTED`. | Amber toast: "Drum 2 Belum Kosong (Terukur: X L). Kuras drum terlebih dahulu". | Drain residual liquid from Drum 2 via gravity valve until $\le 8.0\text{ L}$; re-trigger batch. |
 | **4** | **Water Supply Failure (Early)** | ESP32 Core 1 (`IL-04`) | Closes fill solenoid in 90s; enters `PAUSED_FILL_NO_WATER`; buzzer OFF; amber lamp blinks. | Records warning; sends Telegram notification with deep link. | Amber toast: "Air Masuk Terhenti (< 1.0 L / 90s)". | Inspect source water pump and piping valves; tap `[Lanjutkan Pengisian]` (`TR-19`). Max 3 resumes. |
 | **5** | **Fill Timeout Exceeded (> 20m)** | ESP32 Core 1 (`IL-04`) | Closes fill solenoid at 20 min; enters `PAUSED_FILL_TIMEOUT`; buzzer OFF; pauses fill watchdog. | Records warning; sends Telegram notification with deep link. | Amber modal: "Waktu Pengisian Maksimum 20 Menit Terlampaui". | Inspect municipal line pressure; tap `[Lanjutkan Pengisian]` without draining (`TR-19`). Cumulative 20 min cap. |
 | **6** | **TDS Probe Disconnected/Short** | ESP32 Core 1 (`IL-05`) | Aborts batch; shuts fill solenoid; latches `FAULT_TDS_INVALID`; buzzer ON. | Records fault; sends Critical Telegram alert. | Red modal: "Sensor TDS Tidak Valid (< 50 atau > 2000 ppm)". | Inspect BNC connector, probe cable, and liquid immersion; run calibration wizard (`D-036`). |
 | **7** | **High Raw Water Baseline TDS** | ESP32 Core 1 (`IL-05`) | Aborts batch at `CHECK_BASE`; closes solenoid; latches `FAULT_BASE_TDS_HIGH`; buzzer ON. | Records fault; sends Critical Telegram alert. | Red modal: "Air Baku Tercemar (TDS >= 350 ppm)". | Inspect raw source filtration; flush water lines; drain Drum 2 to ditch. |
 | **8** | **FMCW Radar UART Silence (> 3s)**| ESP32 Core 1 (`IL-06`) | Cuts all active relays immediately; latches `FAULT_RADAR_OFFLINE`; buzzer ON. | Records fault; sends Critical Telegram alert. | Red banner: "Sensor Radar Level Terputus". `Reset Fault` rejected while radar is offline. | Inspect UART1 wiring (GPIO 17/18) and 5V power supply to radar board. |
 | **9** | **Physical E-Stop Mushroom Tripped**| ESP32 GPIO 21 ISR (`IL-07`) | De-energizes all relays in 0 ms (coil power) and $< 5\text{ ms}$ (software); turns on pilot lamp & buzzer. | Records fault; broadcasts E-Stop event to all clients. | Full-screen red hazard overlay: "DARURAT DIAKTIFKAN". | Twist-release mushroom button (`hw_estop_pressed = false`); drain Drum 2 if dirty; click `Reset Fault`. |
-| **10**| **Mid-Batch Power Outage Recovery** | ESP32 Core 1 Cold Boot | Detects active batch in NVS with level $> 5.0\text{ L}$; boots into `BATCH_PAUSED_INSPECTION`. Core 1 owns 30-min timer & deficit calculation. | Mirrors 30-min timer; displays recovery modal. | Screen-locking modal showing measured volume, PPM, and deficit mL. | Tap `[Konfirmasi & Lanjutkan]` to dose deficit, or let 30-min timer auto-resume if deficit $\le 300\text{ mL}$ and no salt spike (`D-013`). |
+| **10**| **Mid-Batch Power Outage Recovery** | ESP32 Core 1 Cold Boot | Detects active batch in NVS with level $> 8.0\text{ L}$; boots into `BATCH_PAUSED_INSPECTION`. Core 1 owns 30-min timer & deficit calculation. | Mirrors 30-min timer; displays recovery modal. | Screen-locking modal showing measured volume, PPM, and deficit mL. | Tap `[Konfirmasi & Lanjutkan]` to dose deficit, or let 30-min timer auto-resume if deficit $\le 300\text{ mL}$ and no salt spike (`D-013`). |
 | **11**| **Concentrate Drum 1 Starvation** | ESP32 Core 1 / Backend | Skips top-up dose; raises `STARVATION_SUSPECTED`; halts at `GATE_EVALUATE`. Clean water in Drum 2 retained. | Flags virtual stock depletion; sends Critical alert. | Amber modal: "Konsentrat Habis / Terbakar. Top-Up Dibatalkan". | Inspect Drum 1; prepare 20 L concentrate; confirm Refill Gate resetting stock (`D-022`, `D-025`), or drain Drum 2. |
 | **12**| **ESP32 Telemetry Silence / Offline**| Backend aiomqtt Ingest | Continues running batch autonomously on ESP32 Core 1. | Marks device `STALE` at 12s, `OFFLINE` at 20s; dispatches Telegram alert. | Yellow badge at 12s; red offline banner at 20s. Mutation controls locked, **Software E-Stop remains active**. | Inspect W5500 Ethernet cable, industrial switch power, and OT LAN IP `192.168.10.20`. |
 | **13**| **Edge Server Reboot Mid-Batch** | ESP32 Core 0 Spooler | FSM finishes batch autonomously; spools events into 500-slot PSRAM buffer. | Backend reboots; re-subscribes to MQTT; ingests backlog from PSRAM. | Kiosk Chromium reloads; resumes live telemetry snapshot in $< 500\text{ ms}$. | Zero operator action needed; agricultural process runs uninterrupted (`D-014`). |

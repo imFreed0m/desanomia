@@ -41,7 +41,7 @@ graph TD
 
 - **Zero Cyber Override:** No database role, configuration flag, debug parameter, or API override can disable or loosen the 7 autonomous firmware safety interlocks (`D-003`, `D-019`, `D-024`):
   1. *TDS Gate:* Distribution pump locked OFF if mean TDS is outside `[Target − 50 ppm, Target + 50 ppm]`.
-  2. *Radar Dry-Run Cutoff:* Distribution pump instantly de-energized if Drum 2 level $< 5.0\text{ L}$.
+  2. *Radar Dry-Run Cutoff:* Distribution pump instantly de-energized if Drum 2 level $< 6.0\text{ L}$ while commanded active (debounced $\le 200\text{ ms}$, `D-048`).
   3. *Batch Depletion Guard:* New batch command rejected if Drum 2 level $> 5.0\text{ L}$.
   4. *Dual-Stage Fill Guard:* Solenoid closed if early rise $< 1.0\text{ L}$ in 90 s or total fill $> 20\text{ min}$.
   5. *Water Baseline & Plausibility:* Abort if clean water $< 50\text{ ppm}$ or $> 2000\text{ ppm}$, or baseline $\ge 350\text{ ppm}$.
@@ -345,6 +345,7 @@ All MQTT commands from backend to firmware are published with **QoS 1** (At Leas
 
 - **ESP32 Circular RAM Cache:** Firmware maintains a 32-slot circular buffer of recently executed UUID `cmd_id`s in internal SRAM.
 - **NVS Persistent Recovery:** The most recently completed `last_executed_cmd_id` is committed to NVS flash upon state transition.
+- **MQTT Clean Session & 30-Second TTL (`D-048`):** The ESP32 connects with `clean_session = true`. All state-changing mutation commands (`START_BATCH`, `RESUME_FILL`, `PAUSE_BATCH`, `RESUME_BATCH`) must include a timestamp and are rejected if $\text{now} - \text{timestamp} > 30\text{ s}$ or if the SNTP clock is unsynchronized (`ERROR_CLOCK_UNSYNCED`). Emergency safety commands (`ESTOP`, `CANCEL`, `RESET_FAULT`) strictly bypass TTL and clock sync checks.
 - **Replay Discard:** If network jitter causes Mosquitto to re-transmit a QoS 1 command whose `cmd_id` matches an entry in RAM or NVS, the ESP32 firmware:
   1. Immediately replies with an `ACK` topic packet carrying the cached execution status.
   2. Discards the payload without re-triggering physical relays or advancing the FSM.
@@ -477,10 +478,11 @@ To support full Progressive Web App (PWA) offline asset caching and secure Servi
 
 ## 10. Emergency Incident Response & Runbooks
 
-### 10.1 Failsafe Watchdogs & Heartbeat Timeout
-The system incorporates layered hardware and software communication watchdogs:
-- **FreeRTOS Communication Watchdog (10 s):** ESP32 firmware monitors MQTT ping packets. If the edge server or Mosquitto broker ceases communication for $> 10\text{ s}$, Core 1 declares `COMMUNICATION_LOST` and immediately de-energizes all actuator relays to the safe unpowered state.
-- **Radar Sensor Watchdog (3 s):** If the FMCW radar sensor on UART1 stops transmitting valid frame bytes for $> 3\text{ s}$, the ESP32 latches `FAULT_RADAR_OFFLINE` and halts any active fluid filling or distribution (`IL-06`).
+### 10.1 Failsafe Watchdogs & Fieldbus Autonomy
+The system incorporates layered hardware and software safety mechanisms (`D-010`, `D-048`):
+- **Fieldbus Comm-Loss Autonomy (`D-010`, `D-048`):** If Ethernet or MQTT communication with the edge server drops during an active batch, the ESP32 does **NOT** de-energize relays. Core 1 continues executing the active batch to completion under local safety interlocks (`IL-01` through `IL-07`). The local pilot lamp blinks (1 Hz) to indicate loss of telemetry uplink, new batches are rejected, and telemetry/events spool to the 8MB Octal PSRAM ring buffer for playback upon reconnect.
+- **Task Watchdog Timer (TWDT - 3 s):** FreeRTOS Task Watchdog Timer supervises Core 1 control tasks (`fsm_task`, `actuator_task`, `sensor_task`). If any task hangs for $> 3\text{ s}$, TWDT panics and hard-resets the MCU (`CONFIG_ESP_TASK_WDT_PANIC=y`), floating GPIOs HIGH and de-energizing active-LOW relays via external 10 kΩ pull-ups.
+- **Radar Sensor Watchdog (`IL-06` - 3 s):** If the FMCW radar sensor on UART1 ceases valid frame transmission for $> 3\text{ s}$, the ESP32 latches `FAULT_RADAR_OFFLINE` and cuts all actuator relays immediately. Recovered via `RESET_FAULT` once frames resume stably for $\ge 3.0\text{ s}$ without requiring tank drain (`D-048`).
 
 ### 10.2 Cyber Incident Physical Isolation Runbook
 In the event of a suspected cyber compromise, unauthorized remote commands, or network intrusion:

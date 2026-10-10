@@ -49,7 +49,7 @@ Admin: full access including user management. Operator: control batches, schedul
 | **FR-07** | Batch History Table | Event & History | `Viewer+` | Paginated records with final TDS, volume, duration, status, and detail view |
 | **FR-08** | TDS History Chart | Event & History | `Viewer+` | Interactive Apache ECharts time-series telemetry per batch |
 | **FR-09** | ESP32 Connectivity Indicator | Sensing & Telemetry | `Viewer+` | Online/Offline status badge with last-seen heartbeat timestamp |
-| **FR-10** | Reset Fault (Gated Recovery) | Safety & Faults | `Operator+` | Clears latched faults; locked while Drum 2 level > 5.0 L (manual drain gate) |
+| **FR-10** | Reset Fault (Gated Recovery) | Safety & Faults | `Operator+` | Clears latched faults; locked while Drum 2 level > 8.0 L (manual drain gate) |
 | **FR-11** | Manual Actuator Control | Safety & Control | `Operator+` | Fine-grained dosing (+10 mL) and mixer timing; 7 safety interlocks |
 | **FR-12** | Schedule Management | Scheduling | `Operator+` | Full CRUD for autonomous fertigation schedules |
 | **FR-13** | Session Authentication & Login | Security & Auth | `All Roles` | Session login with role verification and kiosk touch PIN numpad |
@@ -77,7 +77,7 @@ Admin: full access including user management. Operator: control batches, schedul
 
 #### 1. Batch Automation & State Machine Lifecycle
 - **FR-01: Start Batch** `[Operator+]`  
-  Initiate batch sequence with mandatory confirmation dialog. Gated by pre-flight checks: disabled if FSM is not `IDLE`, Drum 2 level > 5.0 L, or ESP32 is offline.
+  Initiate batch sequence with mandatory confirmation dialog. Gated by pre-flight checks: disabled if FSM is not `IDLE`, Drum 2 level > 8.0 L, or ESP32 is offline.
 - **FR-02: Live FSM State Across 12 Lifecycle States** `[Viewer+]`  
   Real-time tracking and visualization across all 12 discrete states: `IDLE` → `FILLING_WATER` → `CHECK_BASE` → `DOSING` → `MIXING` → `STABILIZING` → `MEASURING_TDS` → `GATE_EVALUATE` → `TOPUP_DOSING` → `RECOVERY_MIX_EVALUATE` → `DISTRIBUTING` → `BATCH_DEPLETED`.
 - **FR-19: Resume Fill Control** `[Operator+]`  
@@ -89,7 +89,7 @@ Admin: full access including user management. Operator: control batches, schedul
 
 #### 2. Safety Interlocks, Alarms & Fault Management
 - **FR-10: Reset Fault & Gated Recovery** `[Operator+]`  
-  Clears latched faults (confirmation required). Enforced by Gated Fault Reset protocol locked while Drum 2 level > 5.0 L to ensure out-of-range solution is physically drained via manual gravity valve before clearing.
+  Clears latched faults (confirmation required). Enforced by Gated Fault Reset protocol locked while Drum 2 level > 8.0 L to ensure out-of-range solution is physically drained via manual gravity valve before clearing.
 - **FR-11: Manual Actuator Control** `[Operator+]`  
   Fine-grained manual dosing in +10 mL increments and timed mixer run per-second on `/manual`; strictly subject to the 7 firmware safety interlocks; disabled during active batch FSM.
 - **FR-17: Emergency Stop (Dual E-Stop UX)** `[Operator+]`  
@@ -123,7 +123,7 @@ Admin: full access including user management. Operator: control batches, schedul
 - **FR-18: Concentrate Virtual Stock Tracking** `[Operator+]`  
   Operator records initial refill of 20 L / 2 kg NPK fertilizer; system tracks remaining stock by deducting actual batch injection history after each distribution run; alerts operator when estimated remaining stock ≤ 2 batches.
 - **FR-23: Guided Sensor Calibration Wizard** `[Operator+]`  
-  Accessible on `/manual`; guides step-by-step TDS probe detaching, requiring Drum 2 ≤ 5.0 L drained hold, real-time ADC stability reading, 1413 µS/cm buffer immersion, baseline raw water PPM calculation, and committing calibrated slope/offset to ESP32 NVS with audit logging.
+  Accessible on `/manual`; guides step-by-step TDS probe detaching, requiring Drum 2 ≤ 8.0 L drained hold, real-time ADC stability reading, 1413 µS/cm buffer immersion, baseline raw water PPM calculation, and committing calibrated slope/offset to ESP32 NVS with audit logging.
 - **FR-24: Named Recipe Presets Library** `[Operator+]`  
   Accessible on `/recipes`; enables managing named crop growth phase presets such as *Vegetatif*, *Generatif*, and *Panen*, modifying default targets, and archiving presets; starting a batch allows 1-click preset selection or custom target entry; permanently snapshots preset name and target band to PostgreSQL batch records for agricultural traceability.
 
@@ -157,7 +157,7 @@ Per-zone valve control, continuous multi-pass closed-loop dosing or PID tuning, 
 
 1. Zero batches distributed outside the recipe TDS gate band [Target ± 50 ppm] (1200–1300 ppm for the default recipe).
 2. Emergency Stop cutoff latency: hardware NC trip de-energizes relays immediately; software E-stop executes relay cutoff on ESP32 in < 100 ms.
-3. Dry-run cutoff protection: Distribution pump shutoff triggered immediately upon radar frame reading level < 5.0 L (firmware execution < 50 ms after sensor frame ingestion; total physical response < 500 ms given UART update period), safely backed by the 5.0 L bottom suction sump buffer to prevent pump cavitation.
+3. Dry-run cutoff protection: Distribution pump shutoff triggered immediately upon radar frame reading level < 6.0 L while pump is commanded active (debounced over 2 frames, response ≤ 200 ms, D-048), safely backed by the 5.0 L bottom suction sump buffer to prevent pump cavitation.
 4. Zero double-dispatch on hardware commands (enforced via Pessimistic UI button disabling and unique `cmd_id`).
 5. Zero critical event data loss during network outages (firmware ring buffer retains state transitions and faults during LAN disconnects; offline alert queue flushes with 100% fidelity upon internet restoration).
 6. Dashboard telemetry latency < 2 s over local LAN.
@@ -166,6 +166,6 @@ Per-zone valve control, continuous multi-pass closed-loop dosing or PID tuning, 
 
 ## Operational assumptions and policies [SPEC]
 
-1. **Unattended Batch Scheduling:** Scheduled batches trigger autonomously without mandatory operator presence, strictly guarded by the 7 firmware safety interlocks (Distribution Drum level ≤ 5.0 L, clean water baseline within 50–350 ppm, no active faults, and ESP32 online).
+1. **Unattended Batch Scheduling:** Scheduled batches trigger autonomously without mandatory operator presence, strictly guarded by the 7 firmware safety interlocks (Distribution Drum level ≤ 8.0 L, clean water baseline within 50–350 ppm, no active faults, and ESP32 online).
 2. **Concentrate Drum (Drum 1) Sensing & Starvation Detection:** Concentrate Drum (Drum 1) has no hardware level sensor and is manually prepared (2 kg fertilizer dissolved in 20 L water). Liquid depletion is detected inferentially: the system calculates dosing based on empirical injection calibration (`DOSE_TEST_RESULT.md`). If the post-dosing TDS exhibits a significant negative anomaly (e.g., measuring ~1000 ppm instead of the expected ~1250 ppm, indicating partial or empty concentrate suction), the system triggers a warning alert prompting the operator to inspect Drum 1 for concentrate starvation.
-3. **Gate Failure & Recovery Protocol:** If measured TDS is outside the [Target ± 50 ppm] gate band (1200–1300 ppm for the default recipe) after single-pass top-up recovery (or if initial TDS exceeds Target + 50 ppm), the distribution pump is locked OFF and `FAULT_PPM_OUT_OF_RANGE` is latched. Recovery requires physical drainage via the manual gravity drain valve to ≤ 5.0 L before the UI unlocks the "Reset Fault" button (Gated Fault Reset protocol).
+3. **Gate Failure & Recovery Protocol:** If measured TDS is outside the [Target ± 50 ppm] gate band (1200–1300 ppm for the default recipe) after single-pass top-up recovery (or if initial TDS exceeds Target + 50 ppm), the distribution pump is locked OFF and `FAULT_PPM_OUT_OF_RANGE` is latched. Recovery requires physical drainage via the manual gravity drain valve to ≤ 8.0 L before the UI unlocks the "Reset Fault" button (Gated Fault Reset protocol).

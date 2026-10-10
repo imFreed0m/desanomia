@@ -269,7 +269,7 @@ CREATE TABLE faults (
     cleared_by UUID NULL REFERENCES users(id),
     reset_cmd_id UUID NULL,
     drum2_volume_at_raise NUMERIC(6, 2) NULL,
-    drum2_volume_at_clear NUMERIC(6, 2) NULL CHECK (drum2_volume_at_clear IS NULL OR drum2_volume_at_clear <= 5.00),
+    drum2_volume_at_clear NUMERIC(6, 2) NULL CHECK (drum2_volume_at_clear IS NULL OR drum2_volume_at_clear <= 8.00),
     detail JSONB NULL
 );
 
@@ -404,7 +404,7 @@ CREATE TABLE settings (
 8. **Virtual Stock Tracking & Refill Gate:**
    Concentrate Drum (Drum 1 / K1–K5) virtual stock in `concentrate_stock` is initialized at 20,000.00 mL (20.0 L). Every completed batch deducts `dose_ml + topup_ml`. If stock drops to $\le 3000.00\text{ mL}$ ($\le 2\text{ batches}$), the system raises a Warning notification. If depleted, batch initiation is interlocked until the operator performs the physical refill and confirms via `Konfirmasi Isi Ulang`, which resets `current_volume_ml` to 20,000.00 mL and logs `CONCENTRATE_REFILLED` in `audit_logs`.
 9. **Gated Fault Reset Verification:**
-   When a fault is cleared, `faults.drum2_volume_at_clear` records the tank level confirmed by radar. The check constraint `drum2_volume_at_clear <= 5.00` enforces that no fault can be marked cleared without verifying that contaminated solution was physically drained via gravity to the waste ditch.
+   When a fault is cleared, `faults.drum2_volume_at_clear` records the tank level confirmed by radar. The check constraint `drum2_volume_at_clear <= 8.00` enforces that no fault can be marked cleared without verifying that contaminated solution was physically drained via gravity to the waste ditch.
 10. **Store-and-Forward Offline Resilience:**
     During 4G WAN dropouts, critical and warning alerts are committed to `alert_queue` with `status = 'pending'`. A background worker polls WAN connectivity and flushes pending alerts in chronological order with original timestamps upon reconnection.
 11. **Settings Synchronization Authority:**

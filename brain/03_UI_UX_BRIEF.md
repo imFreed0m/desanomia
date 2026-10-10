@@ -337,7 +337,7 @@ Modals leverage the modern HTML5 `<dialog>` API with `::backdrop` styling for na
 - **Pause Mode Content:** Real-time volume in Drum 2, measured PPM, calculated concentrate deficit (mL) required to reach target PPM, and single confirmation resume button.
 - **E-Stop Recovery Checklist:**
   - Live hardware switch status check: If `hw_estop_pressed: true`, displays flashing yellow-red stripe bar: *"TOMBOL JAMUR FISIK MASIH TERTEKAN — PUTAR UNTUK MELEPAS"*.
-  - Drain condition check: If Drum 2 > 5.0 L, displays amber lock: *"Kuras drum hingga ≤ 5.0 L sebelum me-reset fault"*.
+  - Drain condition check: If Drum 2 > 8.0 L, displays amber lock: *"Kuras drum hingga ≤ 8.0 L sebelum me-reset fault"* (or select Tiered Recovery, `D-048`).
   - Reset button remains strictly locked until both hardware conditions report green.
 
 ---

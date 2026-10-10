@@ -268,7 +268,7 @@ The Desanomia dashboard interface is composed of eighteen signature industrial c
 - **Dual Hardware Interlock Gating (`TR-10`, `D-012`, `D-019`):**
   The Reset Fault button is **disabled and visually locked** until both hardware preconditions evaluate to `true` in live telemetry:
   1. **Physical E-Stop Switch Twist-Released:** Telemetry must report `hw_estop_pressed: false`. If switch is still physically depressed, the button displays: `"TOMBOL JAMUR MASIH TERTEKAN - PUTAR UNTUK MELEPAS"`.
-  2. **Drum 2 Fluid Level Cleared:** Level sensor must report fluid volume $\le 5.0\text{ L}$. If fluid remains in Drum 2, the button displays: `"KURAS DRUM HINGGA ≤ 5.0 L SEBELUM RESET"`.
+  2. **Drum 2 Fluid Level Cleared:** Level sensor must report fluid volume $\le 8.0\text{ L}$. If fluid remains in Drum 2, the button displays: `"KURAS DRUM HINGGA ≤ 8.0 L SEBELUM RESET"` (or operator selects Tiered Recovery, `D-048`).
 - **Friction Confirmation:** When both preconditions are satisfied, tapping the button opens a modal requiring password/PIN confirmation before dispatching `POST /api/v1/commands/reset-fault`.
 
 ### 4.10 UI-10: Batch History Table

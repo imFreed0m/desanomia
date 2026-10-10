@@ -116,7 +116,7 @@ To prevent HTTP gateway timeouts caused by physical FreeRTOS task scheduling or 
 | `POST /batches/{id}/abort` | `O` | `202 Accepted`| Aborts running batch, de-energizes all relays immediately. Body `{ "confirm": true }`. |
 | **Faults & Safety Gating (`/faults`)** | | | |
 | `GET /faults` | `V` | `200 OK` | Active latched faults and historical clearance log. |
-| `POST /faults/reset` | `O` | `202 Accepted`| Dispatches `RESET_FAULT`. **Firmware Gated:** Rejects if Drum 2 $> 5.0\text{ L}$ or E-Stop open. |
+| `POST /faults/reset` | `O` | `202 Accepted`| Dispatches `RESET_FAULT`. **Firmware Gated:** Rejects if Drum 2 $> 8.0\text{ L}$ (for IL-01) or E-Stop open (`D-048`). |
 | **Actuators & Manual Controls (`/actuators`)** | | | |
 | `POST /actuators/{name}` | `O` | `202 Accepted`| Manual relay jog/toggle (e.g. +10 mL dosing). **Gated:** Rejects (409) if FSM is NOT `IDLE`. |
 | `POST /actuators/estop` | `O` | `202 Accepted`| Software emergency stop trigger. De-energizes all relays immediately (`< 100\text{ ms}`). |
@@ -366,7 +366,7 @@ Every command carries a UUIDv4 `cmd_id` and strict payload typing:
 - `START_BATCH`: Initiates active preparation FSM (`batch_id`, `recipe_id`, `target_tds_ppm`, `tank_pair_id`).
 - `RESUME_FILL`: Re-opens clean water fill valve following `FAULT_NO_WATER_SUPPLY` or `FAULT_FILL_TIMEOUT`.
 - `RESUME_DEFICIT_BATCH`: Acknowledges Pause Mode (`BATCH_PAUSED_INSPECTION`) to execute calculated deficit dosing (`D-013`).
-- `RESET_FAULT`: Clears latched fault (validated against Drum 2 $\le 5.0\text{ L}$ and `hw_estop_pressed == false`).
+- `RESET_FAULT`: Clears latched fault (validated against Drum 2 $\le 8.0\text{ L}$ for chemical faults, or physical switch release, `D-048`).
 - `ESTOP`: Software Emergency Stop trigger de-energizing all relays in $< 5\text{ ms}$.
 - `MANUAL_ACTUATOR`: Executes discrete manual bump (`{"actuator": "dosing_pump", "duration_ms": 1070}` for +10 mL, or `{"actuator": "mixing_pump", "duration_ms": 15000}`).
 - `CALIBRATE_SENSOR`: Commits calibrated slope and offset to ESP32 NVS (`{"sensor": "tds", "slope": 1.1245, "offset": 0.0421, "baseline_offset": 142.0}`).
@@ -500,7 +500,7 @@ All REST HTTP 4xx and 5xx responses strictly adhere to the unified JSON error en
 | **`401`** | `UNAUTHENTICATED` | Session cookie expired, missing, or invalid. |
 | **`403`** | `FORBIDDEN` | Insufficient role (e.g. Viewer attempting batch initiation). |
 | **`404`** | `NOT_FOUND` | Referenced entity ID (`batch_id`, `recipe_id`, `schedule_id`) does not exist. |
-| **`409`** | `INTERLOCK_REJECTED` | Hardware safety interlock rejected command (e.g. Drum 2 $> 5.0\text{ L}$ on start). |
+| **`409`** | `INTERLOCK_REJECTED` | Hardware safety interlock rejected command (e.g. Drum 2 $> 8.0\text{ L}$ on start, `D-048`). |
 | **`409`** | `INVALID_STATE` | Operation invalid in active FSM state (e.g. manual relay jog during active batch). |
 | **`409`** | `DEVICE_OFFLINE` | ESP32-S3 microcontroller is offline; MQTT command cannot be dispatched. |
 | **`422`** | `VALIDATION_ERROR` | Pydantic schema validation failure (e.g. `target_tds` out of allowable bounds). |

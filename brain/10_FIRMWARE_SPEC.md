@@ -3,7 +3,7 @@
 > **System:** DESANOMIA Greenhouse Automated Fertigation System  
 > **Platform:** ESP32-S3 N16R8 Edge Microcontroller (16MB Quad SPI Flash, 8MB Octal PSRAM)  
 > **Toolchain:** PlatformIO / Espressif 32 (ESP-IDF / FreeRTOS SMP / C++17)  
-> **Authority:** Aligned with [00_MASTER_RULES.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/00_MASTER_RULES.md), [01_PRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/01_PRD.md), [02_APPFLOW.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/02_APPFLOW.md), [04_TRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/04_TRD.md), [05_ARCHITECTURE.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/05_ARCHITECTURE.md), [06_DATA_MODEL.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/06_DATA_MODEL.md), [07_DATA_SOURCES.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/07_DATA_SOURCES.md), [08_SECURITY.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/08_SECURITY.md), [09_ERROR_HANDLING.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/09_ERROR_HANDLING.md), [18_DECISIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md), and [SPEC.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/docs/SPEC.md). [SPEC]
+> **Authority:** Aligned with [00_MASTER_RULES.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/00_MASTER_RULES.md), [01_PRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/01_PRD.md), [02_APPFLOW.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/02_APPFLOW.md), [04_TRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/04_TRD.md), [05_ARCHITECTURE.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/05_ARCHITECTURE.md), [06_DATA_MODEL.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/06_DATA_MODEL.md), [07_DATA_SOURCES.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/07_DATA_SOURCES.md), [08_SECURITY.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/08_SECURITY.md), [09_ERROR_HANDLING.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/09_ERROR_HANDLING.md), [18_DECISIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md) (D-003, D-010, D-019, D-045, D-047, D-048), and [20_GLOSSARY.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/20_GLOSSARY.md). [SPEC]
 
 ---
 
@@ -19,11 +19,11 @@ flowchart TD
     classDef ipc fill:#042f2e,stroke:#14b8a6,stroke-width:2px,color:#fff;
 
     subgraph Core1Domain ["Core 1: Real-Time Safety & Control Domain (240 MHz)"]
-        FSM["fsm_task (Priority 5 / 20 Hz)\n12 Fertigation Lifecycle States"]:::core1
+        FSM["fsm_task (Priority 5 / 20 Hz)\n14 Fertigation Lifecycle States"]:::core1
         Interlocks["safety_interlock_matrix\nSynchronous 50 ms Evaluation Loop"]:::core1
-        SensorTask["sensor_task (Priority 4 / 10 Hz)\nTrimmed Median DSP & Radar UART Parser"]:::core1
+        SensorTask["sensor_task (Priority 4 / 10 Hz)\nTrimmed Median DSP, DS18B20 & Radar UART"]:::core1
         ActuatorTask["actuator_task (Priority 5 / Event-Driven)\nSole Hardware Owner of Output Registers"]:::core1
-        EStopISR["emergency_stop_isr (GPIO 21 Falling Edge)\nDirect Task Notification (< 5 ms)"]:::core1
+        EStopISR["emergency_stop_isr (GPIO 21 Falling Edge)\nIRAM_ATTR Direct GPIO Write (< 1 us)"]:::core1
     end
 
     subgraph InterCoreIPC ["Inter-Core Zero-Heap IPC Primitives"]
@@ -36,21 +36,27 @@ flowchart TD
 
     subgraph Core0Domain ["Core 0: Network & Buffer Domain (240 MHz)"]
         W5500Task["w5500_driver_task (Priority 3)\nSPI Ethernet Controller (192.168.10.20)"]:::core0
-        MQTTTask["mqtt_task (Priority 2)\nMosquitto Client (192.168.10.1:1883)\nQoS 1 Idempotency RAM Cache"]:::core0
-        PSRAMSpooler["psram_spooler_task (Priority 1)\n500-Event Octal PSRAM Ring Buffer"]:::core0
-        SNTPTask["sntp_task (Priority 1 / Periodic)\n60-Min Sync with Chrony Stratum-10 NTP"]:::core0
-        Watchdog["twdt_monitor_task (Priority 6)\nFreeRTOS Task Watchdog Supervisor"]:::core0
+        MQTTTask["mqtt_task (Priority 2 / Event-Driven)\nesp-mqtt Event Bridge\nClean Session + 30s TTL + Idempotency Cache"]:::core0
+        PSRAMSpooler["psram_spooler_task (Priority 1 / Event-Driven)\n500-Event Octal PSRAM Ring Buffer"]:::core0
+    end
+
+    subgraph NativeIDF ["ESP-IDF Background Services"]
+        TWDT["ESP-IDF Task Watchdog (TWDT)\n3s Panic Reboot (Core 1 Supervised)"]:::core1
+        SNTP["esp_sntp Background Daemon\nHourly Sync with Chrony (192.168.10.1:123)"]:::core0
     end
 
     subgraph PhysicalHW ["Greenhouse Hardware & Physical Fieldbus"]
-        AFE["DFRobot Analog TDS Probe (ADC1_CH0)"]:::hardware
-        Radar["60 GHz FMCW Radar Level Sensor (UART1)"]:::hardware
-        EStopSwitch["NC Twist Mushroom Switch Contact (GPIO 21)"]:::hardware
-        Relays["4 Active-LOW Optoisolated Relays (GPIO 4-7)"]:::hardware
+        AFE["DFRobot Analog TDS Probe (ADC1_CH0, GPIO 1)"]:::hardware
+        TempSens["DS18B20 Water Temperature (OneWire, GPIO 8)"]:::hardware
+        Radar["60 GHz FMCW Radar Level Sensor (UART1, GPIO 17/18)"]:::hardware
+        EStopSwitch["NC Twist Mushroom Switch (GPIO 21)"]:::hardware
+        FloatSwitch["NC Mechanical Float Switch (Series AC Backstop)"]:::hardware
+        Relays["4 Active-LOW Relays with 10k Pull-Ups (GPIO 4-7)"]:::hardware
         Alarms["DC 12V Pilot Lamp & Buzzer (GPIO 2-3)"]:::hardware
     end
 
     AFE --> SensorTask
+    TempSens --> SensorTask
     Radar --> SensorTask
     EStopSwitch --> EStopISR
     EStopISR --> ActuatorTask
@@ -61,6 +67,7 @@ flowchart TD
     CmdQueue --> ActuatorTask
     ActuatorTask --> Relays
     ActuatorTask --> Alarms
+    FloatSwitch -.-> Relays
 
     FSM --> MQTTTxQueue
     MQTTTxQueue --> MQTTTask
@@ -75,35 +82,39 @@ All task stacks and control structures are allocated statically in `.bss` memory
 
 | Task Name | Core Affinity | Priority | Execution Rate | Stack Size (Bytes) | Allocation Type | Primary Functional Responsibility |
 | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| `fsm_task` | Core 1 | 5 | 20 Hz (50 ms) | 8,192 | `xTaskCreateStaticPinnedToCore` | 12-state fertigation state machine, recipe timing, and deficit calculation. |
-| `actuator_task` | Core 1 | 5 | Event-Driven | 4,096 | `xTaskCreateStaticPinnedToCore` | Sole hardware owner of GPIO output registers; enforces mutual exclusion. |
-| `sensor_task` | Core 1 | 4 | 10 Hz (100 ms) | 4,096 | `xTaskCreateStaticPinnedToCore` | ADC1_CH0 oversampling with trimmed median filter; radar UART1 parsing. |
+| `fsm_task` | Core 1 | 5 | 20 Hz (50 ms) | 8,192 | `xTaskCreateStaticPinnedToCore` | 14-state fertigation state machine, recipe timing, deficit dosing, and safety interlocks. Subscribed to TWDT. |
+| `actuator_task` | Core 1 | 5 | Event-Driven | 4,096 | `xTaskCreateStaticPinnedToCore` | Sole hardware owner of GPIO output registers; enforces mutual exclusion and dead-band delays. Subscribed to TWDT. |
+| `sensor_task` | Core 1 | 4 | 10 Hz (100 ms) | 4,096 | `xTaskCreateStaticPinnedToCore` | ADC1_CH0 trimmed median filtering, 1 Hz DS18B20 OneWire acquisition, radar UART1 parsing. Subscribed to TWDT. |
 | `w5500_driver_task`| Core 0 | 3 | Interrupt/10ms | 4,096 | `xTaskCreateStaticPinnedToCore` | W5500 SPI Ethernet bus handler and hardware interrupt ISR processor. |
-| `mqtt_task` | Core 0 | 2 | 100 Hz (10 ms) | 8,192 | `xTaskCreateStaticPinnedToCore` | Mosquitto connection, QoS 1 ACK processing, and 32-slot idempotency cache. |
-| `psram_spooler_task`| Core 0 | 1 | Event-Driven | 4,096 | `xTaskCreateStaticPinnedToCore` | Offlines event journaling into 8MB Octal PSRAM ring buffer. |
-| `sntp_task` | Core 0 | 1 | Hourly (3600s) | 2,048 | `xTaskCreateStaticPinnedToCore` | Syncs internal clock via SNTP with Chrony on Beelink (`192.168.10.1:123`, `D-020`). |
-| `twdt_monitor_task` | Core 0 | 6 | 1 Hz (1000 ms) | 2,048 | `xTaskCreateStaticPinnedToCore` | FreeRTOS Task Watchdog Timer (TWDT) supervising core health. |
+| `mqtt_task` | Core 0 | 2 | Event-Driven | 8,192 | `xTaskCreateStaticPinnedToCore` | Event bridge wrapping `esp-mqtt`. Enforces `clean_session = true`, 30s command TTL, and 32-slot idempotency cache. |
+| `psram_spooler_task`| Core 0 | 1 | Event-Driven | 4,096 | `xTaskCreateStaticPinnedToCore` | Offlines event journaling into 8MB Octal PSRAM ring buffer during network disconnections. |
+
+> [!NOTE] Native Services (Pruned Tasks)
+> - **Task Watchdog (TWDT):** Built-in ESP-IDF Task Watchdog (`esp_task_wdt`) replaces dedicated monitor tasks. Configured with a 3-second timeout and panic reboot (`CONFIG_ESP_TASK_WDT_PANIC=y`). Tasks `fsm_task`, `actuator_task`, and `sensor_task` subscribe directly and kick the watchdog in each cycle.
+> - **Time Synchronization (SNTP):** Built-in `esp_sntp` background service operates automatically inside lwIP. Synchronizes with Chrony on Beelink (`192.168.10.1:123`, `D-020`) every 60 minutes.
 
 ---
 
-## 2. Zero-Heap Allocation & Deterministic Memory Discipline
+## 2. Zero-Heap Allocation & Scoped Deterministic Memory Discipline
 
-Heap fragmentation in embedded C/C++ firmware leads to sudden runtime crashes and panic reboots after days of continuous operation. Desanomia strictly mandates a **Zero-Heap Rule** inside all recurring control loops.
+Heap fragmentation in embedded C/C++ firmware causes sporadic allocation failures and watchdog panics during long continuous runs. Desanomia strictly mandates a **Zero-Heap Rule in Control Loops**.
 
-### 2.1 Boot-Time Static Allocation Rules
-1. **Static Tasks & Queues:** Dynamic `xTaskCreate()` and `xQueueCreate()` are forbidden. All tasks use `xTaskCreateStaticPinnedToCore()` with statically declared stack arrays (`StackType_t`) and control blocks (`StaticTask_t`).
-2. **Fixed Buffers:** Telemetry payloads, ACK responses, and event logs are formatted into statically allocated `char[512]` buffers using `snprintf()`.
-3. **Prohibited C++ Constructs in Control Loops:**
+### 2.1 Boot-Time Initialization vs Recurring Control Loops
+1. **Scoped Rule:** Dynamic allocations (`malloc`, `calloc`, `new`, `xTaskCreate`, `xQueueCreate`) are strictly permitted **only during the boot initialization phase (`app_main()`)**, as required by third-party drivers (`esp-mqtt`, `lwIP`, `esp_eth_spi`).
+2. **Strictly Prohibited in Recurring Control Loops Post-Initialization:**
    - NO `malloc()`, `calloc()`, `realloc()`, or `free()`.
    - NO C++ `new` or `delete` operators.
    - NO dynamic `std::string` concatenation or resizing.
    - NO dynamic containers (`std::vector::push_back`, `std::map`, `std::list`).
    - NO dynamic Arduino `String` class usage.
-   - NO dynamic JSON DOM allocations (e.g. `DynamicJsonDocument`); all JSON serialization uses fixed stack-allocated schemas.
+   - NO dynamic JSON DOM allocations (e.g. `DynamicJsonDocument`); all JSON serialization uses fixed static stack/global buffers formatted with `snprintf()`.
+3. **CI Enforcement & Telemetry Audit:**
+   - Pre-commit and CI scripts run a static grep checking for `malloc`, `calloc`, `new `, and dynamic containers inside `firmware/src/fsm/`, `firmware/src/safety/`, and `firmware/src/actuators/`.
+   - Firmware publishes `heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL)` in 1 Hz telemetry. Backend alerts if minimum free internal SRAM drops below 40 KB.
 
 ---
 
-## 3. Conflict-Free GPIO Mapping & Bus Protection (Frozen Invariant)
+## 3. Conflict-Free GPIO Mapping & Hardware Safety Layer (Frozen Invariant)
 
 Hardware pin assignments for the ESP32-S3 N16R8 are frozen to prevent electrical contention with native USB-JTAG controllers and internal Octal memory buses:
 
@@ -111,11 +122,12 @@ Hardware pin assignments for the ESP32-S3 N16R8 are frozen to prevent electrical
 | :--- | :--- | :--- | :--- |
 | **GPIO 1** | Analog TDS Probe Input | Analog Input (ADC1_CH0, 0–3.3V) | Connected to DFRobot Gravity Analog TDS AFE conditioner board. |
 | **GPIO 2** | Panel Acoustic Piezo Buzzer | Digital Output (Active HIGH via NPN Transistor) | Dedicated to error and fault annunciation; moved from GPIO 20 (`USB_D+`). |
-| **GPIO 3** | Red Industrial Panel Pilot Lamp | Digital Output (Active HIGH via NPN Transistor) | Dedicated to latched fault indicator; moved from GPIO 19 (`USB_D-`). |
-| **GPIO 4** | Relay 1: Clean Water Fill Solenoid | Digital Output (Active LOW Optoisolated) | Interlock `IL-04` & `IL-05` cutoff. Solenoid rated AC 220V / 10W. |
-| **GPIO 5** | Relay 2: Peristaltic Dosing Pump | Digital Output (Active LOW Optoisolated) | Concentrate dosing protection. DC 12V / 1.5A peristaltic motor. |
-| **GPIO 6** | Relay 3: Submersible Mixing Pump | Digital Output (Active LOW Optoisolated) | Circulation & homogenization. AC 220V / 25W submersible pump. |
-| **GPIO 7** | Relay 4: High-Pressure Distribution Pump | Digital Output (Active LOW Optoisolated) | Interlock `IL-01`, `IL-02`, `IL-07` cutoff. AC 220V / 125W pump. |
+| **GPIO 3** | Red Industrial Panel Pilot Lamp | Digital Output (Active HIGH via NPN Transistor) | Strapping pin on ESP32-S3. Base pulldown resistor keeps pin LOW at reset to guarantee normal boot. |
+| **GPIO 4** | Relay 1: Clean Water Fill Solenoid | Digital Output (Active LOW Optoisolated) | Interlock `IL-04` & `IL-05` cutoff. Solenoid rated AC 220V / 10W. External 10k pull-up to logic VCC. |
+| **GPIO 5** | Relay 2: Peristaltic Dosing Pump | Digital Output (Active LOW Optoisolated) | Concentrate dosing protection. DC 12V / 1.5A peristaltic motor. External 10k pull-up to logic VCC. |
+| **GPIO 6** | Relay 3: Submersible Mixing Pump | Digital Output (Active LOW Optoisolated) | Circulation & homogenization. AC 220V / 25W submersible pump. External 10k pull-up to logic VCC. |
+| **GPIO 7** | Relay 4: High-Pressure Distribution Pump | Digital Output (Active LOW Optoisolated) | Interlock `IL-01`, `IL-02`, `IL-07` cutoff. AC 220V / 125W pump. External 10k pull-up to logic VCC. |
+| **GPIO 8** | DS18B20 Water Temperature Sensor | Digital Input/Output (OneWire Bus) | Dedicated water temperature acquisition for ATC (`D-048`). External 4.7 kΩ pull-up to 3.3V. |
 | **GPIO 10** | W5500 SPI Chip Select (CS) | Digital Output (Active LOW) | Dedicated SPI bus for W5500 Ethernet module. |
 | **GPIO 11** | W5500 SPI MOSI | Digital Output (SPI Bus) | High-speed SPI data transmission to W5500. |
 | **GPIO 12** | W5500 SPI MISO | Digital Input (SPI Bus) | High-speed SPI data reception from W5500. |
@@ -129,7 +141,12 @@ Hardware pin assignments for the ESP32-S3 N16R8 are frozen to prevent electrical
 | **GPIO 21** | Emergency Stop Sensing Contact | Digital Input (Pulled-Up, RC Filter $\le 1\text{ ms}$) | Secondary NC contact sensing. Active open indicates pressed switch (`D-019`). |
 | **GPIO 35–37**| **Internal Octal PSRAM Bus** | **Reserved Memory Bus** | **STRICTLY FORBIDDEN FOR EXTERNAL GPIO ON N16R8 MODULE.** |
 
-### 3.1 Actuator Hardware Register Mutual Exclusion
+### 3.1 Hardware Fail-Safe Protections (Hung CPU & High-Z Defense)
+1. **Relay Board Pull-Up Resistors:** Each active-LOW relay input (GPIO 4–7) is equipped with a hardware external 10 kΩ pull-up resistor to the relay module's logic VCC (+5V or +3.3V). During MCU reset, bootloader execution, or high-Z unconfigured states, relay inputs are pulled HIGH, guaranteeing all relays remain mechanically DE-ENERGIZED (OFF).
+2. **Watchdog Panic Reset:** If CPU Core 1 locks or hangs, the FreeRTOS Task Watchdog Timer (TWDT) panics after 3 seconds (`CONFIG_ESP_TASK_WDT_PANIC=y`), issuing a hardware system reboot. The reboot transitions GPIOs to high-Z, immediately de-energizing relays via the external pull-ups.
+3. **Hardware NC Float Switch Backstop:** An independent mechanical Normally Closed (NC) liquid level float switch is installed at the bottom of Drum 2 (mounted at 6.0 L height) and wired in series with the AC power supply to Relay 4 (distribution pump). If the water level drops below 6.0 L, the float switch mechanically breaks the AC power circuit to the pump, providing an un-bypassable hardware dry-run cutoff even if firmware, radar, MCU, or relay contacts freeze.
+
+### 3.2 Actuator Hardware Register Mutual Exclusion
 The `actuator_task` enforces mutual exclusion at the register write level to prevent incompatible hydraulic operations:
 
 ```cpp
@@ -159,29 +176,51 @@ void update_relays_safe(uint8_t desired_relay_state) {
 
 ## 4. The Seven Autonomous Safety Interlocks (`IL-01` to `IL-07`)
 
-The 7 safety interlocks execute autonomously on Core 1 inside the 20 Hz loop before any actuator state is altered. They cannot be bypassed in either AUTO or MANUAL mode.
+The 7 safety interlocks execute autonomously on Core 1 inside the 20 Hz loop before any actuator state is altered. They cannot be bypassed in either AUTO or MANUAL mode (`D-003`, `D-048`).
 
 | Interlock ID | Interlock Name | Sampling Window / Threshold | Latched Fault Code | Hardware Reaction | Clearing Precondition (Gated Reset) |
 | :---: | :--- | :--- | :--- | :--- | :--- |
-| **`IL-01`** | **TDS Safety Gate** | Final mean TDS $< (\text{Target} - 50\text{ ppm})$ or $> (\text{Target} + 50\text{ ppm})$ after top-up dose. | `FAULT_PPM_OUT_OF_RANGE` | Distribution pump (GPIO 7) locked OFF; mixer de-energized; alarms ON. | Manual gravity drain to waste ditch until radar confirms level $\le 5.0\text{ L}$ (`D-012`). |
-| **`IL-02`** | **Radar Dry-Run Cutoff** | Drum 2 level $< 5.0\text{ L}$ while distribution pump is active. | `FAULT_DRY_RUN` | De-energizes distribution pump in $< 50\text{ ms}$; batch aborted. | FSM returns to `IDLE`; manual fault reset permitted (`D-003`). |
-| **`IL-03`** | **Batch Depletion Guard** | `START_BATCH` command received while Drum 2 level $> 5.0\text{ L}$. | `FAULT_BATCH_REJECTED` | Command rejected via MQTT ACK; all relays remain de-energized. | Drain residual liquid from Drum 2 until $\le 5.0\text{ L}$ before re-triggering. |
+| **`IL-01`** | **TDS Safety Gate** | Final mean TDS $< (\text{Target} - 50\text{ ppm})$ or $> (\text{Target} + 50\text{ ppm})$ after top-up dose. | `FAULT_PPM_OUT_OF_RANGE` | Distribution pump (GPIO 7) locked OFF; mixer de-energized; alarms ON. | Manual gravity drain to waste ditch until radar confirms level $\le 8.0\text{ L}$ (`D-012`, `D-048`). |
+| **`IL-02`** | **Radar Dry-Run Cutoff** | Drum 2 level $< 6.0\text{ L}$ while distribution pump is commanded active (debounced over 2 consecutive frames, $\le 200\text{ ms}$). | `FAULT_DRY_RUN` | De-energizes distribution pump in $\le 200\text{ ms}$; batch aborted; alarms ON. | FSM returns to `IDLE`; manual fault reset permitted after inspection (`D-003`, `D-048`). |
+| **`IL-03`** | **Batch Depletion Guard** | `START_BATCH` command received while Drum 2 level $> 8.0\text{ L}$. | `FAULT_BATCH_REJECTED` | Command rejected via MQTT ACK; all relays remain de-energized. | Drain residual liquid from Drum 2 until $\le 8.0\text{ L}$ before re-triggering (`D-048`). |
 | **`IL-04`** | **Dual-Stage Fill Guard** | Water level rise $< 1.0\text{ L}$ in 90 s OR total continuous fill $> 20\text{ min}$ ($1200\text{ s}$). | `FAULT_NO_WATER_SUPPLY` / `FAULT_FILL_TIMEOUT` | Closes fill solenoid (GPIO 4); pauses fill timer; sounds buzzer. | Operator inspects source line; sends `RESUME_FILL` command without draining (`TR-19`). |
 | **`IL-05`** | **Water Baseline Plausibility**| Clean water TDS $< 50\text{ ppm}$, $> 2000\text{ ppm}$, or baseline $\ge 350\text{ ppm}$ at `CHECK_BASE`. | `FAULT_TDS_INVALID` / `FAULT_BASE_TDS_HIGH` | Closes fill solenoid; aborts batch; de-energizes all relays. | Inspect probe immersion/cable; check raw water filtration; flush contaminated tank. |
-| **`IL-06`** | **Radar Liveness Watchdog** | FMCW radar UART1 silent / missing valid frames for $> 3.0\text{ s}$. | `FAULT_RADAR_OFFLINE` | Cuts all 4 actuator relays immediately; halts FSM. | Auto-clears immediately upon receiving valid radar binary frame (`0xAA 0x55`). |
-| **`IL-07`** | **Emergency Stop Guard** | Physical NC switch contact opened (GPIO 21 HIGH) OR software E-Stop command. | `FAULT_ESTOP` | Mechanical relay coil power cut in 0 ms; GPIO pins set HIGH in $< 5\text{ ms}$. | Twist physical mushroom switch NC (`hw_estop_pressed == false`) AND Drum 2 level $\le 5.0\text{ L}$ (`D-019`). |
+| **`IL-06`** | **Radar Liveness Watchdog** | FMCW radar UART1 silent / missing valid frames for $> 3.0\text{ s}$. | `FAULT_RADAR_OFFLINE` | Cuts all 4 actuator relays immediately; halts FSM; latches fault. | **Gated Reset:** Valid binary frames received continuously for $\ge 3.0\text{ s}$ and level reading stable. Operator sends `RESET_FAULT` (no tank dump required, `D-048`). |
+| **`IL-07`** | **Emergency Stop Guard** | Physical NC switch contact opened (GPIO 21 HIGH) OR software E-Stop command. | `FAULT_ESTOP` | Mechanical relay coil power cut in 0 ms; `emergency_stop_isr` sets GPIO 4-7 HIGH in $< 1\text{ }\mu\text{s}$. | Twist physical mushroom switch NC (`hw_estop_pressed == false`). Operator selects **Tiered Recovery**: (a) Re-verify TDS & Resume, or (b) Abort & Drain to $\le 8.0\text{ L}$ (`D-019`, `D-048`). |
+
+### 4.1 Zero-Latency Emergency Stop ISR (`IRAM_ATTR`)
+To eliminate flash stall latency during SPI flash writes or NVS commits, the E-Stop ISR is compiled into internal IRAM:
+
+```cpp
+// Placed in internal SRAM to run without flash cache dependencies
+void IRAM_ATTR emergency_stop_isr(void* arg) {
+    // 1. Direct hardware register write: force all active-LOW relay pins HIGH (< 1 us)
+    GPIO.out_w1ts.val = (1 << GPIO_RELAY_FILL) |
+                        (1 << GPIO_RELAY_DOSE) |
+                        (1 << GPIO_RELAY_MIX)  |
+                        (1 << GPIO_RELAY_DIST);
+
+    // 2. Notify actuator_task from ISR
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    vTaskNotifyGiveFromISR(actuator_task_handle, &xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+```
+
+Registered during `app_main()` with `ESP_INTR_FLAG_IRAM`.
 
 ---
 
-## 5. The Authoritative 12-State Fertigation FSM Engine
+## 5. The Authoritative 14-State Fertigation FSM Engine
 
-The system executes batch fertigation through an authoritative 12-state finite state machine running at 20 Hz on Core 1:
+The system executes batch fertigation through an authoritative **14-state** finite state machine running at 20 Hz on Core 1:
 
 ```mermaid
 stateDiagram-v2
-    [*] --> IDLE
+    [*] --> IDLE: Normal Boot (NVS fsm_state == IDLE)
+    [*] --> OUTAGE_RECOVERY: Power Glitch Boot (NVS fsm_state != IDLE)
     
-    IDLE --> FILLING_WATER: START_BATCH (Level <= 5.0 L)
+    IDLE --> FILLING_WATER: START_BATCH (Level <= 8.0 L)
     FILLING_WATER --> CHECK_BASE: Level >= 140.0 L
     CHECK_BASE --> DOSING: Clean Water Valid (50 <= TDS < 350 ppm)
     DOSING --> MIXING: Peristaltic Dose Complete (t = V_mL * 0.107)
@@ -191,23 +230,27 @@ stateDiagram-v2
     
     GATE_EVALUATE --> DISTRIBUTING: TDS in [Target - 50, Target + 50]
     GATE_EVALUATE --> TOPUP_DOSING: TDS in [Target - 250, Target - 50) (Single-Pass <= 300 mL)
-    GATE_EVALUATE --> FAULT_PPM_OUT_OF_RANGE: TDS < (Target - 250) OR TDS > (Target + 50)
+    GATE_EVALUATE --> FAULT: TDS < (Target - 250) OR TDS > (Target + 50)
     
     TOPUP_DOSING --> RECOVERY_MIX_EVALUATE: Top-Up Dose Complete
     RECOVERY_MIX_EVALUATE --> DISTRIBUTING: Re-evaluated TDS in [Target - 50, Target + 50]
-    RECOVERY_MIX_EVALUATE --> FAULT_PPM_OUT_OF_RANGE: Re-evaluated TDS Outside Band
+    RECOVERY_MIX_EVALUATE --> FAULT: Re-evaluated TDS Outside Band
     
-    DISTRIBUTING --> BATCH_DEPLETED: Level < 5.0 L (Depletion Confirmed)
-    BATCH_DEPLETED --> IDLE: Relays Safe & Batch Logged
+    DISTRIBUTING --> PAUSED: PAUSE_BATCH (Operator Requested)
+    PAUSED --> DISTRIBUTING: RESUME_BATCH (Operator Requested)
+    
+    DISTRIBUTING --> BATCH_DEPLETED: Level <= 8.0 L (Normal Cutoff)
+    BATCH_DEPLETED --> IDLE: Relays Safe & Batch Logged (5 s)
     
     state FAULT {
         [*] --> LATCHED_FAULT
-        LATCHED_FAULT --> IDLE: RESET_FAULT (hw_estop_pressed == false AND Level <= 5.0 L)
+        LATCHED_FAULT --> IDLE: RESET_FAULT (Cleared & Level <= 8.0 L or Verified Safe)
+        LATCHED_FAULT --> STABILIZING: RESET_FAULT (Tiered E-Stop: Re-verify TDS)
     }
 
     state OUTAGE_RECOVERY {
         [*] --> BATCH_PAUSED_INSPECTION
-        BATCH_PAUSED_INSPECTION --> DOSING: RESUME_DEFICIT (Deficit Dose Calculated)
+        BATCH_PAUSED_INSPECTION --> DOSING: RESUME_DEFICIT (Deficit Calculated)
         BATCH_PAUSED_INSPECTION --> FAULT: Catastrophic Spike (> Target + 500)
     }
 ```
@@ -216,7 +259,7 @@ stateDiagram-v2
 
 | State Enum | Active Actuators | Timing / Exit Trigger | Next Normal State | Anomaly / Fault State |
 | :--- | :--- | :--- | :--- | :--- |
-| `IDLE` | All Relays OFF | Valid `START_BATCH` command | `FILLING_WATER` | Rejects with `FAULT_BATCH_REJECTED` if level $> 5.0\text{ L}$. |
+| `IDLE` | All Relays OFF | Valid `START_BATCH` command | `FILLING_WATER` | Rejects with `FAULT_BATCH_REJECTED` if level $> 8.0\text{ L}$. |
 | `FILLING_WATER` | Fill Solenoid (GPIO 4) | Level reaches $\ge 140.0\text{ L}$ | `CHECK_BASE` | `FAULT_NO_WATER_SUPPLY` (90s) / `FAULT_FILL_TIMEOUT` (20m). |
 | `CHECK_BASE` | All Relays OFF | 10s baseline sample complete | `DOSING` | `FAULT_TDS_INVALID` ($< 50$ or $> 2000$) / `FAULT_BASE_TDS_HIGH` ($\ge 350$). |
 | `DOSING` | Dosing Pump (GPIO 5) | Dosing duration $t_{\text{sec}} = V_{\text{mL}} \times 0.107$ | `MIXING` | `FAULT_ESTOP` if emergency stop triggered. |
@@ -224,27 +267,33 @@ stateDiagram-v2
 | `STABILIZING` | All Relays OFF | 15 seconds settling complete | `MEASURING_TDS` | `FAULT_ESTOP` if emergency stop triggered. |
 | `MEASURING_TDS` | All Relays OFF | 10 seconds DSP median sample | `GATE_EVALUATE` | `FAULT_TDS_INVALID` if signal noise out of bounds. |
 | `GATE_EVALUATE` | All Relays OFF | Instantaneous logic comparison | `DISTRIBUTING` (Pass)<br>`TOPUP_DOSING` (Deficit) | `FAULT_PPM_OUT_OF_RANGE` (Out of bounds or Starvation). |
-| `TOPUP_DOSING` | Dosing Pump (GPIO 5) | Top-up dose $t = V_{\text{topup\_mL}} \times 0.107$ | `RECOVERY_MIX_EVALUATE` | Capped at $\le 300\text{ mL}$ maximum. |
+| `TOPUP_DOSING` | Dosing Pump (GPIO 5) | Top-up dose $t = V_{\text{topup\_mL}} \times 0.107$ | `RECOVERY_MIX_EVALUATE` | Capped at $\le 300\text{ mL}$ maximum (`D-001`). |
 | `RECOVERY_MIX_EVALUATE`| Mixing Pump (GPIO 6) | Mix 60s $\to$ Settle 15s $\to$ Measure 10s | `DISTRIBUTING` (Pass) | `FAULT_PPM_OUT_OF_RANGE` (Zero secondary top-up allowed). |
-| `DISTRIBUTING` | Dist Pump (GPIO 7) | Drum 2 level $< 5.0\text{ L}$ | `BATCH_DEPLETED` | `FAULT_DRY_RUN` if pump runs with level $< 5.0\text{ L}$. |
+| `DISTRIBUTING` | Dist Pump (GPIO 7) | Drum 2 level $\le 8.0\text{ L}$ (Normal Cutoff) | `BATCH_DEPLETED` | `FAULT_DRY_RUN` if level $< 6.0\text{ L}$ while pump ON.<br>`PAUSED` if operator issues `PAUSE_BATCH`. |
+| `PAUSED` | All Relays OFF | `RESUME_BATCH` command | `DISTRIBUTING` | `FAULT_ESTOP` if emergency stop triggered. |
 | `BATCH_DEPLETED` | All Relays OFF | 5 seconds cleanup & NVS clear | `IDLE` | Transitions to `IDLE` and logs batch completion. |
+| `FAULT` | **All Relays OFF** | Gated `RESET_FAULT` | `IDLE` or `STABILIZING` | Enforces latched hardware safe-state; sounds buzzer/lamp. |
+| `OUTAGE_RECOVERY` | **All Relays OFF** | Operator confirmation / auto-resume | `DOSING` or `FAULT` | Persists unpowered inspection state until evaluated (`D-013`). |
 
 ---
 
 ## 6. Sensor Signal Conditioning & DSP Filtering Chains
 
-### 6.1 Analog TDS Conditioning Chain (ADC1_CH0, GPIO 1)
+### 6.1 Temperature-Compensated Analog TDS Conditioning Chain (GPIO 1 & GPIO 8)
 To eliminate electrical noise from AC pump inductive kicks and mains hum:
-1. **Sampling Rate:** 10 Hz acquisition loop inside `sensor_task`.
+1. **Sampling Rate:** 10 Hz acquisition loop inside `sensor_task` for ADC1_CH0; 1 Hz non-blocking acquisition for DS18B20 OneWire temperature.
 2. **10-Sample Moving Trimmed Median Filter:**
    - Buffers the latest 10 consecutive ADC samples in SRAM.
    - Sorts the 10 samples in ascending order.
    - Discards the single lowest sample and single highest sample.
-   - Averages the remaining 8 samples to produce the conditioned raw voltage $V_{\text{raw}}$.
-3. **Automatic Temperature Compensation (ATC):**
-   $$T_{\text{comp}} = 1.0 + 0.02 \times (T_{\text{water}} - 25.0) \implies \text{Baseline: } 27.0^\circ\text{C} \implies T_{\text{comp}} = 1.04$$
-   $$\text{TDS}_{\text{ppm}} = \left(\frac{V_{\text{raw}} \times K_{\text{cell}}}{T_{\text{comp}}}\right) + V_{\text{offset}}$$
-   Where $K_{\text{cell}}$ (probe slope) and $V_{\text{offset}}$ are loaded from NVS namespace `calib_tds`.
+   - Averages the remaining 8 samples to produce conditioned raw voltage $V_{\text{raw}}$.
+3. **Automatic Temperature Compensation (ATC) & Cubic Polynomial Curve-Fitting:**
+   The DFRobot Gravity Analog TDS probe output is non-linear and strongly temperature dependent (2.0% / °C). Firmware applies temperature compensation to raw voltage before calculating TDS:
+   $$V_{\text{compensation}} = \frac{V_{\text{raw}}}{1.0 + 0.02 \times (T_{\text{water}} - 25.0)}$$
+   $$\text{TDS}_{\text{ppm}} = \left(133.42 \times V_{\text{compensation}}^3 - 255.86 \times V_{\text{compensation}}^2 + 857.39 \times V_{\text{compensation}}\right) \times 0.5 \times K_{\text{cell}}$$
+   Where:
+   - $T_{\text{water}}$ is the live solution temperature from DS18B20 on GPIO 8 (defaults to 25.0 °C if sensor disconnected).
+   - $K_{\text{cell}}$ is the calibrated probe cell constant loaded from NVS namespace `calib_tds` (default $1.00$).
 
 ### 6.2 60 GHz FMCW Radar Level Sensor Frame Parser (UART1)
 1. **Baud Rate & Pins:** 115200 bps, 8N1 on GPIO 17 (TX) and GPIO 18 (RX).
@@ -255,18 +304,30 @@ To eliminate electrical noise from AC pump inductive kicks and mains hum:
 3. **Distance-to-Volume Conversion Geometry:**
    $$V_{\text{drum2\_L}} = \left(\frac{H_{\text{tank\_mm}} - D_{\text{measured\_mm}}}{H_{\text{tank\_mm}} - H_{\text{sump\_mm}}}\right) \times 140.0\text{ L} + 5.0\text{ L}$$
    Where $H_{\text{tank\_mm}} = 950\text{ mm}$ and $H_{\text{sump\_mm}} = 50\text{ mm}$.
-4. **Watchdog Supervision:** If no valid frame is received for $> 3.0\text{ s}$, `IL-06` triggers `FAULT_RADAR_OFFLINE` immediately.
+4. **Formula Floor & Threshold Separation (`D-048`):**
+   - At the bottom of the drum ($D = 950\text{ mm}$), the mathematical formula outputs exactly $5.0\text{ L}$.
+   - **Normal Distribution Cutoff:** The FSM cleanly stops the distribution pump when $V \le 8.0\text{ L}$, preventing pump air-intake and vortex cavitation.
+   - **Dry-Run Safety Cutoff (`IL-02`):** Trips if level drops $< 6.0\text{ L}$ while the pump is commanded ON, debounced over 2 consecutive frames ($\le 200\text{ ms}$).
+   - **Batch Precondition Gate (`IL-03`):** Accepts new batches when level is $\le 8.0\text{ L}$, eliminating false rejections caused by mm-level sensor jitter on an empty drum.
+5. **Watchdog Supervision:** If no valid frame is received for $> 3.0\text{ s}$, `IL-06` triggers `FAULT_RADAR_OFFLINE` immediately.
 
 ---
 
-## 7. Command Idempotency, MQTT Protocols & PSRAM Spooling (D-015, D-045)
+## 7. Command Idempotency, MQTT Protocols, Autonomy & PSRAM Spooling
 
-### 7.1 QoS 1 Command Idempotency Protocol (D-045)
+### 7.1 MQTT Connection, 30s TTL & Stale Command Protection (`D-048`)
+1. **Clean Session Mandate:** Firmware connects to Mosquitto with `clean_session = true` to prevent the broker from queueing stale commands during extended offline periods.
+2. **30-Second Command TTL:** All incoming mutation commands (`START_BATCH`, `RESUME_FILL`, `PAUSE_BATCH`, `RESUME_BATCH`) must include a UTC Unix timestamp in seconds. The command is rejected if:
+   $$\text{now}_{\text{sntp}} - \text{timestamp} > 30\text{ s}$$
+   Or if the ESP32 internal SNTP clock has not yet completed initial synchronization (`ERROR_CLOCK_UNSYNCED`).
+3. **Safety Command TTL Exemption:** `ESTOP`, `CANCEL`, and `RESET_FAULT` commands are strictly **exempt** from the 30s TTL and clock synchronization check, ensuring instant safety action regardless of time sync state.
+
+### 7.2 QoS 1 Command Idempotency Protocol (`D-045`)
 Every command from the backend carries a UUID `cmd_id`:
 
 ```cpp
 struct IdempotencyCache {
-    char cmd_ids[32][37]; // 32 UUID slots
+    char cmd_ids[32][37]; // 32 UUID slots in internal SRAM
     uint8_t write_idx = 0;
 };
 ```
@@ -277,33 +338,12 @@ struct IdempotencyCache {
    - Firmware returns an immediate ACK packet on `desanomia/gh1/ack` with status `ALREADY_EXECUTED`.
    - The command payload is discarded without advancing the FSM or re-energizing actuators.
 
-### 7.2 Static JSON Payload Formatting
-All outbound payloads are serialized using `snprintf()` into static buffers:
-
-```cpp
-// Static telemetry serialization
-void publish_telemetry_frame() {
-    static char payload[512];
-    snprintf(payload, sizeof(payload),
-        "{\"ts\":%lld,\"fsm\":\"%s\",\"sensors\":{\"tds\":%.1f,\"vol\":%.1f},"
-        "\"actuators\":{\"fill\":%d,\"dose\":%d,\"mix\":%d,\"dist\":%d},"
-        "\"safety\":{\"estop\":%s,\"fault\":\"%s\"}}",
-        esp_timer_get_time() / 1000,
-        fsm_state_to_str(current_state),
-        current_tds_ppm, current_volume_l,
-        is_relay_on(RELAY_FILL), is_relay_on(RELAY_DOSE),
-        is_relay_on(RELAY_MIX), is_relay_on(RELAY_DIST),
-        hw_estop_pressed ? "true" : "false",
-        active_fault_code
-    );
-    mqtt_publish("desanomia/gh1/telemetry", payload, 0); // QoS 0
-}
-```
-
-### 7.3 Octal PSRAM Offline Event Ring Buffer
-- **Capacity:** 500 discrete lifecycle events (state changes, gate evaluations, fault trips).
-- **Storage Medium:** Statically allocated ring buffer in 8MB Octal PSRAM (`EXT_RAM_ATTR`).
-- **Drain Policy:** When W5500 Ethernet reconnects to Mosquitto, `psram_spooler_task` drains queued events chronologically over `desanomia/gh1/events` with QoS 1, ensuring 100% audit trail recovery without losing transient state changes.
+### 7.3 OT Fieldbus Comm-Loss Autonomy (`D-048`)
+If W5500 Ethernet or the MQTT connection drops during an active batch:
+1. **Autonomous Execution:** The running batch continues execution to completion under local ESP32 Core 1 safety interlocks (`IL-01` through `IL-07`). Relays are **NOT** de-energized merely due to MQTT loss (the former 10s rule is explicitly removed).
+2. **Local Annunciation:** The local pilot lamp blinks (1 Hz) to signal loss of telemetry uplink.
+3. **New Batch Lockout:** New batches cannot start until the network connection is restored.
+4. **PSRAM Event Spooling:** Up to 500 state change and interlock events are buffered into the 8MB Octal PSRAM ring buffer (`EXT_RAM_ATTR`) during uptime. Upon reconnection, `psram_spooler_task` drains the queue chronologically with QoS 1. (Reboot and power loss recovery rely on the NVS flash journal).
 
 ---
 
@@ -326,7 +366,7 @@ Flash memory namespaces are strictly separated:
 
 ---
 
-## 9. PlatformIO Build Configuration & Host-Native Unit Testing
+## 9. PlatformIO Build Configuration, Partitions & OTA Strategy
 
 ### 9.1 `platformio.ini` Authoritative Specification
 ```ini
@@ -337,18 +377,14 @@ framework = espidf
 monitor_speed = 115200
 upload_speed = 921600
 
-# Hardware Feature Flags: 16MB Flash + 8MB Octal PSRAM
-board_build.flash_size = 16MB
+# 16MB Flash Hardware Target (DevKitC-1 default is 8MB)
+board_upload.flash_size = 16MB
 board_build.flash_mode = qio
 board_build.psram_type = opi
 board_build.partitions = partitions_16mb.csv
 
+# ESP-IDF Configuration
 build_flags =
-    -D BOARD_HAS_PSRAM
-    -D ARDUINO_USB_MODE=1
-    -D ARDUINO_USB_CDC_ON_BOOT=1
-    -D CONFIG_SPIRAM_MODE_OCT=1
-    -D CORE_DEBUG_LEVEL=3
     -Wall
     -Wextra
     -Werror
@@ -357,8 +393,52 @@ build_flags =
 extra_scripts = pre:scripts/protect_psram_pins.py
 ```
 
-### 9.2 Host-Native Unit Testing Strategy (`test/`)
-Firmware logic components are hardware-abstracted to enable 100% host-native testing on development workstations without physical microcontrollers:
-1. **`test_fsm_engine.cpp`:** Tests all 12 FSM state transitions, timeout behaviors, and gate evaluations using mock sensor feeds.
-2. **`test_safety_interlocks.cpp`:** Simulates sensor fault injections (TDS spike, dry-run, radar disconnect, E-stop) and asserts that the `actuator_task` immediately forces all relay bits HIGH (un-energized).
-3. **`test_trimmed_median_filter.cpp`:** Feeds known noisy ADC sequences and verifies outlier rejection and temperature compensation mathematical accuracy.
+### 9.2 Native `sdkconfig.defaults` Specification
+ESP-IDF native symbols must be configured in `sdkconfig.defaults` (verified via `pio run -t menuconfig`):
+
+```ini
+# Octal PSRAM Configuration
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_OCT=y
+
+# Native USB Serial/JTAG Console
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
+
+# Task Watchdog Panic and Auto-Reboot
+CONFIG_ESP_TASK_WDT_PANIC=y
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=3
+CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT=y
+
+# IRAM Safety Execution
+CONFIG_GPIO_CTRL_FUNC_IN_IRAM=y
+
+# Bootloader Dual-App OTA Rollback Protection
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+```
+
+### 9.3 16MB Flash Partition Table (`partitions_16mb.csv`)
+```csv
+# Name,   Type, SubType, Offset,   Size,     Flags
+nvs,      data, nvs,     0x9000,   0x10000,  # 64 KB NVS Journal & Calibration
+otadata,  data, ota,     0x19000,  0x2000,   # 8 KB OTA Selection Data
+phy_init, data, phy,     0x1b000,  0x1000,   # 4 KB PHY Calibration
+ota_0,    app,  ota_0,   0x20000,  0x300000, # 3 MB Primary Application Partition
+ota_1,    app,  ota_1,   0x320000, 0x300000, # 3 MB Secondary Application Partition
+coredump, data, coredump,0x620000, 0x20000,  # 128 KB Core Dump for Crash Analysis
+storage,  data, spiffs,  0x640000, 0x9C0000, # ~9.7 MB Local Storage / Diagnostic Logs
+```
+
+### 9.4 Boot Self-Test & OTA Rollback Protocol
+On every system boot, the firmware executes a self-test sequence:
+1. Validates internal SRAM and Octal PSRAM integrity (`heap_caps_check_integrity_all`).
+2. Validates I2C ADC and OneWire DS18B20 bus presence.
+3. Validates W5500 SPI Ethernet controller responsiveness.
+4. If self-test passes, calls `esp_ota_mark_app_valid_cancel_rollback()`.
+5. If initialization crashes or triggers TWDT panic before self-test completion, the bootloader rolls back automatically to the previous working OTA partition.
+
+### 9.5 Host-Native Unit Testing Suite (`test/`)
+1. **`test_level_boundaries.cpp`:** Tests level conversions and boundaries: normal cutoff at 8.0 L, dry-run trip at < 6.0 L, precondition reject at > 8.0 L.
+2. **`test_radar_parser.cpp`:** Tests binary frame parsing, corrupted XOR checksum rejection, packet resynchronization, and over-range noise clamping.
+3. **`test_idempotency_ttl.cpp`:** Tests 32-slot circular cache duplicate suppression, 30-second timestamp TTL expiration, and unsynced clock gating.
+4. **`test_interlock_latching.cpp`:** Tests IL-06 radar liveness latched behavior, asserting that valid frames alone do not re-energize pumps until `RESET_FAULT` is sent.
+5. **`test_trimmed_median_filter.cpp`:** Validates 10-sample trimmed median filter rejection and the DFRobot cubic polynomial ATC formula.

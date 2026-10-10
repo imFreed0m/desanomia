@@ -199,7 +199,7 @@ stateDiagram-v2
   RECOVERY_MIX_EVALUATE --> DISTRIBUTING: TDS in Gate Band [Target ± 50 ppm]
   RECOVERY_MIX_EVALUATE --> FAULT_LATCHED: TDS Still Outside Gate Band
 
-  DISTRIBUTING --> BATCH_DEPLETED: Drum 2 Level <= 5.0 L (IL-02 Dry-Run)
+  DISTRIBUTING --> BATCH_DEPLETED: Drum 2 Level <= 8.0 L (Normal Cutoff)
   BATCH_DEPLETED --> IDLE: Batch Journal Closed
 
   state BATCH_PAUSED_INSPECTION {
@@ -209,19 +209,19 @@ stateDiagram-v2
     Hold_Relays_OFF --> Force_Drain: Catastrophic Spike > 500 ppm
   }
 
-  IDLE --> BATCH_PAUSED_INSPECTION: Cold Boot Recovery (Level > 5.0 L)
+  IDLE --> BATCH_PAUSED_INSPECTION: Cold Boot Recovery (Level > 8.0 L)
   BATCH_PAUSED_INSPECTION --> DOSING: Resume Deficit Dosing
-  BATCH_PAUSED_INSPECTION --> IDLE: Drain Complete (Level <= 5.0 L)
+  BATCH_PAUSED_INSPECTION --> IDLE: Drain Complete (Level <= 8.0 L)
 
   state FAULT_LATCHED {
     [*] --> Relays_Cut_Buzzer_Active
   }
-  FAULT_LATCHED --> IDLE: RESET_FAULT (Level <= 5.0 L AND hw_estop_pressed == false)
+  FAULT_LATCHED --> IDLE: RESET_FAULT (Level <= 8.0 L AND hw_estop_pressed == false)
 ```
 
 | State | Purpose | Hardware Outputs Active | Normal Exit / Next State | Anomaly / Fault Path |
 | :--- | :--- | :--- | :--- | :--- |
-| **`IDLE`** | Resting state, awaiting batch dispatch | All relays OFF | Valid `START_BATCH` command $\to$ `FILLING_WATER` | IL-03: Rejected if level $> 5.0\text{ L}$ |
+| **`IDLE`** | Resting state, awaiting batch dispatch | All relays OFF | Valid `START_BATCH` command $\to$ `FILLING_WATER` | IL-03: Rejected if level $> 8.0\text{ L}$ |
 | **`FILLING_WATER`** | Fill Drum 2 with clean water to 140.0 L | Relay 1 (Fill Valve AC 220V) ON | Radar level $\ge 140.0\text{ L} \to$ `CHECK_BASE` | IL-04: Rise $< 1.0\text{ L}$ in 90s or $> 20\text{ min} \to$ `FAULT_NO_WATER_SUPPLY` |
 | **`CHECK_BASE`** | Measure raw groundwater baseline TDS | All relays OFF | Baseline captured ($50 \le \text{TDS} < 350\text{ ppm}) \to$ `DOSING` | IL-05: TDS $< 50\text{ ppm} \to$ `FAULT_TDS_INVALID`; $\ge 350\text{ ppm} \to$ `FAULT_BASE_TDS_HIGH` |
 | **`DOSING`** | Deliver calculated fertilizer concentrate | Relay 2 (Peristaltic Pump DC 12V) ON | Pump runtime $t_{\text{pump\_sec}}$ elapsed $\to$ `MIXING` | E-Stop or Power cut |
@@ -231,9 +231,9 @@ stateDiagram-v2
 | **`GATE_EVALUATE`** | Evaluate mean TDS against recipe band | All relays OFF | Pass: $[\text{Target} \pm 50\text{ ppm}] \to$ `DISTRIBUTING` | Deficit: $\to$ `TOPUP_DOSING`; Overshoot: $\to$ `FAULT_PPM_OUT_OF_RANGE` |
 | **`TOPUP_DOSING`** | Deliver single-pass top-up ($\le 300\text{ mL}$) | Relay 2 (Peristaltic Pump DC 12V) ON | Top-up volume delivered $\to$ `RECOVERY_MIX_EVALUATE` | E-Stop or Power cut |
 | **`RECOVERY_MIX_EVALUATE`** | Homogenize and re-evaluate top-up | Relay 3 ON (60s), Settle (15s), Measure (10s) | Pass: $[\text{Target} \pm 50\text{ ppm}] \to$ `DISTRIBUTING` | Fail: $\to$ `FAULT_PPM_OUT_OF_RANGE` |
-| **`DISTRIBUTING`** | Irrigate 6 beds (980 drippers) | Relay 4 (Dist Pump AC 220V) ON | Drum 2 level $\le 5.0\text{ L} \to$ `BATCH_DEPLETED` | IL-02: Level $< 5.0\text{ L}$ cuts pump in $< 50\text{ ms}$ |
+| **`DISTRIBUTING`** | Irrigate 6 beds (980 drippers) | Relay 4 (Dist Pump AC 220V) ON | Drum 2 level $\le 8.0\text{ L} \to$ `BATCH_DEPLETED` | IL-02: Level $< 6.0\text{ L}$ cuts pump in $\le 200\text{ ms}$ (`D-048`) |
 | **`BATCH_DEPLETED`** | Finalize batch and record totals | All relays OFF | Event log committed $\to$ `IDLE` | Database / queue retry |
-| **`BATCH_PAUSED_INSPECTION`** *(Latched Mode)* | Outage cold-boot hold with Drum 2 $> 5.0\text{ L}$ | All relays OFF | 30-min auto-resume green OR manual confirm $\to$ `DOSING` | Catastrophic spike $> 500\text{ ppm} \to$ manual gravity drain to $\le 5.0\text{ L}$ |
+| **`BATCH_PAUSED_INSPECTION`** *(Latched Mode)* | Outage cold-boot hold with Drum 2 $> 8.0\text{ L}$ | All relays OFF | 30-min auto-resume green OR manual confirm $\to$ `DOSING` | Catastrophic spike $> 500\text{ ppm} \to$ manual gravity drain to $\le 8.0\text{ L}$ |
 
 ### 4.3 Integrated 7 Firmware Safety Interlocks
 
@@ -241,13 +241,13 @@ All 7 interlocks execute in the 20 Hz FreeRTOS Core 1 loop prior to relay actuat
 
 | ID | Interlock Name | Trigger Condition | Latched Fault Code | Hardware Safety Response | Reset Requirement (Gated Reset) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **IL-01** | **TDS Safety Gate** | Final mean TDS $< (\text{Target}-50)$ or $> (\text{Target}+50\text{ ppm})$ | `FAULT_PPM_OUT_OF_RANGE` | Distribution pump (GPIO 7) locked OFF | Manual drain via gravity valve to ditch until level $\le 5.0\text{ L}$ |
-| **IL-02** | **Radar Dry-Run Cutoff** | Drum 2 level $< 5.0\text{ L}$ while distribution pump is active | `FAULT_DRY_RUN` | Cut distribution pump (GPIO 7) in $< 50\text{ ms}$ | FSM returns to `IDLE` / refilling allowed |
-| **IL-03** | **Batch Depletion Guard** | `START_BATCH` command received while Drum 2 $> 5.0\text{ L}$ | `FAULT_BATCH_REJECTED` | Reject command, all relays remain OFF | Drain residual water to $\le 5.0\text{ L}$ |
+| **IL-01** | **TDS Safety Gate** | Final mean TDS $< (\text{Target}-50)$ or $> (\text{Target}+50\text{ ppm})$ | `FAULT_PPM_OUT_OF_RANGE` | Distribution pump (GPIO 7) locked OFF | Manual drain via gravity valve to ditch until level $\le 8.0\text{ L}$ |
+| **IL-02** | **Radar Dry-Run Cutoff** | Drum 2 level $< 6.0\text{ L}$ while distribution pump is active | `FAULT_DRY_RUN` | Cut distribution pump (GPIO 7) in $\le 200\text{ ms}$ (`D-048`) | FSM returns to `IDLE` / refilling allowed |
+| **IL-03** | **Batch Depletion Guard** | `START_BATCH` command received while Drum 2 $> 8.0\text{ L}$ | `FAULT_BATCH_REJECTED` | Reject command, all relays remain OFF | Drain residual water to $\le 8.0\text{ L}$ (`D-048`) |
 | **IL-04** | **Dual-Stage Fill Guard** | Level rise $< 1.0\text{ L}$ in 90s OR total fill time $> 20\text{ min}$ | `FAULT_NO_WATER_SUPPLY` / `FAULT_FILL_TIMEOUT` | Close fill valve (GPIO 4), halt timer | Clear water supply issue, click `Resume Fill` on UI |
 | **IL-05** | **Water Baseline Plausibility** | Raw water TDS $< 50$, $> 2000$, or baseline $\ge 350\text{ ppm}$ | `FAULT_TDS_INVALID` / `FAULT_BASE_TDS_HIGH` | Close fill valve, abort batch immediately | Inspect TDS probe cable or raw water source |
-| **IL-06** | **Radar Liveness Watchdog** | Radar UART1 silent / missing frames for $> 3.0\text{ s}$ | `FAULT_RADAR_OFFLINE` | Cut all 4 relays immediately | Auto-clears immediately upon receiving valid UART frame |
-| **IL-07** | **Emergency Stop Guard** | Physical NC switch loop open (GPIO 21 High / ISR) OR software E-Stop command | `FAULT_ESTOP` | Mechanical power bus cut ($0\text{ ms}$) + GPIO Low ($< 5\text{ ms}$) | Twist physical switch NC (`hw_estop_pressed == false`) AND Drum 2 level $\le 5.0\text{ L}$ |
+| **IL-06** | **Radar Liveness Watchdog** | Radar UART1 silent / missing frames for $> 3.0\text{ s}$ | `FAULT_RADAR_OFFLINE` | Cut all 4 relays immediately | Latched; de-latched via RESET_FAULT once valid frames stable $\ge 3.0\text{ s}$ (`D-048`) |
+| **IL-07** | **Emergency Stop Guard** | Physical NC switch loop open (GPIO 21 High / ISR) OR software E-Stop command | `FAULT_ESTOP` | Mechanical power bus cut ($0\text{ ms}$) + GPIO Low ($< 5\text{ ms}$) | Twist physical switch NC (`hw_estop_pressed == false`) AND Drum 2 level $\le 8.0\text{ L}$ (or Tiered Recovery, `D-048`) |
 
 ---
 
@@ -351,7 +351,7 @@ The edge system is designed to degrade gracefully across all failure boundaries:
 | **Mid-Batch Power Outage (AC Loss)** | Mains loss un-energizes system; cold-boot detected on AC restoration | BIOS AMI auto-boots Beelink; ESP32 boots and reads NVS status: incomplete batch AND Drum 2 $> 5.0\text{ L}$ | Enters `BATCH_PAUSED_INSPECTION` mode (all relays OFF). UI displays deficit math. 30-min auto-resume timer triggers if all 7 interlocks pass, or operator performs manual gravity drain if spike $> 500\text{ ppm}$ (D-013). |
 | **4G WAN / Cellular Modem Loss** | Ping probe to `api.telegram.org` fails | Greenhouse batch execution, HMI Kiosk, and local Gazebo TV operate 100% unaffected | Outbound Telegram alerts queue in table `alert_queue` (up to 1,000 items). Flushed chronologically upon WAN restoration (TR-22). |
 | **Water Supply Stall / Solenoid Failure** | Dual-Stage Fill Guard (IL-04): Level rise $< 1.0\text{ L}$ in 90s OR fill time $> 20\text{ min}$ | De-energizes Fill Valve (GPIO 4); latches `FAULT_NO_WATER_SUPPLY` or `FAULT_FILL_TIMEOUT` | Batch is NOT aborted or drained. UI exposes `Resume Fill` button, allowing operator to resolve plumbing and resume filling without restarting batch (TR-19). |
-| **Emergency Stop Mushroom Trip** | Direct series NC contact open ($0\text{ ms}$) + GPIO 21 falling edge ISR ($< 5\text{ ms}$) | Hardware relay coil bus cut mechanically; firmware de-energizes all GPIO outputs; latches `FAULT_ESTOP` | Local buzzer pulses for 60s; Pilot Lamp solid ON. Reset button is hard-locked until physical switch is twisted open (`hw_estop_pressed == false`) AND Drum 2 level $\le 5.0\text{ L}$ (D-019). |
+| **Emergency Stop Mushroom Trip** | Direct series NC contact open ($0\text{ ms}$) + GPIO 21 falling edge ISR ($< 5\text{ ms}$) | Hardware relay coil bus cut mechanically; firmware de-energizes all GPIO outputs; latches `FAULT_ESTOP` | Local buzzer pulses for 60s; Pilot Lamp solid ON. Reset button is hard-locked until physical switch is twisted open (`hw_estop_pressed == false`) AND Drum 2 level $\le 8.0\text{ L}$ (or Tiered Recovery, `D-048`) (D-019). |
 
 ---
 

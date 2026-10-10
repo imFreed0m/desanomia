@@ -115,6 +115,15 @@ Central Architectural Decision Records (ADR) for the DESANOMIA precision greenho
   5. *E-Stop Protection:* Software E-Stop is mounted outside `KioskErrorBoundary` (with fallback in crash view) and explicitly exempt from `STALE` and `OFFLINE` mutation lockouts, remaining 1-tap clickable 24/7.
   6. *Audit Log Synchronization:* Deprecates SHA-256 hash chaining columns across `06_DATA_MODEL.md`, `09_ERROR_HANDLING.md`, and `11_API_CONTRACT.md` in favor of PostgreSQL PL/pgSQL append-only triggers (`trg_audit_logs_immutability`) and daily offsite backup verification (`D-044`).
 
+- **D-048 (Firmware Hardening, Volumetric Threshold Split, Fieldbus Autonomy & Hardware Failsafes):**
+  1. *Volumetric Threshold Split & Debounce:* Resolves the 5.0 L formula floor race condition (`IL-02` vs normal exit vs `IL-03`). Normal distribution stops cleanly at $V \le 8.0\text{ L}$ (`BATCH_DEPLETED`). Dry-run safety cutoff `IL-02` trips at $< 6.0\text{ L}$ while the pump is active, debounced over 2 consecutive frames ($\le 200\text{ ms}$). Batch initiation and gated reset precondition permits start/reset at $\le 8.0\text{ L}$, eliminating spurious rejections from mm-scale radar jitter on an empty drum.
+  2. *Hardware Dry-Run Backstop & Relay Failsafes:* Active-LOW relay inputs (GPIO 4–7) fit external 10 kΩ pull-ups to logic VCC so MCU reset/high-Z guarantees relays are OFF. `fsm_task`, `actuator_task`, and `sensor_task` subscribe to FreeRTOS Task Watchdog Timer (TWDT) with 3s panic reboot (`CONFIG_ESP_TASK_WDT_PANIC=y`). An independent mechanical NC float switch at 6.0 L height is wired in series with Relay 4 (distribution pump) AC power, providing a physical fail-safe dry-run cutoff.
+  3. *Temperature-Compensated TDS (ATC):* Adds DS18B20 digital temperature sensor on GPIO 8 with 4.7 kΩ pull-up. The DFRobot Analog TDS probe conditioning formula incorporates the official cubic polynomial curve-fitting ($(133.42 V^3 - 255.86 V^2 + 857.39 V) \times 0.5 \times K_{\text{cell}}$) applied to temperature-compensated voltage ($V / (1 + 0.02(T - 25))$).
+  4. *Fieldbus Comm-Loss Autonomy:* Resolves the contradiction in `08_SECURITY.md` §10.1 by choosing autonomy: on loss of Ethernet/MQTT, running batches finish under local ESP32 Core 1 safety interlocks, events spool to 8MB Octal PSRAM ring buffer, new batches are rejected, and the local pilot lamp blinks. The conflicting 10s automatic shutdown rule is deleted.
+  5. *Command Replay Protection & 30s TTL:* ESP32 connects with `clean_session = true`. State-changing commands require $\text{now} - \text{timestamp} \le 30\text{ s}$ and synchronized SNTP clock (`ERROR_CLOCK_UNSYNCED`). `ESTOP`, `CANCEL`, and `RESET_FAULT` bypass TTL and clock sync.
+  6. *Tiered E-Stop Recovery & Latched Watchdog Preconditions:* Relaxes mandatory tank draining in D-019 for intact E-stop interruptions: if solution was already mixed and tank is intact, operator on Kiosk may choose "Re-verify TDS & Resume" (`STABILIZING` $\to$ `MEASURING_TDS` $\to$ `GATE_EVALUATE`), or "Abort & Drain". `IL-06` radar watchdog latches on missing frames; cleared via `RESET_FAULT` once frames are stable for $\ge 3.0\text{ s}$ without dumping tank.
+  7. *Task Architecture & Scoped Zero-Heap:* Task architecture pruned from 8 to 6 tasks (`fsm_task`, `actuator_task`, `sensor_task`, `w5500_driver_task`, `mqtt_task`, `psram_spooler_task`), delegating watchdog and time sync to native ESP-IDF `esp_task_wdt` and `esp_sntp`. Zero-heap rule scoped strictly to post-init recurring control loops. E-Stop ISR compiled into `IRAM_ATTR` with direct GPIO register write HIGH. PlatformIO build specifies 16MB flash, `sdkconfig.defaults`, `partitions_16mb.csv`, and dual OTA rollback cancellation (`esp_ota_mark_app_valid_cancel_rollback`).
+
 ---
 
 ## Proposed Decisions
@@ -126,3 +135,4 @@ Central Architectural Decision Records (ADR) for the DESANOMIA precision greenho
 ## Open Decisions
 
 *None.* (All foundational system inquiries have been answered and codified in `brain/00` through `brain/17`).
+

@@ -132,27 +132,28 @@ TEST_F(SafetyInterlocksTest, IL01_RejectsDistributionWhenOutOfToleranceBand) {
     EXPECT_FALSE(interlocks.CanEnergizeDistributionPump(INFINITY, target_ppm));
 }
 
-// IL-02: Dry-Run Cutoff Guard (< 50 ms shutdown when Drum 2 < 5.0 L)
+// IL-02: Dry-Run Cutoff Guard (<= 200 ms shutdown when Drum 2 < 6.0 L, D-048)
 TEST_F(SafetyInterlocksTest, IL02_TripsDryRunCutoffWhenVolumeBelowSumpThreshold) {
     // Volume at 5.1 L -> Permitted
-    EXPECT_TRUE(interlocks.EvaluateDryRun(5.1f));
+    EXPECT_TRUE(interlocks.EvaluateDryRun(6.1f));
     
-    // Volume at 5.0 L (Sump boundary) -> Permitted
-    EXPECT_TRUE(interlocks.EvaluateDryRun(5.0f));
+    // Volume at 6.0 L (Dry-run boundary) -> Permitted
+    EXPECT_TRUE(interlocks.EvaluateDryRun(6.0f));
     
-    // Volume drops to 4.9 L -> Dry-Run Trip
-    EXPECT_FALSE(interlocks.EvaluateDryRun(4.9f));
+    // Volume drops to 5.9 L -> Dry-Run Trip
+    EXPECT_FALSE(interlocks.EvaluateDryRun(5.9f));
     EXPECT_EQ(interlocks.GetLastFault(), FaultCode::FAULT_DRY_RUN);
 }
 
-// IL-03: Batch Depletion Guard (Reject new batch if Drum 2 > 5.0 L)
+// IL-03: Batch Depletion Guard (Reject new batch if Drum 2 > 8.0 L, D-048)
 TEST_F(SafetyInterlocksTest, IL03_RejectsBatchStartWhenResidualFluidRemains) {
     // Drum 2 has 5.1 L remaining -> Rejected
-    EXPECT_FALSE(interlocks.CanStartNewBatch(/*drum2_volume_l=*/5.1f));
+    EXPECT_FALSE(interlocks.CanStartNewBatch(/*drum2_volume_l=*/8.1f));
     EXPECT_EQ(interlocks.GetLastFault(), FaultCode::FAULT_BATCH_REJECTED);
     
     // Drum 2 fully emptied to 0.0 L -> Permitted
-    EXPECT_TRUE(interlocks.CanStartNewBatch(/*drum2_volume_l=*/0.0f));
+    EXPECT_TRUE(interlocks.CanStartNewBatch(/*drum2_volume_l=*/8.0f));
+    EXPECT_TRUE(interlocks.CanStartNewBatch(/*drum2_volume_l=*/5.0f));
 }
 
 // IL-04: Dual-Stage Fill Guard (Early rise < 1.0 L in 90s OR Total > 20 min)
@@ -226,7 +227,7 @@ TEST_F(SafetyInterlocksTest, GatedReset_RequiresBothPhysicalSwitchAndDrainedDrum
     EXPECT_FALSE(fault_mgr.AttemptReset(/*hw_estop_pressed=*/true, /*drum2_volume_l=*/0.0f));
     EXPECT_TRUE(fault_mgr.IsLatched());
     
-    // Scenario 2: Switch released, but Drum 2 still has fluid (drum2_volume_l > 5.0 L)
+    // Scenario 2: Switch released, but Drum 2 still has fluid (drum2_volume_l > 8.0 L)
     EXPECT_FALSE(fault_mgr.AttemptReset(/*hw_estop_pressed=*/false, /*drum2_volume_l=*/15.0f));
     EXPECT_TRUE(fault_mgr.IsLatched());
     
@@ -556,11 +557,11 @@ describe('UI-09 Reset Fault Button Preconditions', () => {
     expect(screen.getByText(/TOMBOL JAMUR MASIH TERTEKAN/i)).toBeInTheDocument();
   });
 
-  it('remains disabled when Drum 2 volume > 5.0 L', () => {
+  it('remains disabled when Drum 2 volume > 8.0 L', () => {
     render(<ResetFaultButton hwEstopPressed={false} drum2Volume={12.0} />);
     const btn = screen.getByRole('button');
     expect(btn).toBeDisabled();
-    expect(screen.getByText(/KURAS DRUM HINGGA ≤ 5.0 L/i)).toBeInTheDocument();
+    expect(screen.getByText(/KURAS DRUM HINGGA ≤ 8.0 L/i)).toBeInTheDocument();
   });
 
   it('enables when both preconditions are satisfied', () => {
@@ -677,13 +678,13 @@ Before any live nutrient solution is loaded into the greenhouse drums, physical 
 2. **Sensor Calibration Verification:**
    - Radar millimeter-wave level reading matches physical dipstick depth within $\pm 1.0\text{ cm}$ across 0.0 L, 50.0 L, 100.0 L, and 140.0 L graduations.
    - Flow meter pulse calibration verifies 140.0 L fill volume within $\pm 1.5\%$.
-3. **Dry-Run Trip Cutoff:** Drain Drum 2 using distribution pump P1. Verify that when water level drops below 5.0 L, distribution pump P1 de-energizes within $< 50\text{ ms}$ and firmware latches `FAULT_DRY_RUN`.
+3. **Dry-Run Trip Cutoff:** Drain Drum 2 using distribution pump P1. Verify that when water level drops below 6.0 L, distribution pump P1 de-energizes within $\le 200\text{ ms}$ (debounced over 2 frames, `D-048`) and firmware latches `FAULT_DRY_RUN`.
 
 #### Stage 2: Supervised First Nutrient Run
 1. **Concentrate Priming:** Load Concentrate Drum 1 with standard A+B stock solution. Manually jog peristaltic pump PP1 (+10 mL) to prime delivery tube.
 2. **Automated Batch Execution:** Initiate automated batch with Generatif recipe (Target 1250 ppm).
 3. **Tolerance Gate Verification:** Verify that initial dosing injection lands within $[ 1250 - 250, 1250 + 50 ]\text{ ppm}$, single-pass top-up dosing successfully trims TDS into $[ 1200, 1300 ]\text{ ppm}$, and distribution proceeds autonomously without operator intervention.
-4. **Residue Drain:** Verify post-distribution flush and residual drainage cleans lines to $\le 5.0\text{ L}$.
+4. **Residue Drain:** Verify post-distribution flush and residual drainage cleans lines to $\le 8.0\text{ L}$ (`D-048`).
 
 ---
 
