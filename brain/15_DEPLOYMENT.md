@@ -396,6 +396,28 @@ http {
 }
 ```
 
+### 3.2 Eclipse Mosquitto Broker Configuration (`infra/mosquitto/config/mosquitto.conf`)
+
+The MQTT broker enforces transport isolation, authentication, and MQTT 5 message expiry interval (`D-051`):
+
+```conf
+# infra/mosquitto/config/mosquitto.conf
+
+# Plaintext listener strictly bound to OT Fieldbus bridge
+listener 1883 0.0.0.0
+allow_anonymous false
+password_file /mosquitto/config/passwd
+
+# Persistence configuration
+persistence true
+persistence_location /mosquitto/data/
+
+# MQTT 5 Command Message Expiry Interval (D-051)
+# Broker drops and expires unacknowledged queued command packets older than 30 seconds
+max_packet_size 65536
+max_keepalive 60
+```
+
 ---
 
 ## 4. Control-Room HMI Kiosk Provisioning (Cage Wayland + Chromium)

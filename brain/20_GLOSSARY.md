@@ -47,11 +47,11 @@ A strict one-way quality validation threshold enforcing that post-mix fluid TDS 
 _Avoid_: PPM check, EC filter, Quality loop, Dosing tolerance
 
 **Single-Pass Top-Up Recovery**:
-An automated single-attempt corrective addition of concentrate (capped at 300 mL max) triggered only when post-mix TDS falls in $[\text{Target} - 250\text{ ppm},\ \text{Target} - 50\text{ ppm})$. Followed by 60s mixing, 15s settling, and re-evaluation. If still out of band, the batch latches `FAULT_PPM_OUT_OF_RANGE`.
+An automated single-attempt corrective addition of concentrate (capped at 300 mL max) triggered only when post-mix TDS falls in $[\text{Target} - 229.3\text{ ppm},\ \text{Target} - 50\text{ ppm})$ (derived from $300\text{ mL} \times 107.0 / 140.0\text{ L} \approx 229.3\text{ ppm}$, `D-051`). Followed by 60s mixing, 15s settling, and re-evaluation. If still out of band, the batch latches `FAULT_PPM_OUT_OF_RANGE`.
 _Avoid_: Closed-loop auto-dosing, Iterative top-up, Continuous PID dosing, Multi-dose correction
 
 **Concentrate Starvation Detection**:
-An inferential monitoring mechanism where the system detects depletion of Concentrate Drum (Drum 1) when post-dosing TDS exhibits a significant negative deviation ($> 250\text{ ppm}$ deficit below target, e.g. $< 1000\text{ ppm}$ on a 1250 ppm target), raising `STARVATION_SUSPECTED` and aborting dosing without blind chemical hunting.
+An inferential monitoring mechanism where the system detects depletion of Concentrate Drum (Drum 1) when post-dosing TDS exhibits a significant negative deviation ($> 229.3\text{ ppm}$ deficit below target, e.g. $< 1020.7\text{ ppm}$ on a 1250 ppm target, exceeding the $300\text{ mL}$ top-up cap, `D-051`), raising `STARVATION_SUSPECTED` and aborting dosing without blind chemical hunting.
 _Avoid_: Electronic float sensing, Dry run level check, Direct Drum 1 sensing
 
 **Refill Confirmation Gate**:

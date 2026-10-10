@@ -185,10 +185,10 @@ Each Technical Requirement directly satisfies and enforces its corresponding Pro
     - `STABILIZING`: Seluruh aktuator OFF, pengendapan turbulensi cairan selama tepat **15 detik**.
     - `MEASURING_TDS`: Akusisi data sensor ADC multisampling selama **10 detik** (frekuensi sampling 10 Hz, 10-sample moving trimmed median filter).
     - `GATE_EVALUATE`: Evaluasi terhadap gate band $[\text{TDS}_{\text{target}} - 50\text{ ppm}]$ s/d $[\text{TDS}_{\text{target}} + 50\text{ ppm}]$.
-    - `TOPUP_DOSING`: Jika $[\text{TDS}_{\text{target}} - 250\text{ ppm}] \le \text{TDS}_{\text{mean}} < [\text{TDS}_{\text{target}} - 50\text{ ppm}]$, FSM menghitung dosis top-up:
-      $$V_{\text{topup\_mL}} = \min\left( \frac{(\text{TDS}_{\text{target}} - \text{TDS}_{\text{mean}}) \times 140.0}{94.68}, 300.0\text{ mL} \right)$$
+    - `TOPUP_DOSING`: Jika $[\text{TDS}_{\text{target}} - 229.3\text{ ppm}] \le \text{TDS}_{\text{mean}} < [\text{TDS}_{\text{target}} - 50\text{ ppm}]$ (dosis defisit $\le 300\text{ mL}$, `D-051`), FSM menghitung dosis top-up menggunakan konstanta $K_{\text{yield}} = 107.0$:
+      $$V_{\text{topup\_mL}} = \min\left( \frac{(\text{TDS}_{\text{target}} - \text{TDS}_{\text{mean}}) \times 140.0}{107.0}, 300.0\text{ mL} \right)$$
     - `RECOVERY_MIX_EVALUATE`: Single-pass recovery cycle terdiri dari mixing 60 s, stabilizing 15 s, dan measuring 10 s. Jika setelah siklus ini TDS tetap di luar gate band, sistem mengunci `FAULT_PPM_OUT_OF_RANGE`.
-    - **Ambang Kelaparan (Starvation):** Jika $\text{TDS}_{\text{mean}} < (\text{TDS}_{\text{target}} - 250\text{ ppm})$, sistem membunyikan warning `STARVATION_SUSPECTED`.
+    - **Ambang Kelaparan (Starvation):** Jika $\text{TDS}_{\text{mean}} < (\text{TDS}_{\text{target}} - 229.3\text{ ppm})$ (defisit $> 229.3\text{ ppm}$ melampaui batas mekanis $300\text{ mL}$), sistem membunyikan warning `STARVATION_SUSPECTED` dan menghentikan batch tanpa mengaktifkan Relay 2 (`D-051`).
   - **Matriks Terpadu 7 Safety Interlocks:**
     Semua 7 safety interlocks dieksekusi sinkron pada setiap siklus loop 50 ms sebelum memperbarui status GPIO relay:
 

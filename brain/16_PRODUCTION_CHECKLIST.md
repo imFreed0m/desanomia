@@ -17,7 +17,7 @@
   - [ ] Clean water baseline range compiled: $50\text{ to }350\text{ ppm}$ acceptable; $\ge 350\text{ ppm}$ trips `FAULT_BASE_TDS_HIGH`.
   - [ ] 60 GHz radar millimeter-wave UART silence watchdog compiled at $3.0\text{ s}$.
   - [ ] Same-day double distribution lockout enforced with dual friction barrier: mandatory agronomic risk checkbox + 3-second press-and-hold button on `SAME_DAY_FORCE_OVERRIDE` (`D-050`).
-- [ ] **Decision Log Completeness:** Decisions `D-001` through `D-050` in `brain/18_DECISIONS.md` are formally marked `Accepted`, with zero open architectural blockers.
+- [ ] **Decision Log Completeness:** Decisions `D-001` through `D-051` in `brain/18_DECISIONS.md` are formally marked `Accepted`, with zero open architectural blockers.
 - [ ] **Canonical Terminology Compliance:** All documentation and code adheres strictly to `brain/20_GLOSSARY.md` (e.g. `Concentrate Drum 1`, `Distribution Drum 2`, `Gated Fault Reset`, `Pause Mode`).
 
 ---

@@ -174,7 +174,7 @@ The Desanomia dashboard interface is composed of twenty-six signature industrial
 | +-------------------------------------------------------------------------+ +---------------------------------------------------------+ |
 | | UI-05: BATCH EVENT TIMELINE & AUDIT LOG                                 | | UI-15: DASHBOARD SCHEDULE CALENDAR & 7-DAY TIMELINE     | |
 | | 02:01:00 - Transisi IDLE -> FILLING_WATER (140.0 L)                     | | Hari Ini: Pair 1 (Generatif 1250 ppm) [BERJALAN]        | |
-| | 02:03:15 - Transisi CHECK_BASE -> DOSING (Injeksi 380 mL NPK)           | | Besok   : Pair 1 (Generatif 1250 ppm) [06:00 WIB]       | |
+| | 02:03:15 - Transisi CHECK_BASE -> DOSING (Injeksi 1695 mL NPK)          | | Besok   : Pair 1 (Generatif 1250 ppm) [06:00 WIB]       | |
 | | 02:05:00 - Target Tercapai: 1248 ppm (Delta: -2 ppm)                    | | [Sen] [Sel*] [Rab] [Kam] [Jum] [Sab] [Min]              | |
 | +---------------------------------------------------------------------------+-----------------------------------------------------------+ |
 ```
@@ -235,7 +235,7 @@ The Desanomia dashboard interface is composed of twenty-six signature industrial
 ### 4.5 UI-05: Batch Event Timeline
 
 - **Purpose:** Real-time chronological audit trail of state transitions and sensor gates for the active batch.
-- **Event Log Entries:** Displays event timestamp, state transition (`IDLE -> FILLING_WATER`), automated dosing volumes injected (e.g. `Dosed: 380 mL NPK A+B`), stabilization settling times, and tolerance gate evaluation results.
+- **Event Log Entries:** Displays event timestamp, state transition (`IDLE -> FILLING_WATER`), automated dosing volumes injected (e.g. `Dosed: 1695 mL NPK A+B`), stabilization settling times, and tolerance gate evaluation results.
 - **Telemetry Pinning:** Each historical entry displays a snapshot of TDS, temperature, and water level captured at transition time.
 
 ### 4.6 UI-06: Interactive TDS History Chart

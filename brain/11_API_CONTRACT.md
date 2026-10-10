@@ -168,8 +168,9 @@ To prevent HTTP gateway timeouts caused by physical FreeRTOS task scheduling or 
 ```python
 # POST /api/v1/batches
 class BatchCreateRequest(BaseModel):
-    recipe_id: int = Field(..., description="ID of Named Recipe Preset")
+    recipe_id: UUID = Field(..., description="UUID of Named Recipe Preset")
     tank_pair_id: Literal[1] = Field(default=1, description="Tank pair (strictly 1 in Phase 1; pairs 2-5 return 422 until plumbed)")
+    force_same_day_override: bool = Field(default=False, description="Explicit operator override flag for same-day distribution (UX-FR-17, D-050)")
 
 class CommandAcceptedResponse(BaseModel):
     cmd_id: str = Field(..., description="UUIDv4 tracking identifier (echoed from Idempotency-Key or server-generated)")
@@ -373,6 +374,7 @@ Every command carries a UUIDv4 `cmd_id` (mirrored from client `Idempotency-Key` 
 - **30-Second TTL Enforcement (`D-048`):** All commands carry a UTC Unix epoch timestamp in seconds (`ts`). The ESP32 rejects incoming commands if $(\text{now}_{\text{sntp}} - \text{ts}) > 30\text{ s}$ or if clock synchronization is not yet complete (`ERROR_CLOCK_UNSYNCED`).
 - **Safety TTL Exemption:** `ESTOP`, `ABORT_BATCH`, and `RESET_FAULT` commands are strictly **exempt** from the 30s TTL and clock check, ensuring immediate execution.
 - **Clean Session Mandate:** ESP32 connects with `clean_session = true` to prevent the broker from queueing stale commands during offline periods.
+- **Dual-Layer Command TTL & Message Expiry (D-051):** Outbound commands are published with Mosquitto `message_expiry_interval = 30`. ESP32 firmware validates command timestamp against internal SNTP clock, rejecting any command older than 30 seconds ($|t_{\text{now}} - t_{\text{cmd}}| > 30\text{ s}$) with `COMMAND_EXPIRED`.
 
 ```json
 {
@@ -485,9 +487,9 @@ Emitted upon every discrete FSM transition, gate result, top-up injection, or fa
   "to_state": "MIXING",
   "trigger": "DOSING_COMPLETE",
   "payload": {
-    "concentrate_injected_ml": 842.1,
+    "concentrate_injected_ml": 1694.6,
     "target_tds_ppm": 1250,
-    "baseline_tds_ppm": 142.0
+    "baseline_tds_ppm": 104.0
   }
 }
 ```

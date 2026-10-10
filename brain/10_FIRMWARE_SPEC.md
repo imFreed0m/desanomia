@@ -266,8 +266,8 @@ stateDiagram-v2
 | `MIXING` | Mixing Pump (GPIO 6) | 120 seconds countdown complete | `STABILIZING` | `FAULT_ESTOP` if emergency stop triggered. |
 | `STABILIZING` | All Relays OFF | 15 seconds settling complete | `MEASURING_TDS` | `FAULT_ESTOP` if emergency stop triggered. |
 | `MEASURING_TDS` | All Relays OFF | 10 seconds DSP median sample | `GATE_EVALUATE` | `FAULT_TDS_INVALID` if signal noise out of bounds. |
-| `GATE_EVALUATE` | All Relays OFF | Instantaneous logic comparison | `DISTRIBUTING` (Pass)<br>`TOPUP_DOSING` (Deficit) | `FAULT_PPM_OUT_OF_RANGE` (Out of bounds or Starvation). |
-| `TOPUP_DOSING` | Dosing Pump (GPIO 5) | Top-up dose $t = V_{\text{topup\_mL}} \times 0.107$ | `RECOVERY_MIX_EVALUATE` | Capped at $\le 300\text{ mL}$ maximum (`D-001`). |
+| `GATE_EVALUATE` | All Relays OFF | Instantaneous logic comparison | `DISTRIBUTING` (Pass)<br>`TOPUP_DOSING` (Deficit $\le 229.3\text{ ppm}$) | `FAULT_PPM_OUT_OF_RANGE` (Over-concentration) or `STARVATION_SUSPECTED` (Deficit $> 229.3\text{ ppm} \implies V_{\text{calc}} > 300\text{ mL}$, zero dose injected, `D-051`). |
+| `TOPUP_DOSING` | Dosing Pump (GPIO 5) | Top-up dose $t = V_{\text{topup\_mL}} \times 0.107$ | `RECOVERY_MIX_EVALUATE` | Capped strictly at $\le 300\text{ mL}$ maximum ($K_{\text{yield}} = 107.0$, `D-001`, `D-051`). |
 | `RECOVERY_MIX_EVALUATE`| Mixing Pump (GPIO 6) | Mix 60s $\to$ Settle 15s $\to$ Measure 10s | `DISTRIBUTING` (Pass) | `FAULT_PPM_OUT_OF_RANGE` (Zero secondary top-up allowed). |
 | `DISTRIBUTING` | Dist Pump (GPIO 7) | Drum 2 level $\le 8.0\text{ L}$ (Normal Cutoff) | `BATCH_DEPLETED` | `FAULT_DRY_RUN` if level $< 6.0\text{ L}$ while pump ON.<br>`PAUSED` if operator issues `PAUSE_BATCH`. |
 | `PAUSED` | All Relays OFF | `RESUME_BATCH` command | `DISTRIBUTING` | `FAULT_ESTOP` if emergency stop triggered. |
@@ -391,6 +391,20 @@ build_flags =
 
 # Memory Bus Protection: Octal PSRAM GPIOs Locked
 extra_scripts = pre:scripts/protect_psram_pins.py
+
+[env:native]
+platform = native
+build_flags =
+    -std=gnu++17
+    -O0
+    --coverage
+    -DUNIT_TEST
+    -Wl,--wrap=malloc
+    -Wl,--wrap=calloc
+    -Wl,--wrap=realloc
+    -Wl,--wrap=free
+test_build_src = yes
+extra_scripts = test/coverage_script.py
 ```
 
 ### 9.2 Native `sdkconfig.defaults` Specification

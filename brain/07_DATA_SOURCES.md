@@ -227,7 +227,7 @@ When telemetry frames arrive at the FastAPI MQTT subscriber, they are verified a
 | :--- | :--- | :--- | :--- |
 | **Solution TDS** | 1000–1400 ppm (batch) | $< 0\text{ ppm}$ or $> 5000\text{ ppm}$ | Rejection drops reading from chart rollup; flags sensor fault alert. |
 | **Clean Water Baseline** | 50–350 ppm (`CHECK_BASE`) | $< 50\text{ ppm}$ or $\ge 350\text{ ppm}$ | Trips IL-05: `FAULT_TDS_INVALID` (< 50) or `FAULT_BASE_TDS_HIGH` ($\ge 350$). |
-| **Post-Dosing TDS Yield** | $[\text{Target} \pm 250\text{ ppm}]$ | Anomaly delta $> 250\text{ ppm}$ deficit | Flags `STARVATION_SUSPECTED` warning; limits top-up to $\le 300\text{ mL}$. |
+| **Post-Dosing TDS Yield** | $[\text{Target} \pm \text{tolerance\_band\_ppm}]$ (nominal $\pm 50\text{ ppm}$) | Anomaly delta $> 229.3\text{ ppm}$ deficit | Flags `STARVATION_SUSPECTED` warning; halts batch without energizing Relay 2 (top-up exceeds $300\text{ mL}$ cap, `D-051`). |
 | **Drum 2 Level** | 0.0–140.0 L ($0\%–100\%$) | $< 0.0\text{ L}$ or $> 145.0\text{ L}$ | Discards corrupt radar frame; if frames drop $> 3\text{ s} \to$ `FAULT_RADAR_OFFLINE`. |
 | **E-Stop Sensing** | Boolean `false` (normal) | Invalid JSON type | Asserts `hw_estop_pressed = true` failsafe on deserialization failure. |
 | **Relay Feedback** | Boolean map of 4 relays | Invalid relay dictionary | Compares against expected FSM state; logs `ACTUATOR_DISCREPANCY` if mismatched. |

@@ -59,8 +59,8 @@ Desanomia is structured as a tightly coordinated cyber-physical monorepo spannin
 
 The `main` branch represents deployable production code for the greenhouse facility:
 1. **Linear History:** Rebase or Squash-and-merge enforced. No merge commits.
-2. **Required Status Checks:** `firmware`, `backend`, `frontend`, and `e2e` must all report passing.
-3. **Safety Branch Coverage Gate:** Any pull request modifying `firmware/src/safety_interlocks.cpp`, `firmware/src/fsm_engine.cpp`, or `firmware/src/dosing_calculator.cpp` that results in $< 100\%$ branch coverage is **vetoed and blocked from merging**.
+2. **Required Status Checks:** `ci_pass` (Unified Status Check Aggregator) must report passing. Path-filtered workflows report status into the aggregator so PRs touching only a subset of paths are never blocked by skipped jobs.
+3. **Safety Branch Coverage Gate:** Any pull request modifying `firmware/src/safety_interlocks.cpp`, `firmware/src/fsm_engine.cpp`, `firmware/src/dosing_calculator.cpp`, or `firmware/src/sensor_dsp.cpp` that results in $< 100\%$ branch coverage is **vetoed and blocked from merging**.
 4. **Signed Commits:** GPG/SSH commit signature verification enabled.
 
 ---
@@ -93,10 +93,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Clang-Tidy and Cppcheck
+      - name: Install Clang-Tidy, Cppcheck and LCOV
         run: |
           sudo apt-get update
           sudo apt-get install -y clang-tidy cppcheck lcov
+
+      - name: Run Clang-Tidy Static Analysis
+        run: |
+          clang-tidy --warnings-as-errors=* -p . src/*.cpp -- -std=c++17 -Iinclude
 
       - name: Run Cppcheck
         run: |
@@ -133,7 +137,7 @@ jobs:
       - name: Calculate Branch Coverage for Safety Modules
         run: |
           lcov --capture --directory .pio/build/native --output-file coverage.info
-          lcov --extract coverage.info "*/src/safety_interlocks.cpp" "*/src/fsm_engine.cpp" "*/src/dosing_calculator.cpp" --output-file safety_coverage.info
+          lcov --extract coverage.info "*/src/safety_interlocks.cpp" "*/src/fsm_engine.cpp" "*/src/dosing_calculator.cpp" "*/src/sensor_dsp.cpp" --output-file safety_coverage.info
           
           # Enforce 100% branch coverage on safety-critical files
           BRANCH_COV=$(lcov --summary safety_coverage.info | grep "branches" | awk '{print $2}' | tr -d '%')
@@ -270,7 +274,7 @@ jobs:
           DATABASE_URL: postgresql+asyncpg://postgres:testpassword@localhost:5432/desanomia_test
         run: alembic upgrade head
 
-      - name: Execute Pytest Suite with Coverage Gate (>= 85%)
+      - name: Execute Pytest Suite with Coverage Gate (>= 85% total, >= 95% commands/safety)
         env:
           DATABASE_URL: postgresql+asyncpg://postgres:testpassword@localhost:5432/desanomia_test
           MQTT_HOST: localhost
@@ -279,9 +283,23 @@ jobs:
         run: |
           pytest -v \
                  --cov=app \
+                 --cov-branch \
                  --cov-report=term-missing \
                  --cov-report=xml \
                  --cov-fail-under=85
+          
+          # Enforce 95% branch coverage on safety-critical command & scheduler modules
+          python -c "
+          import xml.etree.ElementTree as ET, sys
+          tree = ET.parse('coverage.xml')
+          for pkg in tree.findall('.//package'):
+              if any(k in pkg.attrib.get('name', '') for k in ['commands', 'scheduler', 'mqtt_bridge']):
+                  rate = float(pkg.attrib.get('branch-rate', 0.0)) * 100
+                  print(f'Package {pkg.attrib.get(\"name\")}: branch coverage {rate:.1f}%')
+                  if rate < 95.0:
+                      print(f'ERROR: Branch coverage for {pkg.attrib.get(\"name\")} must be >= 95.0%')
+                      sys.exit(1)
+          "
 
       - name: Upload Backend Coverage Report
         uses: actions/upload-artifact@v4
