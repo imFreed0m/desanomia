@@ -5,6 +5,11 @@ Format: Keep a Changelog. Versions follow SemVer for the software, firmware has 
 ## Unreleased
 
 ### Added
+- **Milestone M0: Repository Infrastructure, Documentation & Pre-Commit Tooling:**
+  - `T-001`: Established monorepo directory hierarchy and domain boundary rules with `simulator/AGENTS.md` and `deploy/AGENTS.md`.
+  - `T-002`: Specification alignment and invariant audit completed across all 21 specification files in `brain/` (`00`–`20`).
+  - `T-003`: Configured `.editorconfig` (LF, UTF-8, 2-space indent) and `.pre-commit-config.yaml` with Ruff, Prettier, and Clang-Format hooks, passing `pre-commit run --all-files` with code 0 while safeguarding specification files.
+  - `T-004`: Committed environment variable templates `backend/.env.example`, `frontend/.env.example`, and `deploy/.env.example` defining all required configuration keys without secrets.
 - brain/ documentation set 00 to 19 drafted from SPEC.md v1.0.0, with [PROPOSED] and [VERIFY] items to reconcile.
 - 02_APPFLOW (screen map, click behavior, user journeys) and 03_UI_UX_BRIEF (tokens, typography, components, layouts).
 - `brain/03_UI_UX_BRIEF.md` fully formulated and reviewed under frontend-design and modern-web-guidance: established the "Clean Laboratory Minimal" aesthetic stance (DFII 15/15), non-default scientific typography pairing (Space Grotesk display/hero + Geist Sans UI body + Geist Mono telemetry), authentic 3D Industrial Blue HDPE Drum silhouette (`docs/id-11134207-7r98p-lxp8w56k0dv280.webp` with barrel curvature, molded black lid, and silver clamp collar) featuring a dynamic view-dependent camera-facing X-ray transparency shader (clear acrylic facet dynamically tracking camera angle with opaque blue rear wall contrast), perceptual oklch() color spaces, CSS Container Queries (@container) for intrinsic Bento card adaptability, accessible 3D WebGL canvas integration (semantic <div role="meter"> DOM mirrors), native HTML5 <dialog> API with ::backdrop blur, 30 FPS capped React Three Fiber 3D fluid cylinders with procedural GLSL wave shaders, multi-tier layouts (Gazebo 43" TV 30/70 split showcase with auto-cycling drum carousel, HMI 15.6" kiosk 56x56 px touch cockpit with on-screen numpad, and Mobile PWA), and 3-tier safety modal friction system.

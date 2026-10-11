@@ -146,9 +146,9 @@ _Avoid_: Cloud font loading, CDN script injection, Online bundle dependency
 
 ## 5. UI/UX & Operator Cockpit Ergonomics
 
-**Industrial Cockpit Design System**:
-The visual and interaction design philosophy for the greenhouse control room: high-contrast dark theme (`bg-slate-950` foundation `#020617`, `bg-slate-900` cards `#0F172A`, `border-slate-800` borders `#1E293B`, `D-050`), Space Grotesk display headers, Geist Sans body copy, tabular numerals (`tabular-nums`), WCAG 2.2 AAA compliant contrast ($\ge 7:1$ text contrast, with `--text-muted` #94A3B8 on #020617 yielding 7.3:1), and large touch targets (uniform $\ge 56 \times 56\text{ CSS px}$ for routine interactive controls on Tier 1 Kiosk, $\ge 64 \times 64\text{ CSS px}$ for Master E-Stop and batch initiation buttons, `D-050`).
-_Avoid_: SaaS generic dashboard, Low-contrast gray, Light theme default, AI slop
+**Clean Minimalist Laboratory Design System**:
+The visual and interaction design philosophy for the greenhouse control room: light, clean, and sleek Scandinavian minimalist aesthetic matching the Aeros design reference (`#F8FAFC` warm off-white canvas, `#FFFFFF` pure white cards with 28px curvature, `#E2E8F0` hairline borders, generous whitespace, large bold metric numerals, soft pastel status pills, smooth dual-gradient cubic spline wave charts), Inter / Plus Jakarta Sans typography, tabular numerals (`tabular-nums`), WCAG 2.2 compliant contrast ($\ge 4.5:1$ text), and large touch targets (uniform $\ge 56 \times 56\text{ CSS px}$ for routine interactive controls on Tier 1 Kiosk, prominent coral-red pill for Master E-Stop).
+_Avoid_: Heavy industrial dark theme, Cluttered mechanical gauges, Cramped data tables, Low-contrast gray, AI slop
 
 **Pessimistic UI Mutation Discipline**:
 The interaction pattern where clicking an actuator or state-changing button immediately disables the button, displays a pending spinner, and holds the interface state until hardware confirmation is returned over WebSocket/MQTT telemetry. If confirmation is not received within 3.0 seconds, the mutation enters `OUTCOME_UNKNOWN` (`D-047`, `D-050`): controls remain locked, an amber caution state is displayed, telemetry polling reconciles actual state, and any operator retry reuses the exact same `cmd_id` to prevent duplicate dosing.

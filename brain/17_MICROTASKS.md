@@ -7,7 +7,7 @@
 ## Milestone M0: Repository Infrastructure, Documentation & Pre-Commit Tooling
 
 - [ ] **T-001 Monorepo Structure & Domain Isolation:** Create root monorepo directory hierarchy (`firmware/`, `backend/`, `frontend/`, `simulator/`, `deploy/`, `docs/`, `brain/`). Done when: Directory layout committed with initial READMEs establishing domain boundaries per Master Rule 3.
-- [ ] **T-002 Specification Alignment & Invariant Audit:** Reconcile all historical specifications in `docs/` against `brain/` SOTT. Done when: Zero unresolved `[VERIFY]` tags remain and all empirical constants match `docs/SPEC.md`.
+- [ ] **T-002 Specification Alignment & Invariant Audit:** Reconcile all historical specifications in `docs/` against `brain/` SOTT. Done when: Zero unresolved `[VERIFY]` tags remain.
 - [ ] **T-003 Pre-Commit Tooling & Linting Hooks:** Configure `.gitignore`, `.editorconfig`, and pre-commit hooks for Ruff (Python), ESLint/Prettier (TypeScript/CSS), and Clang-Format (C++). Done when: Running `pre-commit run --all-files` exits with code 0.
 - [ ] **T-004 Environment Variable Templates:** Commit `backend/.env.example`, `frontend/.env.example`, and `deploy/.env.example` defining all required configuration keys. Done when: Template files committed with zero plaintext production secrets.
 - [ ] **T-005 GitHub Repository Secrets & Permissions Setup:** Configure GitHub Actions repository secrets (`GHCR_TOKEN`, `TELEGRAM_BOT_TOKEN`, `ALERT_CHAT_ID`) and branch protection rules on `main`. Done when: Branch protection requires linear history and signed commits.

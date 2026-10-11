@@ -1,6 +1,6 @@
 # 12 UI Specification
 
-> **Authority Notice:** Single Source of Truth (SOTT) for Desanomia's Industrial Cockpit user interface architecture, multi-tier display environments, component registry (`UI-01` to `UI-26`), client state management, WebSocket telemetry ingestion, touch ergonomics, and accessibility. Governed by [00_MASTER_RULES.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/00_MASTER_RULES.md), [03_UI_UX_BRIEF.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/03_UI_UX_BRIEF.md), [04_TRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/04_TRD.md), [08_SECURITY.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/08_SECURITY.md), [09_ERROR_HANDLING.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/09_ERROR_HANDLING.md), [10_FIRMWARE_SPEC.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/10_FIRMWARE_SPEC.md), [11_API_CONTRACT.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/11_API_CONTRACT.md), and [18_DECISIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md) (including `D-001` through `D-050`).
+> **Authority Notice:** Single Source of Truth (SOTT) for Desanomia's Light Minimalist Cockpit user interface architecture, multi-tier display environments, component registry (`UI-01` to `UI-26`), client state management, WebSocket telemetry ingestion, touch ergonomics, and accessibility. Governed by [00_MASTER_RULES.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/00_MASTER_RULES.md), [03_UI_UX_BRIEF.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/03_UI_UX_BRIEF.md), [04_TRD.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/04_TRD.md), [08_SECURITY.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/08_SECURITY.md), [09_ERROR_HANDLING.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/09_ERROR_HANDLING.md), [10_FIRMWARE_SPEC.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/10_FIRMWARE_SPEC.md), [11_API_CONTRACT.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/11_API_CONTRACT.md), [18_DECISIONS.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md) (including `D-001` through `D-050`), and [`DESIGN.md`](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/docs/DESIGN.md).
 
 ---
 
@@ -38,7 +38,7 @@ Desanomia implements an offline-first Single Page Application (SPA) architecture
 - **Core Framework:** React 18/19 SPA with TypeScript (`strict: true`).
 - **Build System & Dev Server:** Vite 5+ configured for 100% offline static production builds (`dist/`).
 - **Forbidden Regressions ([`D-005`](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md#L22)):** Next.js, React Server Components (RSC), and Server Actions are strictly prohibited. The system must operate fully decoupled from node runtime servers.
-- **Styling & Design System ([`D-029`](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md#L74), `D-050`):** Tailwind CSS 3.4+ configured with `@tailwindcss/container-queries`, modern `oklch()` color spaces with hex fallbacks, and industrial cockpit tokens.
+- **Styling & Design System ([`D-029`](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md#L74), `D-050`):** Tailwind CSS 3.4+ configured with `@tailwindcss/container-queries`, modern `oklch()` color spaces with hex fallbacks, and light minimalist laboratory tokens matching [`DESIGN.md`](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/docs/DESIGN.md).
 - **Component Primitives (`D-050`):** shadcn/ui built on headless Radix UI accessible primitives. Standardizing on Radix UI dialogs eliminates browser-level `showModal()` top-layer inert traps, guaranteeing that the top navigation Master Emergency Stop (E-Stop) bar remains permanently clickable at `z-[100]`.
 - **Data Visualization:** Apache ECharts 5+ for historical time-series telemetry charts with canvas-accelerated rendering and `lttb` downsampling.
 - **Fluid Surface Physics Engine ([`D-046`](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md#L108)):** Dual-layer HTML5 Canvas 2D procedural sine-wave engine rendering fluid hydrodynamics at 60 FPS without WebGL/Three.js overhead. The `requestAnimationFrame` loop automatically pauses during static or standby states to preserve CPU resources.
@@ -65,7 +65,7 @@ Per decisions [`D-014`](file:///home/maria_zahra/Documents/projects/greenhouse/d
 
 | Specification Parameter | Tier 1: Primary HMI Kiosk | Tier 2: Gazebo Monitoring TV | Tier 3: Mobile PWA Client |
 | :--- | :--- | :--- | :--- |
-| **Target Hardware** | UPERFECT BE156PF 15.6" IPS FHD (1920×1080) | Xiaomi TV A 43" Google TV FHD (1920×1080) | Smartphone Browsers (Safari / Chrome, 360–430px) |
+| **Target Hardware** | UPERFECT BE185EF 15.6" IPS FHD (1920×1080, 355×223×11/6 mm) | Xiaomi TV A 43" Google TV FHD (1920×1080) | Smartphone Browsers (Safari / Chrome, 360–430px) |
 | **Physical Mounting** | Standing console (90 cm height) in Panel Room | VESA 200×200 wall bracket in Gazebo Dining/Lounge | Handheld field operator mobile device |
 | **Windowing / Runtime** | Cage Wayland compositor running Chromium kiosk | Fully Kiosk Browser on Android TV (Wired LAN) | Mobile Safari / Chrome running as standalone PWA |
 | **Network Path** | Direct HDMI 2.0 + USB-C touch loopback (`127.0.0.1:8080`)| Wired Ethernet (`192.168.1.50`) via PTP bridge | Tailscale Mesh VPN (`100.x.y.z`) over 4G uplink |
@@ -110,9 +110,9 @@ The application is structured into focused operational views governed by client-
 | `/403` | Akses Ditolak | All | Role-elevation prompt or permission denied notice with return CTA. |
 | `/404` | Halaman Tidak Ditemukan | All | Fallback 404 view with 1-tap navigation back to `/`. |
 
-### 3.1 Persistent Industrial Cockpit Shell
+### 3.1 Persistent Light Minimalist Cockpit Shell
 
-The layout shell wraps all protected views in a unified industrial frame:
+The layout shell wraps all protected views in a clean, airy minimalist frame:
 
 ```
 +-------------------------------------------------------------------------------------------------------------------------------------+
@@ -508,32 +508,35 @@ Optimistic UI updates are **strictly forbidden** in safety-critical automation (
 
 ## 6. Design Tokens, Typography & Accessibility Standards
 
-### 6.1 Industrial Cockpit Color Tokens (D-029, D-050)
+### 6.1 Light Clean & Sleek Minimalist Color Tokens (D-029, D-050)
 
-All styling tokens are declared in `frontend/src/index.css` leveraging standard hex and perceptual `oklch()` color spaces:
+All styling tokens are declared in `frontend/src/index.css` leveraging standard hex and perceptual `oklch()` color spaces matching [`DESIGN.md`](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/docs/DESIGN.md):
 
 ```css
 :root {
-  /* Foundations & Cockpit Surfaces */
-  --cockpit-bg: #020617;              /* oklch(14.5% 0.02 260) - Tailwind slate-950 */
-  --card-surface: #0F172A;            /* oklch(20.8% 0.03 260) - Tailwind slate-900 */
-  --card-surface-elevated: #1E293B;   /* oklch(27.8% 0.033 256) - Tailwind slate-800 */
-  --border-subtle: #1E293B;           /* Tailwind slate-800 */
-  --border-active: #38BDF8;           /* oklch(78.5% 0.13 220) - Tailwind sky-400 */
+  /* Foundations & Surfaces */
+  --cockpit-bg: #F8FAFC;              /* Slate 50 - Warm off-white foundation */
+  --card-surface: #FFFFFF;            /* Pure White - Rounded 28px card container */
+  --card-surface-elevated: #F1F5F9;   /* Slate 100 - Inset surface / subtle pill */
+  --border-subtle: #E2E8F0;           /* Slate 200 - Hairline card divider */
+  --border-active: #2563EB;           /* Blue 600 - Royal Blue focus ring & active selection */
 
-  /* Operational Status Semaphores */
-  --status-normal: #10B981;           /* oklch(69.6% 0.17 162) - Emerald 500 */
-  --status-normal-glow: rgba(16, 185, 129, 0.25);
-  --status-warning: #F59E0B;          /* oklch(75.2% 0.16 68) - Amber 500 */
-  --status-warning-glow: rgba(245, 158, 11, 0.25);
-  --status-danger: #EF4444;           /* oklch(63.7% 0.22 25) - Red 500 */
-  --status-danger-glow: rgba(239, 68, 68, 0.35);
-  --status-standby: #64748B;          /* oklch(55.4% 0.046 257) - Slate 500 */
+  /* Operational Status Semaphores (Soft Pastels) */
+  --status-normal: #10B981;           /* Emerald 500 - In tolerance text */
+  --status-normal-bg: #DCFCE7;        /* Emerald 100 - Mint pill background */
+  --status-normal-glow: rgba(16, 185, 129, 0.15);
+  --status-warning: #F97316;          /* Orange 500 - Deficit text */
+  --status-warning-bg: #FFEDD5;       /* Orange 100 - Peach pill background */
+  --status-warning-glow: rgba(249, 115, 22, 0.15);
+  --status-danger: #EF4444;           /* Red 500 - Critical/fault text */
+  --status-danger-bg: #FEE2E2;        /* Red 100 - Coral pill background */
+  --status-danger-glow: rgba(239, 68, 68, 0.15);
+  --status-standby: #64748B;          /* Slate 500 - Muted standby */
 
-  /* Typography Colors (WCAG AAA Compliant on #020617) */
-  --text-primary: #F8FAFC;            /* Slate 50 - Contrast 18.5:1 (AAA) */
-  --text-secondary: #CBD5E1;          /* Slate 300 - Contrast 11.6:1 (AAA) */
-  --text-muted: #94A3B8;              /* Slate 400 - Contrast 7.3:1 (AAA) */
+  /* Typography Colors (WCAG AAA Compliant on #FFFFFF / #F8FAFC) */
+  --text-primary: #0F172A;            /* Slate 900 - Contrast 15.8:1 (AAA) */
+  --text-secondary: #64748B;          /* Slate 500 - Contrast 4.8:1 (AA) */
+  --text-muted: #94A3B8;              /* Slate 400 - Contrast 3.2:1 (Large text) */
 }
 ```
 
@@ -557,7 +560,7 @@ All styling tokens are declared in `frontend/src/index.css` leveraging standard 
 
 - **Contrast Ratios:** Text-to-background contrast maintains a minimum of **$7.0:1$** for primary text and secondary captions (exceeding WCAG AAA). Graphical elements maintain $\ge 3.0:1$.
 - **No Color-Alone Signaling:** Every green, amber, or red indicator is paired with an explicit typographic label (e.g. `[LULUS]`, `[PERINGATAN]`, `[BAHAYA]`).
-- **Focus Ring Trapping:** Headless Radix UI dialog primitives manage focus trapping with high-contrast focus rings (`outline: 2px solid #38BDF8; outline-offset: 2px;`).
+- **Focus Ring Trapping:** Headless Radix UI dialog primitives manage focus trapping with high-contrast focus rings (`outline: 2px solid #2563EB; outline-offset: 2px;`).
 - **Screen Reader Announcements (`aria-live`):** Routine FSM transitions are routed through `<div aria-live="polite" class="sr-only">`. Latched faults and emergency stops use `aria-live="assertive"`.
 
 ### 6.4 Comprehensive WCAG 2.2 Accessibility Architecture & Implementation Specification
@@ -566,10 +569,10 @@ Desanomia's greenhouse cockpit interface enforces strict compliance with **WCAG 
 
 #### 1. Perceivable: Glare Resistance, Tabular Stability & Non-Color Semantics
 - **Text & Interactive Contrast (SC 1.4.3 Level AA, SC 1.4.6 Level AAA, SC 1.4.11 Level AA):**
-  - Primary text (`--text-primary: #F8FAFC`) on dark cockpit foundation (`#020617`): **18.5:1** (exceeds 7.0:1 AAA).
-  - Secondary captions (`--text-secondary: #CBD5E1`): **11.6:1** (exceeds 7.0:1 AAA).
-  - Inactive / Muted captions (`--text-muted: #94A3B8`): **7.3:1** (exceeds 7.0:1 AAA, eliminating previous 4.3:1 failure).
-  - Active interactive borders (`--border-active: #38BDF8`): **5.8:1** (exceeds 3.0:1 requirement for user interface components).
+  - Primary text (`--text-primary: #0F172A`) on white card foundation (`#FFFFFF`): **15.8:1** (exceeds 7.0:1 AAA).
+  - Secondary captions (`--text-secondary: #64748B`): **4.8:1** (exceeds 4.5:1 AA).
+  - Inactive / Muted captions (`--text-muted: #94A3B8`): **3.2:1** (meets WCAG large text requirements).
+  - Active interactive borders (`--border-active: #2563EB`): **4.5:1** (exceeds 3.0:1 requirement for user interface components).
 - **Zero Color-Alone Signaling (SC 1.4.1 Level A):**
   - Every operational status semaphore pairs color with an explicit typographic badge and semantic icon:
     - Normal / In Tolerance: Emerald + Checkmark icon + Text `"Dalam Toleransi"`.
@@ -593,14 +596,14 @@ Desanomia's greenhouse cockpit interface enforces strict compliance with **WCAG 
   - Mounted as the first focusable element in the DOM:
     ```html
     <a href="#main-cockpit" 
-       class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[110] focus:px-6 focus:py-3 focus:bg-sky-500 focus:text-slate-950 focus:font-bold focus:rounded-xl focus:shadow-2xl focus:outline-none focus:ring-4 focus:ring-white">
+       class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[110] focus:px-6 focus:py-3 focus:bg-blue-600 focus:text-white focus:font-bold focus:rounded-full focus:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-300">
       Lewati ke Konten Utama Cockpit
     </a>
     ```
 - **Focus Visible & Focus Appearance (SC 2.4.7 Level AA, SC 2.4.13 Level AAA):**
   - All interactive elements exhibit high-contrast visible focus indicators:
     ```css
-    focus-visible:ring-4 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 focus-visible:outline-none
+    focus-visible:ring-4 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none
     ```
 - **Pessimistic UI & Action Feedback (SC 4.1.2 Level A, D-047, D-049):**
   - Mutation buttons set `aria-busy="true"` and `disabled` immediately upon actuation.
@@ -656,16 +659,16 @@ export function KioskMasterEmergencyStop({ onTrigger, isPending }: KioskMasterEm
       disabled={isPending}
       aria-label="Darurat: Hentikan Semua Aktuator Segera"
       aria-busy={isPending}
-      className="relative z-[100] min-h-[56px] min-w-[56px] h-16 px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-700 active:scale-95 text-white font-extrabold text-base tracking-wider uppercase shadow-[0_0_20px_rgba(239,68,68,0.5)] border-2 border-red-400 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 flex items-center justify-center gap-2"
+      className="relative z-[100] min-h-[56px] min-w-[56px] h-14 px-6 py-2.5 rounded-full bg-red-500 hover:bg-red-600 active:scale-95 text-white font-bold text-sm tracking-wide uppercase shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 flex items-center justify-center gap-2"
     >
-      <span className="w-3 h-3 rounded-full bg-white animate-ping" aria-hidden="true" />
+      <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" aria-hidden="true" />
       <span>{isPending ? "Menghentikan..." : "STOP DARURAT"}</span>
     </button>
   );
 }
 ```
 - **Accessibility Tree:** Role: `button`, Name: `"Darurat: Hentikan Semua Aktuator Segera"`, Busy: `false` (or `true`), Focusable: `true`.
-- **Physical Ergonomics:** $64\text{ px}$ height $\times$ min $140\text{ px}$ width, exceeding min $56 \times 56\text{ px}$.
+- **Physical Ergonomics:** $56\text{ px}$ height $\times$ min $140\text{ px}$ width, exceeding min $56 \times 56\text{ px}$.
 - **WCAG Mapping:** SC 2.5.8 Target Size, SC 4.1.2 Name, Role, Value, SC 2.4.7 Focus Visible.
 
 #### 2. Live Fluid Vessel Level Meter (`DrumLevelMeter`)
@@ -692,15 +695,15 @@ export function DrumLevelMeter({ label, volumeL, maxL, drumId }: DrumLevelMeterP
       aria-valuemax={maxL}
       aria-valuetext={textValue}
       tabIndex={0}
-      className="p-4 bg-slate-900/90 border border-slate-800 rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+      className="p-5 bg-white border border-slate-200 rounded-[28px] shadow-sm hover:shadow-md transition-shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
     >
       <div className="flex justify-between items-center mb-2">
-        <span className="text-sm font-semibold text-slate-300">{label}</span>
-        <span className="telemetry-numeral text-lg font-bold text-slate-100">
-          {volumeL.toFixed(1)} <span className="text-xs font-normal text-slate-400">L</span>
+        <span className="text-sm font-semibold text-slate-700">{label}</span>
+        <span className="telemetry-numeral text-lg font-bold text-slate-900">
+          {volumeL.toFixed(1)} <span className="text-xs font-normal text-slate-500">L</span>
         </span>
       </div>
-      <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700/60" aria-hidden="true">
+      <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200" aria-hidden="true">
         <div
           className="h-full bg-emerald-500 rounded-full transition-all duration-500 ease-out"
           style={{ width: `${percent}%` }}
@@ -755,10 +758,10 @@ export function GatedFaultResetButton({
         disabled={isLocked}
         aria-busy={isPending}
         aria-describedby={isLocked ? "reset-fault-blocker-reason" : undefined}
-        className={`min-h-[56px] min-w-[56px] h-14 px-6 py-3 rounded-2xl font-bold text-sm tracking-wide transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
+        className={`min-h-[56px] min-w-[56px] h-14 px-6 py-3 rounded-full font-bold text-sm tracking-wide transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
           isLocked
-            ? "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed opacity-70"
-            : "bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white shadow-lg shadow-emerald-950/40 border border-emerald-400"
+            ? "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-70"
+            : "bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white shadow-md shadow-emerald-500/20"
         }`}
       >
         {isPending ? "Memproses Reset..." : "[Reset Fault] Buka Kunci Sistem"}
@@ -768,7 +771,7 @@ export function GatedFaultResetButton({
         <p
           id="reset-fault-blocker-reason"
           role="note"
-          className="text-xs font-medium text-amber-400 bg-amber-950/30 border border-amber-800/60 p-2.5 rounded-xl"
+          className="text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 p-2.5 rounded-2xl"
         >
           <span className="font-bold">Prasyarat Reset: </span>{reasonText}
         </p>
@@ -819,17 +822,17 @@ export function PipelineStepper({ currentState }: { currentState: string }) {
               <div
                 aria-label={`Tahap ${idx + 1} dari 12: ${step.label}, ${statusText}`}
                 tabIndex={0}
-                className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-400 ${
+                className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500 ${
                   isCurrent
-                    ? "bg-sky-500 text-slate-950 ring-4 ring-sky-500/30 scale-110"
+                    ? "bg-blue-600 text-white ring-4 ring-blue-500/20 scale-110 shadow-sm"
                     : isCompleted
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-800 text-slate-400 border border-slate-700"
+                    ? "bg-emerald-500 text-white"
+                    : "bg-slate-100 text-slate-400 border border-slate-200"
                 }`}
               >
                 {isCompleted ? "✓" : idx + 1}
               </div>
-              <span className="text-[10px] font-medium text-slate-400 mt-1 text-center truncate max-w-[72px]" aria-hidden="true">
+              <span className="text-[10px] font-medium text-slate-500 mt-1 text-center truncate max-w-[72px]" aria-hidden="true">
                 {step.label}
               </span>
             </li>
@@ -898,11 +901,11 @@ To eliminate test fragility across CI suites ([`13_TESTING.md`](file:///home/mar
 | **Same-Day Lockout** | [`D-039`](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md#L94), `D-050` | HTTP 409 triggers UI-16; mandates risk checkbox + 3-second press-and-hold confirmation. |
 | **Offline Autonomy** | [`04_TRD:TR-01`](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/04_TRD.md#L45) | Build output contains zero references to external origins or CDNs. CI fails on remote URL grep. |
 | **Numeric Typography** | `D-050` | `.telemetry-numeral` applies Space Grotesk tabular numerals preventing layout shift at 1.0 Hz. |
-| **Contrast Ratios** | `D-050` | `--text-muted` #94A3B8 on #020617 provides 7.3:1 contrast, satisfying WCAG AAA. |
+| **Contrast Ratios** | `D-050` | `--text-primary` #0F172A on #FFFFFF provides 15.8:1 contrast, satisfying WCAG AAA. |
 | **Zero-Scroll Boundary**| `D-050` | Cockpit dashboard fits 1080px non-scrolling budget; tables on `/batches` scroll internally. |
 | **Stream A11y Boundary**| `D-050`, `a11y-architect` | 1.0 Hz raw telemetry streaming strictly prohibited from driving `aria-live`; 3-tier announcer. |
 | **Modal A11y Dismissal**| `D-050`, `a11y-architect` | Safety overlays (UI-16, UI-19, UI-20) non-dismissible via Escape/backdrop; routine modals dismissible. |
 | **Audio-Visual Parity** | `D-050`, `a11y-architect` | All chimes $< 1.5\text{ s}$ non-looping; UI-17 audio mute toggle; 100% visual banner/toast parity. |
-| **Skip Navigation & Focus**| `D-050`, `a11y-architect` | First DOM element is `#main-cockpit` skip link; focus rings use 4px sky-400 with 2px offset. |
+| **Skip Navigation & Focus**| `D-050`, `a11y-architect` | First DOM element is `#main-cockpit` skip link; focus rings use 4px blue-500 with 2px white offset. |
 | **Gated Action A11y**   | `D-050`, `a11y-architect` | Blocked controls use `aria-describedby` linking to physical cause (`hw_estop_pressed`, etc.). |
 

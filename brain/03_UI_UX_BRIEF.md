@@ -2,89 +2,71 @@
 
 Visual design language, component tokens, SVG/Canvas fluid rendering, and per-screen layout specifications for Desanomia. This document establishes the definitive visual and architectural authority, ensuring pixel-perfect, accessible, and high-performance interfaces across all display tiers. Functional behavior is detailed in `12_UI_SPEC`, and navigation flows are specified in `02_APPFLOW`.
 
-> [!IMPORTANT] Theme & Modal Architecture Authority (D-029, D-050)
-> Under Architectural Decisions **D-029** and **D-050**, the **Dark Slate Industrial Cockpit** (`#020617` foundation, `#0F172A` cards, `#1E293B` borders) is the authoritative primary theme across all physical greenhouse displays (Tier 1 Kiosk and Tier 2 Gazebo TV), formally superseding early light-mode "Clean Laboratory Minimal" draft explorations. 
-> Furthermore, per **D-050**, modal architecture standardizes on accessible Radix UI / shadcn dialog primitives with a persistent `z-[100]` Master E-Stop header bar mounted outside modal backdrops, replacing HTML5 native `<dialog>.showModal()` to eliminate top-layer inert traps.
-> All production component implementations, tokens, and contrast ratios are governed by [`brain/12_UI_SPEC.md`](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/12_UI_SPEC.md).
+> [!IMPORTANT] Theme & Design Authority
+> The **Light Clean & Sleek Scandinavian Minimalist** theme (`#F8FAFC` warm off-white canvas, `#FFFFFF` pure white cards with 28px curvature, `#E2E8F0` subtle borders) is the authoritative primary design language for Desanomia (strictly matching the reference design). There is no dark theme in Version 1; the interface is light, airy, uncluttered, and effortlessly glanceable.
+> Furthermore, modal architecture standardizes on accessible Radix UI / shadcn dialog primitives with a persistent Master E-Stop header button mounted outside modal backdrops.
+> All production component implementations, tokens, and contrast ratios are governed by this standard and [`DESIGN.md`](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/docs/DESIGN.md).
 
 ---
 
-## 1. Design Philosophy: Industrial Cockpit & Scientific Ergonomics
+## 1. Design Philosophy: Light, Clean & Sleek Minimalist UI
 
-Desanomia breaks decisively from cluttered, hobbyist IoT boards and generic SaaS templates. It establishes a dedicated aesthetic stance: **Dark Slate Industrial Cockpit**—an ultra-crisp, high-craft scientific cockpit combining horticultural biology with precision laboratory instrumentation.
+Desanomia establishes a dedicated aesthetic stance: **Light Scandinavian Minimalist Laboratory**—inspired by modern, high-end clean IoT interfaces with generous breathing room, crisp card containers, bold typography, and zero visual clutter.
 
 ### 1.1 Core Aesthetic Mandates
 
-1. **Intentional Aesthetic Direction (Dark Slate Industrial Cockpit, D-029, D-050):**
-   - High-contrast, glare-resistant dark atmosphere designed for 24/7 readability under variable greenhouse and panel room lighting.
-   - Deep slate foundation (`#020617`) with elevated Bento cards (`#0F172A`), crisp architectural micro-borders (`#1E293B`), and WCAG AAA compliant text contrast (`#F8FAFC` primary, `#CBD5E1` secondary, `#94A3B8` muted at 7.3:1).
+1. **Clean Light Mode Canvas:**
+   - Soft warm off-white canvas foundation (`#F8FAFC` / `#F4F5F7`) with elevated pure white cards (`#FFFFFF`).
+   - Generous rounded corners (`border-radius: 28px` / `rounded-3xl`) and soft, diffuse ambient drop shadows (`box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.04)`).
+   - High text contrast with crisp slate typography (`#0F172A` primary, `#64748B` secondary, `#94A3B8` muted).
 2. **Differentiation Anchor:**
-   > *"If this interface were screenshotted with the logo and title removed, an engineer or researcher would immediately recognize it by the dual glass fluid vessels with real-time procedural wave physics, volumetric Liters calibrations, Space Grotesk scientific telemetry numerals, and the asymmetric horticultural Bento grid."*
-3. **Status Semantics Over Decorative Color:**
-   - Color is strictly reserved for process meaning (OK, Warning, Danger, Idle).
-   - Interactive primary buttons use vibrant Royal Blue (`#2563EB`) so they are never conflated with operational green status indicators.
-4. **Touch-First Panel Ergonomics (Panel Room Cockpit, D-050):**
-   - Uniform minimum interactive tap target of **56×56 CSS px** on the HMI Kiosk (with **64×64 CSS px** for Master E-Stop and batch initiation) for reliable operation with nitrile gloves.
-   - Integrated On-Screen Touch Numpad ($72 \times 72\text{ px}$ keys) for numeric entries and 6-digit Kiosk PIN elevation—completely eliminating awkward operating system virtual keyboards in the panel room.
-5. **Lightweight Fluid Web Experience:**
-   - Real-time fluid vessels rendered with SVG/Canvas wave physics at 60 FPS (D-046) to run cool (< 45°C) and stably 24/7 on embedded hardware (Beelink EQ12 Intel N100 and Xiaomi TV A Mali-G52 GPU).
-6. **Modern Web Standards & Complete Offline Autonomy:**
-   - CSS Container Queries (`@container`) for intrinsic component responsiveness.
-   - Accessible Radix UI Dialog primitives (`D-050`) with persistent `z-[100]` Master E-Stop header bar to eliminate native `<dialog>` top-layer inert traps.
-   - 100% bundled local assets (variable fonts, Lucide SVG icons) with zero external CDN dependencies.
-
-### 1.2 Design Feasibility & Impact Index (DFII)
-
-| Dimension | Score (1–5) | Justification |
-| :--- | :---: | :--- |
-| **Aesthetic Impact** | 5 | Unmistakable, distinctive laboratory aesthetic; glass fluid vessels & scientific type. |
-| **Context Fit** | 5 | Perfectly tailored for research greenhouse fertigation and multi-tier displays. |
-| **Implementation Feasibility** | 5 | React + Vite (D-005), SVG/Canvas fluid rendering, Tailwind CSS, and Modern CSS container queries. |
-| **Performance Safety** | 4 | 60 FPS SVG/Canvas wave physics (< 5% CPU), zero layout shift. |
-| **Consistency Risk** | 1 | Strictly centralized CSS tokens and typed component primitives. |
-
-$$\text{DFII} = (\text{Impact} + \text{Fit} + \text{Feasibility} + \text{Performance}) - \text{Consistency Risk} = (5 + 5 + 5 + 4) - 1 = \mathbf{17} \longrightarrow \mathbf{15/15 \text{ (Max: Excellent, Execute Fully)}}$$
+   > *"An interface that looks airy, modern, and effortless to read at a glance: massive bold metric numerals, soft pastel status pills, smooth dual-gradient cubic spline wave charts, and sleek rounded pill action controls."*
+3. **Status Semantics & Pastel Accents:**
+   - Operational status uses soft, friendly pastel pill badges: Mint Green (`#DCFCE7` bg, `#10B981` text) for normal/in-tolerance, Soft Peach (`#FFEDD5` bg, `#F97316` text) for deficit/warning, and Coral Red (`#FEE2E2` bg, `#EF4444` text) for emergency/fault.
+   - Interactive primary buttons use vibrant Royal Blue (`#2563EB`) solid pills (`[Mulai Batch]`).
+4. **Touch Ergonomics & Sleek Controls:**
+   - Uniform minimum interactive tap target of **56×56 CSS px** on the HMI Kiosk with tactile rounded pill shapes (`rounded-full`).
+   - Master E-Stop: Sleek, high-contrast Coral Red pill button mounted in the top navigation bar.
+5. **Fluid Hydrodynamics & Data Curves:**
+   - Dual-tone cubic spline area wave charts with smooth royal blue top strokes and soft sky-blue to warm pastel apricot/salmon gradient fills.
+   - Simplified, beautiful visual metrics eliminating mechanical gauges in favor of modern digital readouts.
 
 ---
 
 ## 2. Color System & Modern Color Space Tokens
 
-Colors are specified in both standard hex codes and perceptual `oklch()` color spaces to guarantee uniform visual weight and smooth gradient interpolation without muddy gray transitions.
-
-### 2.1 Color Token Palette (Authoritative: Dark Slate Industrial Cockpit, D-050)
+### 2.1 Color Token Palette (Light Clean & Sleek Minimalist)
 
 ```css
 :root {
   /* Foundations & Surfaces */
-  --background: #020617;              /* Slate 950 - Main viewport foundation */
-  --background-subtle: #090D1A;       /* Deep Slate - Subtle inset foundation */
-  --surface: #0F172A;                 /* Slate 900 - Bento cards & panels */
-  --surface-hover: #1E293B;           /* Slate 800 - Card hover / elevated */
-  --border-subtle: #1E293B;           /* Slate 800 - Standard card dividers */
-  --border-focus: #3B82F6;            /* Blue 500 - Focus rings & active states */
+  --background: #F8FAFC;              /* Slate 50 - Soft warm off-white canvas */
+  --background-subtle: #F1F5F9;       /* Slate 100 - Secondary inset surface */
+  --surface: #FFFFFF;                 /* Pure White - Rounded 28px cards */
+  --surface-hover: #F8FAFC;           /* Elevated hover state */
+  --border-subtle: #E2E8F0;           /* Slate 200 - Faint hairline border */
+  --border-focus: #2563EB;            /* Blue 600 - Focus rings & active states */
 
-  /* Typography (WCAG AAA on #020617) */
-  --text-primary: #F8FAFC;            /* Slate 50 - Contrast 18.5:1 (AAA) */
-  --text-secondary: #CBD5E1;          /* Slate 300 - Contrast 11.6:1 (AAA) */
-  --text-muted: #94A3B8;              /* Slate 400 - Contrast 7.3:1 (AAA, D-050) */
+  /* Typography */
+  --text-primary: #0F172A;            /* Slate 900 - Crisp high-contrast headings & hero values */
+  --text-secondary: #64748B;          /* Slate 500 - Readable labels & units */
+  --text-muted: #94A3B8;              /* Slate 400 - Subtle guides & timestamps */
 
-  /* Interactive Non-Status */
-  --primary: #2563EB;                 /* Blue 600 - Royal Blue CTA */
+  /* Interactive Controls */
+  --primary: #2563EB;                 /* Blue 600 - Royal Blue CTA pill */
   --primary-hover: #1D4ED8;           /* Blue 700 */
-  --primary-subtle: rgba(37, 99, 235, 0.15);
+  --primary-subtle: #EFF6FF;          /* Blue 50 - Active tab/pill background */
 
-  /* Process Status Semaphores */
-  --status-ok: #10B981;               /* Emerald 500 - Nominal operational */
-  --status-ok-bg: rgba(16, 185, 129, 0.12);
-  --status-warn: #F59E0B;             /* Amber 500 - Caution / pending */
-  --status-warn-bg: rgba(245, 158, 11, 0.12);
-  --status-danger: #EF4444;           /* Red 500 - Safety faults & emergency */
-  --status-danger-bg: rgba(239, 68, 68, 0.15);
+  /* Process Status Semaphores (Soft Pastels) */
+  --status-ok: #10B981;               /* Emerald 500 - In tolerance text */
+  --status-ok-bg: #DCFCE7;            /* Emerald 100 - Soft pastel pill badge */
+  --status-warn: #F97316;             /* Orange 500 - Deficit text */
+  --status-warn-bg: #FFEDD5;          /* Orange 100 - Soft peach pill badge */
+  --status-danger: #EF4444;           /* Red 500 - Emergency / fault text */
+  --status-danger-bg: #FEE2E2;        /* Red 100 - Soft rose pill badge */
   --status-idle: #64748B;             /* Slate 500 - Neutral standby */
 }
 ```
-
-> *Note: Legacy high-key "Clean Laboratory Minimal" light tokens (`--background: #F5F7FA`, `--surface: #FFFFFF`) documented in early concept drafts remain archived for secondary administrative export views only; all active greenhouse runtimes strictly enforce the Dark Slate tokens above per D-029 and D-050.*
 
 ### 2.2 Elevation, Shadows & Glassmorphism
 
