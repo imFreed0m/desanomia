@@ -15,6 +15,7 @@ task-state.json
 credentials/
 secrets/
 .temp/
+docs/*
 
 # Dependencies & Package Managers
 node_modules/
