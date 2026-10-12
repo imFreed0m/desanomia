@@ -8,70 +8,16 @@
 
 ## 1. System Architecture & Edge Platform
 
-The Desanomia edge stack runs on an industrial on-site **Beelink EQ12 Mini PC** co-located inside the greenhouse control room, communicating with an **ESP32-S3 N16R8** microcontroller over an isolated wired industrial network.
-
-```mermaid
-flowchart TD
-  subgraph FieldLevel ["Greenhouse Field & Panel (OT LAN 192.168.10.0/24)"]
-    Sensors["Sensors: Analog TDS/EC (GPIO 1) + 60GHz FMCW Radar (GPIO 17/18)"] --> ESP["ESP32-S3 N16R8 Firmware\n(Core 1: 20Hz FSM & 7 Safety Interlocks\nCore 0: MQTT & PSRAM Spooler)"]
-    ESP --> Actuators["Relay Drivers: Fill (GPIO 4), Dose (GPIO 5), Mix (GPIO 6), Distribute (GPIO 7)\nPanel Alarms: Buzzer (GPIO 2) & Pilot Lamp (GPIO 3)"]
-    EStop["NC Twist Mushroom E-Stop"] -->|"Direct Hardwire Cutoff (0 ms)"| RelayPwr["DC 5V/12V Relay Coil Power Bus"]
-    EStop -->|"GPIO 21 Interrupt ISR (< 5 ms)"| ESP
-    USB["Native USB Serial/JTAG\n(GPIO 19 D- / GPIO 20 D+)"] -->|"Open JTAG Debug & Flashing (D-027)"| ESP
-  end
-
-  subgraph EdgeHost ["Beelink EQ12 Mini PC (Intel N100 / 16GB DDR5 / 500GB NVMe)"]
-    ETH0["ETH0: 2.5 GbE (192.168.10.1)\nOT Industrial Subnet (Isolated Cable)"]
-    ETH1["ETH1: 2.5 GbE (192.168.1.10)\nIT / Uplink Subnet (Protected)"]
-    
-    subgraph DockerCompose ["Docker Compose Services"]
-      Mosq["Eclipse Mosquitto MQTT\n(Bound strictly to 192.168.10.1:1883)"]
-      Postgres["PostgreSQL 16 Alpine\n(9 Tables / Range Partitioning / NVMe Buffer)"]
-      FastAPI["FastAPI Backend (Python 3.12)\n(aiomqtt + 1Hz WebSocket Hub + Scheduler)"]
-      Nginx["Nginx Alpine Static Reverse Proxy\n(ETH1 :80/:443 TLS + Loopback :8080)"]
-    end
-
-    Chrony["Chrony NTP Daemon\n(/dev/rtc0 Battery Master / Stratum 10)"]
-    Cage["Cage Wayland Compositor\n(systemd kiosk service)"] --> Chromium["Chromium Kiosk (GPU Accel)\nhttp://127.0.0.1:8080"]
-  end
-
-  subgraph DisplayTiers ["Display & Client Tiers"]
-    Chromium --> KioskUI["Primary HMI Touchscreen\n(UPERFECT 15.6'' FHD / USB-C Touch / 100% Offline)"]
-    ETH1 --> GazeboTV["Secondary Gazebo TV (Xiaomi 43'' FHD)\n(Wired LAN / Fully Kiosk / IP Allowlist + Bearer Token)"]
-    ETH1 --> Tailscale["Tailscale Mesh VPN Uplink\n(Orbit Star H2 4G Modem)"] --> MobilePWA["Mobile Clients / Operators\n(Authenticated PWA / TLS Port 443)"]
-    FastAPI -->|HTTPS / Off-Queue| Telegram["Telegram Bot Cloud API\n(Alerts & Interactive Callbacks)"]
-  end
-
-  ESP <-->|MQTT QoS 1 / ETH0 W5500 SPI| Mosq
-  Mosq <--> FastAPI
-  FastAPI <--> Postgres
-  Nginx <--> FastAPI
-```
+> **Cross-Reference Notice:** Refer to [brain/05_ARCHITECTURE.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/05_ARCHITECTURE.md) for the canonical system topology diagram, hardware node specifications (Beelink EQ12 Mini PC and ESP32-S3 N16R8), and complete GPIO pin allocation tables.
 
 ### 1.1 Edge Host Hardware Profile [SPEC]
-
-- **Host Model:** Beelink EQ12 Mini PC.
-- **CPU:** Intel Processor N100 (Alder Lake-N, 4 Cores / 4 Threads, base 0.8 GHz, boost up to 3.4 GHz, 6W TDP).
-- **GPU:** Intel UHD Graphics (24 Execution Units) with hardware QuickSync H.264/H.265 decoders.
-- **Memory:** 16GB DDR5-4800 MHz SO-DIMM (single-channel).
-- **Storage:** 500GB M.2 2280 PCIe 3.0 x4 NVMe SSD (internal) + 1x 2.5" SATA III expansion bay.
-- **Networking:** Dual 2.5 Gbps RJ45 Ethernet ports (Intel i225-V / i226-V controller).
-- **Wireless:** Wi-Fi 6 (Intel AX101 802.11ax) + Bluetooth 5.2.
-- **I/O Ports:** 2x HDMI 2.0 (supports 4K@60Hz), 4x USB 3.2 Gen 2 (10 Gbps Type-A), 1x 12V DC-in jack (5.5×2.5 mm).
-- **Power Envelope:** 12V 3A DC external power supply (36W peak, ~12W nominal idle load).
-- **Environmental Rating:** Operating temperature -10°C to 45°C; 30% to 90% non-condensing relative humidity.
-- **Power Loss Recovery:** BIOS American Megatrends (AMI) configured with `Restore on AC Power Loss: Power On` to ensure autonomous cold boot when mains electrical supply recovers.
+- **Host Model:** Beelink EQ12 Mini PC (Intel Processor N100, 16GB DDR5, 500GB NVMe SSD, Dual 2.5 GbE NICs). See [brain/05_ARCHITECTURE.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/05_ARCHITECTURE.md) for full hardware parameters and power-loss auto-recovery configuration.
 
 ### 1.2 Microcontroller Hardware Profile [SPEC]
+- **Chipset:** Espressif ESP32-S3 N16R8 (Dual-Core LX7 @ 240 MHz, 16MB Flash, 8MB PSRAM, W5500 SPI Ethernet). See [brain/05_ARCHITECTURE.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/05_ARCHITECTURE.md).
 
-- **Chipset:** Espressif ESP32-S3 N16R8 (Xtensa® Dual-Core 32-bit LX7 running at 240 MHz).
-- **Memory:** 16MB Quad SPI Flash, 8MB Octal SPI PSRAM, 512KB internal SRAM.
-- **Ethernet / Network Interface:** W5500 SPI Ethernet module connected via dedicated industrial Cat5e/Cat6 cable to Beelink ETH0 (100% wired physical Ethernet via unmanaged switch; Wi-Fi strictly disabled).
-- **Real-Time OS:** FreeRTOS v10.x SMP (Dual-Core asymmetric configuration).
-
-### 1.3 ESP32-S3 Conflict-Free GPIO Pin Allocation Table [SPEC]
-
-To prevent catastrophic pin conflicts with the native USB Serial/JTAG controller and internal memory buses, the hardware GPIO mapping is strictly governed by [10_FIRMWARE_SPEC.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/10_FIRMWARE_SPEC.md#pinout--gpio-allocation-spec). Refer to that document for the authoritative hardware pin assignments, electrical logic levels, and engineering safety constraints.
+### 1.3 GPIO Pin Allocation
+- Governed strictly by [10_FIRMWARE_SPEC.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/10_FIRMWARE_SPEC.md#pinout--gpio-allocation-spec) and [05_ARCHITECTURE.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/05_ARCHITECTURE.md).
 
 ---
 
@@ -81,72 +27,19 @@ The system serves three strictly separated client display tiers:
 
 | Tier | Display Hardware | Host Interface | Operating System / Shell | Authentication & Session Model | Intended Role |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Tier 1: Primary HMI Kiosk** | UPERFECT BE156PF 15.6" FHD (1920×1080) IPS, 10-point capacitive touch, 90 cm standing kiosk | Direct HDMI 2.0 + USB-C (Touch Data) to Beelink EQ12 | Debian 12 Minimal + Cage Wayland compositor running Chromium in `--kiosk` mode (`http://127.0.0.1:8080`) | Persistent local loopback `Operator` session (zero idle logout); modal PIN/Password elevation to `Admin` | Primary Operator Control (100% offline, 1-tap E-Stop) |
+| **Tier 1: Primary HMI Touchscreen Kiosk** | UPERFECT BE156PF 15.6" FHD (1920×1080) IPS, 10-point capacitive touch, 90 cm standing kiosk | Direct HDMI 2.0 + USB-C (Touch Data) to Beelink EQ12 | Debian 12 Minimal + Cage Wayland compositor running Chromium in `--kiosk` mode (`http://127.0.0.1:8080`) | Persistent local loopback `Operator` session (zero idle logout); modal PIN/Password elevation to `Admin` | Primary Operator Control (100% offline, 1-tap E-Stop) |
 | **Tier 2: Secondary Gazebo Display** | Xiaomi TV A 43" FHD (1920×1080) Google TV™ 2026, VESA wall mount | Wired RJ45 Ethernet to Orbit Star H2 / Gazebo DMZ via 156.5m Tenda O1 PTP bridge | Android TV OS running Fully Kiosk Browser 24/7 | Auto-authenticated `Viewer` session via Nginx static IP allowlist (`192.168.1.50`) **AND** read-only device bearer token in headers (D-026). All mutations return `403 Forbidden` | Passive 24/7 Telemetry Mirror (zero control dispatch) |
 | **Tier 3: Remote Mobile Clients** | Modern Mobile Smartphones (iOS / Android) | Tailscale Mesh VPN / Local Wi-Fi | Modern Mobile Browser (Chrome/Safari) running installed PWA via TLS/HTTPS (`:443`) with internal Local CA root certificate | Standard Username/Password credentials; sliding 8-hour idle timeout, 7-day absolute limit. Transmitted via `HttpOnly`, `SameSite=Lax`, `Secure` cookies with full Service Worker PWA support | Remote Monitoring & Guarded Control (two-step confirmation modal E-stop) |
 
 ---
 
-## 3. Network Topology & Dual NIC Segmentation
+## 3. Network Topology & Dual-NIC Segmentation
 
-The Beelink EQ12 utilizes its physical Dual 2.5 Gbps Ethernet interfaces to create an absolute hardware-level operational air-gap between greenhouse industrial controls and external networks:
+> **Specification Authority:** Refer to [brain/05_ARCHITECTURE.md](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/05_ARCHITECTURE.md#1-system-topology) for canonical physical cabling, industrial unmanaged switch interconnects, and host `nftables` hardware air-gap isolation rules between OT LAN (`192.168.10.0/24`) and IT LAN (`192.168.1.0/24`).
 
-```
-[ ESP32-S3 Microcontroller ] 
-         │ (192.168.10.20)
-         ▼
-[ Unmanaged Industrial Switch ] ─── ETH0 (192.168.10.1) ───► [ Beelink EQ12 ]
-(OT LAN: 192.168.10.0/24)                                    [ Docker Compose ]
-                                                                     │
-[ Orbit Star H2 Modem / WAN ] ─── ETH1 (192.168.1.10) ◄──────────────┘
-         │ (192.168.1.1)            (IT LAN: 192.168.1.0/24)
-         ├────────────────────────────────────────┐
-         ▼                                        ▼
-[ Tenda O1 PTP Bridge ]                  [ Tailscale Mesh VPN ]
-         │ (156.5m span)                          │
-         ▼                                        ▼
-[ Xiaomi TV 43'' Gazebo ]                [ Mobile Operator Phones ]
-(192.168.1.50 - Allowlisted)             (PWA over TLS :443)
-```
-
-1. **OT Industrial Subnet (`ETH0` - `192.168.10.0/24`):**
-   - Static IP: `192.168.10.1/24`.
-   - Connected directly to the greenhouse fieldbus switch via physical Cat5e/Cat6 cable.
-   - Dedicated solely to ESP32-S3 (`192.168.10.20`), sensor gateways, and local HMI. Wi-Fi is disabled on this segment.
-   - **Mosquitto MQTT Binding Invariant:** Eclipse Mosquitto binds exclusively to `192.168.10.1:1883`. External interfaces (`ETH1`) are blocked from accessing MQTT port 1883 via Docker network isolation and host `nftables` firewall rules.
-   - **Chrony NTP Server:** Beelink broadcasts NTP over `192.168.10.1:123` to provide local stratum-10 network clock synchronization for ESP32.
-2. **IT / WAN Uplink Subnet (`ETH1` - `192.168.1.0/24`):**
-   - Assigned IP: `192.168.1.10/24` via DHCP or static lease from Orbit Star H2 4G modem (`192.168.1.1`).
-   - Carries traffic for:
-     - Tenda O1 2.4 GHz Point-to-Point (PTP) wireless bridge (156.5m span to Gazebo).
-     - Xiaomi TV A 43" (Gazebo Monitoring Display, static IP `192.168.1.50`).
-     - Tailscale daemon for outbound WireGuard mesh tunnel to mobile clients.
-     - Outbound HTTPS traffic to Telegram Bot API.
-   - **Nginx Web Gateway:** Nginx binds to `192.168.1.10:80` (auto-redirect to HTTPS) and `192.168.1.10:443` (TLS with local CA certificate), plus `127.0.0.1:8080` for the local Kiosk loopback.
-3. **Host OS Kernel & nftables Firewall Ruleset (D-043, TR-31):**
-   - To support Docker bridge container networking while strictly prohibiting raw routing between OT and IT subnets:
-     ```bash
-     # Aktifkan forwarding di kernel untuk kebutuhan internal container networking
-     sysctl -w net.ipv4.ip_forward=1
-     ```
-   - Configuration `/etc/nftables.conf`:
-     ```text
-     table inet filter {
-         chain forward {
-             type filter hook forward priority 0; policy drop;
-
-             # Izinkan traffic yang established/related
-             ct state established,related accept
-
-             # Blokir total routing silang antara ETH0 (OT) dan ETH1 (IT)
-             iifname "eth0" oifname "eth1" drop
-             iifname "eth1" oifname "eth0" drop
-
-             # Izinkan Docker bridge berkomunikasi keluar ke IT LAN saja
-             iifname "docker0" oifname "eth1" accept
-         }
-     }
-     ```
+The Beelink EQ12 leverages its dual 2.5 GbE interfaces to enforce a physical air-gap between fieldbus actuators and external uplinks:
+- **OT Industrial Network (`ETH0` - `192.168.10.1/24`):** Dedicated exclusively to ESP32-S3 microcontroller (`192.168.10.20`), sensor conditioners, and local MQTT broker binding. Zero external WAN access.
+- **IT / WAN Uplink Network (`ETH1` - `192.168.1.10/24`):** Dedicated to Nginx web gateway, Gazebo TV bridge (`192.168.1.50`), and Tailscale VPN tunnel.
 
 ---
 

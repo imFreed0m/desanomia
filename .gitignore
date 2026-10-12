@@ -16,6 +16,7 @@ credentials/
 secrets/
 .temp/
 docs/*
+.jcode/
 
 # Dependencies & Package Managers
 node_modules/
@@ -65,9 +66,6 @@ Thumbs.db
 .idea/
 *.sublime-project
 *.sublime-workspace
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
 
 # Graphify temporary caches
 graphify-out/cache/

@@ -94,6 +94,10 @@ _Avoid_: Direct live chemical startup, Blind automated trial, Unchecked fertiliz
 
 ## 3. Embedded Firmware & Real-Time Architecture
 
+**Quad-Channel Memory**:
+The architectural memory-caching and context-retrieval protocol utilized by autonomous agents in DESANOMIA to maintain multi-tier operational context (comprising semantic memory retrieval, AST callgraphs, structural architecture graphs, and past agent session history).
+_Avoid_: Tri-memory, TriMemory, Legacy memory stack, Flat session memory
+
 **Asymmetric Dual-Core Allocation**:
 The FreeRTOS CPU core pinning discipline on the ESP32-S3 N16R8: Core 1 (240 MHz) is dedicated strictly to deterministic real-time control (20 Hz FSM tick, 50 ms safety interlock matrix evaluation, and 10 Hz sensor conditioning); Core 0 (240 MHz) is dedicated to asynchronous I/O (W5500 SPI Ethernet, MQTT client, QoS 1 ACK handshakes, and 500-event Octal PSRAM ring buffer spooling).
 _Avoid_: Symmetric multitasking, Unpinned tasks, Core-free FreeRTOS, Random affinity

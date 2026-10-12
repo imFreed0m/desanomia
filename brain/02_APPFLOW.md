@@ -1,6 +1,6 @@
 # 02 Appflow
 
-Screen navigation, user journeys, and what each click does. Functional behavior of each component is in 12_UI_SPEC, visuals in 03_UI_UX_BRIEF. [PROPOSED, SPEC defines roles, session login, dashboard and history features]
+Screen navigation, user journeys, and what each click does. Functional behavior of each component is in 12_UI_SPEC, visuals in 03_UI_UX_BRIEF. [SPEC]
 
 ## Scope note
 
