@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desanomia 3D Fluid Tank Preview</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+    }
+    #canvas-container {
+      flex: 1;
+      height: 100%;
+      position: relative;
+    }
+    #ui-panel {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(22, 27, 34, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(240, 246, 252, 0.1);
+      border-radius: 8px;
+      padding: 18px 22px;
+      width: 320px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      z-index: 10;
+    }
+    h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #58a6ff;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: #8b949e;
+      margin-bottom: 16px;
+    }
+    .control-group {
+      margin-bottom: 14px;
+    }
+    label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .value-badge {
+      color: #58a6ff;
+      font-weight: bold;
+    }
+    input[type=range] {
+      width: 100%;
+      accent-color: #238636;
+      cursor: pointer;
+    }
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+    .btn-toggle {
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s ease;
+    }
+    .btn-toggle.active {
+      background: #238636;
+      border-color: #2ea043;
+      color: #fff;
+    }
+    .btn-toggle:hover {
+      border-color: #8b949e;
+    }
+    #loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: #0d1117;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 99;
+      transition: opacity 0.4s ease;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(88, 166, 255, 0.2);
+      border-top-color: #58a6ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 12px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div id="loading-text" style="font-size: 14px; color: #8b949e;">Loading 3D Barrel & Fluid Shader...</div>
+  </div>
+
+  <div id="canvas-container"></div>
+
+  <div id="ui-panel">
+    <h1>Desanomia Telemetry</h1>
+    <div class="subtitle">Drum Distribusi 160L / Concentrated Tank</div>
+
+    <div class="control-group">
+      <label>Water Level <span id="val-level" class="value-badge">75%</span></label>
+      <input type="range" id="slider-level" min="5" max="95" value="75">
+    </div>
+
+    <div class="control-group">
+      <label>Wave Agitation / Flow <span id="val-wave" class="value-badge">Moderate</span></label>
+      <input type="range" id="slider-wave" min="1" max="50" value="15">
+    </div>
+
+    <div class="toggle-row">
+      <span>Pump / Aeration Status:</span>
+      <button id="btn-pump" class="btn-toggle">OFF</button>
+    </div>
+
+    <div class="toggle-row">
+      <span>Barrel Opacity (Cutaway):</span>
+      <button id="btn-cutaway" class="btn-toggle active">Semi-Glass</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    const container = document.getElementById('canvas-container');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const loadingText = document.getElementById('loading-text');
+
+    const sliderLevel = document.getElementById('slider-level');
+    const valLevel = document.getElementById('val-level');
+    const sliderWave = document.getElementById('slider-wave');
+    const valWave = document.getElementById('val-wave');
+    const btnPump = document.getElementById('btn-pump');
+    const btnCutaway = document.getElementById('btn-cutaway');
+
+    // Scene Setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0e131a);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 1.2, 2.5);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 + 0.1;
+    controls.target.set(0, 0.5, 0);
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+    scene.add(ambientLight);
+
+    const dirLight1 = new THREE.DirectionalLight(0xdcf8ff, 2.0);
+    dirLight1.position.set(3, 5, 2);
+    dirLight1.castShadow = true;
+    scene.add(dirLight1);
+
+    const dirLight2 = new THREE.DirectionalLight(0x58a6ff, 1.2);
+    dirLight2.position.set(-3, 3, -2);
+    scene.add(dirLight2);
+
+    // Floor Grid
+    const grid = new THREE.GridHelper(10, 20, 0x30363d, 0x161b22);
+    grid.position.y = -0.01;
+    scene.add(grid);
+
+    // Fluid Custom Shader Material
+    const fluidVertexShader = `
+      uniform float uTime;
+      uniform float uWaveSpeed;
+      uniform float uWaveHeight;
+      varying vec3 vNormal;
+      varying vec3 vWorldPosition;
+      varying vec2 vUv;
+
+      void main() {
+        vUv = uv;
+        vNormal = normalize(normalMatrix * normal);
+        vec3 pos = position;
+
+        // Wave displacement on top lid
+        if (pos.y > 0.45) {
+          float wave1 = sin(pos.x * 12.0 + uTime * uWaveSpeed) * cos(pos.z * 12.0 + uTime * uWaveSpeed * 0.8);
+          float wave2 = sin(pos.x * 24.0 - uTime * uWaveSpeed * 1.4 + pos.z * 18.0) * 0.5;
+          pos.y += (wave1 + wave2) * uWaveHeight;
+        }
+
+        vec4 worldPos = modelMatrix * vec4(pos, 1.0);
+        vWorldPosition = worldPos.xyz;
+        gl_Position = projectionMatrix * viewMatrix * worldPos;
+      }
+    `;
+
+    const fluidFragmentShader = `
+      uniform vec3 uColorDeep;
+      uniform vec3 uColorShallow;
+      varying vec3 vNormal;
+      varying vec3 vWorldPosition;
+      varying vec2 vUv;
+
+      void main() {
+        vec3 viewDir = normalize(cameraPosition - vWorldPosition);
+        float fresnel = pow(1.0 - max(dot(viewDir, vNormal), 0.0), 3.0);
+        vec3 waterColor = mix(uColorDeep, uColorShallow, fresnel * 0.7);
+
+        vec3 lightDir = normalize(vec3(3.0, 5.0, 2.0));
+        vec3 halfVec = normalize(lightDir + viewDir);
+        float spec = pow(max(dot(vNormal, halfVec), 0.0), 32.0);
+
+        vec3 finalColor = waterColor + vec3(spec * 0.6);
+        gl_FragColor = vec4(finalColor, 0.88);
+      }
+    `;
+
+    const fluidUniforms = {
+      uTime: { value: 0 },
+      uWaveSpeed: { value: 2.0 },
+      uWaveHeight: { value: 0.015 },
+      uColorDeep: { value: new THREE.Color(0x0284c7) },
+      uColorShallow: { value: new THREE.Color(0x38bdf8) }
+    };
+
+    const fluidMaterial = new THREE.ShaderMaterial({
+      vertexShader: fluidVertexShader,
+      fragmentShader: fluidFragmentShader,
+      uniforms: fluidUniforms,
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+
+    // Fluid Mesh: LatheGeometry sederhana yang mengikuti lekukan volume barrel (gembung di tengah, melengkung di dasar & leher)
+    const profilePoints = [
+      new THREE.Vector2(0.00, 0.03),  // dasar tengah
+      new THREE.Vector2(0.20, 0.03),  // alas dalam
+      new THREE.Vector2(0.23, 0.10),  // lengkungan bawah
+      new THREE.Vector2(0.248, 0.25), // dinding bawah
+      new THREE.Vector2(0.252, 0.50), // gembung tengah
+      new THREE.Vector2(0.252, 0.75), // dinding atas
+      new THREE.Vector2(0.245, 0.90), // bahu atas
+      new THREE.Vector2(0.230, 0.98), // leher atas
+      new THREE.Vector2(0.00, 0.98)   // puncak tutup
+    ];
+    const fluidGeom = new THREE.LatheGeometry(profilePoints, 48);
+    const fluidMesh = new THREE.Mesh(fluidGeom, fluidMaterial);
+    fluidMesh.position.set(0, 0, 0);
+    scene.add(fluidMesh);
+
+    // Barrel Model Reference
+    let barrelModel = null;
+    const barrelMaterials = [];
+
+    // Load Original glTF Barrel Model
+    const loader = new GLTFLoader();
+    loader.load(
+      'scene.gltf',
+      (gltf) => {
+        barrelModel = gltf.scene;
+
+        // Apply cutaway semi-glass material
+        barrelModel.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+
+            if (child.material) {
+              const mat = child.material.clone();
+              mat.transparent = true;
+              mat.opacity = 0.55;
+              mat.depthWrite = true;
+              mat.roughness = 0.45;
+              // Lembutkan normal map agar tidak timbul efek artefak/pola bayangan kasar seperti carbon
+              if (mat.normalScale) {
+                mat.normalScale.set(0.25, 0.25);
+              }
+              child.material = mat;
+              barrelMaterials.push(mat);
+            }
+          }
+        });
+
+        // Hide duplicate barrel instances
+        const drum3 = barrelModel.getObjectByName('Plastic_barrel_3');
+        if (drum3) drum3.visible = false;
+        const drum2 = barrelModel.getObjectByName('Plastic_barrel_2');
+        if (drum2) drum2.visible = false;
+        const drum1 = barrelModel.getObjectByName('Plastic_barrel_1');
+        if (drum1) drum1.visible = false;
+
+        // Target height ~1.05m
+        const targetHeight = 1.05;
+
+        // Compute bounding box strictly for the visible drum
+        const drumMesh = barrelModel.getObjectByName('Plastic_barrel__0');
+        barrelModel.updateMatrixWorld(true);
+
+        const drumBox = new THREE.Box3();
+        if (drumMesh) {
+          drumBox.setFromObject(drumMesh);
+        } else {
+          drumBox.setFromObject(barrelModel);
+        }
+
+        const size = new THREE.Vector3();
+        drumBox.getSize(size);
+        const center = new THREE.Vector3();
+        drumBox.getCenter(center);
+
+        const scaleFactor = targetHeight / (size.y || 1);
+        barrelModel.scale.setScalar(scaleFactor);
+
+        // Center barrel at (0, 0, 0)
+        barrelModel.position.x = -center.x * scaleFactor;
+        barrelModel.position.z = -center.z * scaleFactor;
+        barrelModel.position.y = -drumBox.min.y * scaleFactor;
+
+        // Align fluid cylinder exactly with barrel center
+        fluidMesh.position.set(0, 0, 0);
+
+        scene.add(barrelModel);
+
+        // Hide loading
+        loadingOverlay.style.opacity = '0';
+        setTimeout(() => loadingOverlay.remove(), 400);
+      },
+      (xhr) => {
+        if (xhr.lengthComputable) {
+          const percent = Math.round((xhr.loaded / xhr.total) * 100);
+          loadingText.innerText = `Loading Assets: ${percent}%`;
+        }
+      },
+      (error) => {
+        console.error('Error loading glTF:', error);
+        loadingText.innerText = 'Failed loading glTF model: ' + error.message;
+      }
+    );
+
+    // UI Listeners
+    function updateFluidLevel(percent) {
+      valLevel.innerText = `${percent}%`;
+      const scaleY = (percent / 100) * 0.95;
+      fluidMesh.scale.set(1, scaleY, 1);
+    }
+
+    sliderLevel.addEventListener('input', (e) => {
+      updateFluidLevel(e.target.value);
+    });
+    updateFluidLevel(75);
+
+    sliderWave.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value);
+      fluidUniforms.uWaveHeight.value = val * 0.001;
+      fluidUniforms.uWaveSpeed.value = 1.0 + (val * 0.15);
+      valWave.innerText = val > 30 ? 'High Turbulance' : (val > 15 ? 'Moderate' : 'Calm');
+    });
+
+    let isPumpActive = false;
+    btnPump.addEventListener('click', () => {
+      isPumpActive = !isPumpActive;
+      btnPump.classList.toggle('active', isPumpActive);
+      btnPump.innerText = isPumpActive ? 'ACTIVE (PUMPING)' : 'OFF';
+
+      if (isPumpActive) {
+        fluidUniforms.uWaveHeight.value = 0.035;
+        fluidUniforms.uWaveSpeed.value = 6.0;
+        fluidUniforms.uColorDeep.value.setHex(0x0369a1);
+      } else {
+        const val = parseInt(sliderWave.value);
+        fluidUniforms.uWaveHeight.value = val * 0.001;
+        fluidUniforms.uWaveSpeed.value = 1.0 + (val * 0.15);
+        fluidUniforms.uColorDeep.value.setHex(0x0284c7);
+      }
+    });
+
+    let isCutaway = true;
+    btnCutaway.addEventListener('click', () => {
+      isCutaway = !isCutaway;
+      btnCutaway.classList.toggle('active', isCutaway);
+      btnCutaway.innerText = isCutaway ? 'Semi-Glass' : 'Solid Opaque';
+
+      barrelMaterials.forEach(mat => {
+        mat.opacity = isCutaway ? 0.55 : 1.0;
+      });
+    });
+
+    // Window Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Animation Loop
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      fluidUniforms.uTime.value += delta;
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>

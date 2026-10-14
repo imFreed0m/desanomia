@@ -163,20 +163,19 @@ The Desanomia dashboard interface is composed of twenty-six signature industrial
 | | Step: 4 dari 12 (Injeksi Nutrisi) | | Status: DALAM TOLERANSI (OK)      | | | Wave: Tenang              | | Wave: Pusaran Mixer   | | |
 | | [UI-08: Mulai Batch] [UI-09: Reset] | | Baseline Air Baku: 104 ppm        | | | [Konfirmasi Refill]       | | (Kuras Manual Fisik)  | | |
 | +-----------------------------------+ +-----------------------------------+ +---------------------------+ +-----------------------+ | |
-|                                                                             | Standby: [Pair 2] [Pair 3] [Pair 4] [Pair 5] (Terkunci) | |
+| | UI-04: ACTUATOR STATUS BAR        | | UI-22: ACTIVE RECIPE CARD         | | Standby: [Pair 2] [Pair 3] [Pair 4] [Pair 5] (Terkunci) | |
+| | [SV1: OFF] [PP1: RUN] [M1: OFF]   | | Resep Aktif: Generatif (1250 ppm) | +---------------------------------------------------------+ |
+| | [Relay 4: LOCKED]                 | | Injeksi NPK A+B: 1695 mL          | +---------------------------------------------------------+ |
+| +-----------------------------------+ +-----------------------------------+ | UI-15: DASHBOARD SCHEDULE CALENDAR & 7-DAY TIMELINE     | |
+| +-------------------------------------------------------------------------+ | Hari Ini: Pair 1 (Generatif 1250 ppm) [BERJALAN]        | |
+| | UI-06: INTERACTIVE TDS HISTORY CHART (Apache ECharts)                   | | Besok   : Pair 1 (Generatif 1250 ppm) [06:00 WIB]       | |
+| | [1h] [6h*] [24h] [7d]  --- Toleransi 1200-1300 ppm                      | | [Sen] [Sel*] [Rab] [Kam] [Jum] [Sab] [Min]              | |
+| | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        | +---------------------------------------------------------+ |
+| | Live Stream Point: 1248 ppm | Temp: 27.0°C                              | | UI-05: BATCH EVENT TIMELINE & AUDIT LOG                 | |
+| +-------------------------------------------------------------------------+ | 02:01:00 - Transisi IDLE -> FILLING_WATER (140.0 L)     | |
+|                                                                             | 02:03:15 - Transisi CHECK_BASE -> DOSING (1695 mL NPK)  | |
 |                                                                             +---------------------------------------------------------+ |
-| +-------------------------------------------------------------------------+ +---------------------------------------------------------+ |
-| | UI-06: INTERACTIVE TDS HISTORY CHART (Apache ECharts)                   | | UI-04: ACTUATOR STATUS PANEL & TEST BENCH               | |
-| | [1h] [6h*] [24h] [7d]  --- Toleransi 1200-1300 ppm                      | | Katup Air Masuk (SV1)     : [OFF]     [Manual Jog 5s]   | |
-| | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        | | Pompa Peristaltik (PP1)   : [RUNNING] [+10 mL Bump]     | |
-| | Live Stream Point: 1248 ppm | Temp: 27.0°C                              | | Pompa Mixer (M1)          : [OFF]     [Mixer Jog 10s]   | |
-| +-------------------------------------------------------------------------+ | Pompa Distribusi (Relay 4): [LOCKED]  (Belum Matang)    | |
-| +-------------------------------------------------------------------------+ +---------------------------------------------------------+ |
-| | UI-05: BATCH EVENT TIMELINE & AUDIT LOG                                 | | UI-15: DASHBOARD SCHEDULE CALENDAR & 7-DAY TIMELINE     | |
-| | 02:01:00 - Transisi IDLE -> FILLING_WATER (140.0 L)                     | | Hari Ini: Pair 1 (Generatif 1250 ppm) [BERJALAN]        | |
-| | 02:03:15 - Transisi CHECK_BASE -> DOSING (Injeksi 1695 mL NPK)          | | Besok   : Pair 1 (Generatif 1250 ppm) [06:00 WIB]       | |
-| | 02:05:00 - Target Tercapai: 1248 ppm (Delta: -2 ppm)                    | | [Sen] [Sel*] [Rab] [Kam] [Jum] [Sab] [Min]              | |
-| +---------------------------------------------------------------------------+-----------------------------------------------------------+ |
++-----------------------------------------------------------------------------------------------------------------------------------------+
 ```
 
 ### 4.1 UI-01: FSM Status Card
@@ -266,6 +265,13 @@ The Desanomia dashboard interface is composed of twenty-six signature industrial
   1. **Pemilihan Resep (Recipe Selection):** Dropdown selector featuring Named Recipe Presets (`Vegetatif 1100 ppm`, `Generatif 1250 ppm`, `Panen 1050 ppm`). Arbitrary custom PPM entry is disallowed to guarantee agricultural traceability ([`D-037`](file:///home/maria_zahra/Documents/projects/greenhouse/desanomia/brain/18_DECISIONS.md#L89), `D-050`).
   2. **Waktu Pelaksanaan (Timing Dispatch):** Choice between `Sekarang` (Immediate execution) and `Jadwalkan Nanti` (Time-picker for scheduled cron dispatch).
   3. **Alokasi Tangki (Target Tank Pair):** Target tank pair selection (`Pair 1` active; `Pairs 2–5` disabled in Phase 1).
+- **Mandatory Safety Interlock — Drum 1 Refill Confirmation Toggle:**
+  - Before an immediate batch can be triggered (`Mulai Sekarang`), the operator must explicitly acknowledge that Drum 1 has sufficient concentrate stock.
+  - If Drum 1 virtual level is flagged low or newly replenished, the modal enforces a mandatory confirmation toggle: `"Konfirmasi Pengisian Penuh (20L + 2kg)"`.
+  - The `Mulai Batch` primary trigger remains disabled until this toggle is verified active, resetting virtual stock to 20.0 L and preventing starvation faults during automated injection.
+- **Schedule Conflict & Overwrite Arbitration:**
+  - When setting a schedule (`Jadwalkan Nanti`) that collides with an existing programmed run for the same tank pair, the modal surfaces an active conflict alert.
+  - The operator is prompted with an explicit `Timpa Jadwal yang Ada (Overwrite)` option, logging the previous schedule eviction in the audit trail.
 - **Backend HTTP 409 Conflict Handling:**
   - `SAME_DAY_DOUBLE_DISTRIBUTION` $\to$ Intercepts submission and triggers UI-16 Hard Confirmation Modal.
   - `OUT_OF_STOCK_CONCENTRATE` $\to$ Intercepts submission and triggers UI-21 Refill Modal.

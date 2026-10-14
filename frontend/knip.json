@@ -1,0 +1,7 @@
+{
+  "$schema": "https://unpkg.com/knip@5/resources/knip-json-schema.json",
+  "project": ["src/**/*.{ts,tsx}!"],
+  "ignore": ["src/utils/cn.ts"],
+  "ignoreDependencies": ["clsx", "recharts", "tailwind-merge", "@storybook/blocks"],
+  "ignoreExportsUsedInFile": true
+}
