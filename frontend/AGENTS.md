@@ -64,25 +64,31 @@ import { Button } from "antd";                   // ❌
 
 ---
 
-## 3. Kiosk Display (CRITICAL)
+## 3. Kiosk Display & E-Stop UX (CRITICAL)
 
 - Target viewport: **UPERFECT 15.6" IPS FHD (1920×1080)**
 - **Zero vertical scroll** on main dashboard: `h-[1080px] overflow-hidden`
 - `html, body` are already fixed at 1920×1080 in `src/index.css` — do not change
 - `user-select: none` — kiosk mode, text selection is disabled
+- **Dual E-Stop UX Policy (`D-019`, `D-050`):**
+  - **Tier 1 Kiosk (Local Panel Room):** Instant 1-tap pill ($64 \times 64\text{ px}$, `z-[100]`) **without** confirmation modal.
+  - **Remote / Mobile PWA:** Mandatory 2-step gated confirmation modal (`aria-modal="true"`) to prevent accidental remote dispatch.
 
 ---
 
-## 4. Hardware & Safety Rules
+## 4. Hardware Safety Rules, Gated Resets & Sensor States
 
-- Hardware actions use **pessimistic UI** — do not update state before backend confirmation
-- **Prevent double-dispatch** — disable buttons while pending
-- **Emergency Stop:** minimum **48×48 px**, `aria-modal="true"`, focus trapping
-- Sensor data must represent 4 states:
-  - **Normal**
-  - **Stale** (>30 seconds)
-  - **Offline** (>60 seconds)
-  - **Saturation** (2000 ppm)
+- Hardware actions use **pessimistic UI** — do not update state before backend confirmation.
+- **Prevent double-dispatch** — disable buttons while pending.
+- **Sensor Liveness & Limits (`D-003`, `D-010`):**
+  - Radar Liveness Watchdog: offline after **>3.0 seconds** of silence (`FAULT_RADAR_OFFLINE`).
+  - TDS Plausibility: clean water baseline must be within `[50, 2000] ppm` (baseline $<350\text{ ppm}$).
+- **Gated Fault Reset (`D-012`):**
+  - The UI `Reset Fault` button **MUST** be disabled/locked if Distribution Drum (Drum 2) level $>8.0\text{ L}$ during chemical/TDS out-of-range faults.
+  - Mandatory drainage instruction: off-spec batches must be drained manually via bottom gravity drain valve to the waste ditch before fault de-latching is permitted.
+- **Mid-Outage Pause & Top-Up Constraints (`D-013`, `D-051`):**
+  - When recovering from power loss with Drum 2 level $>5.0\text{ L}$, display `BATCH_PAUSED_INSPECTION` modal showing volume, measured PPM, and calculated deficit concentrate ($V_{\text{deficit}} \le 300\text{ mL}$).
+  - Single-pass top-up recovery cap: maximum **300 mL** concentrate addition. If deficit exceeds $300\text{ mL}$ ($<\text{Target} - 229.3\text{ ppm}$), raise `STARVATION_SUSPECTED` instead of blind dosing.
 
 ---
 
