@@ -32,6 +32,8 @@ out/
 .output/
 .turbo/
 .cache/
+storybook-static/
+.storybook-build/
 
 # Python artifacts
 __pycache__/
