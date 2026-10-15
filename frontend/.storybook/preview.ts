@@ -1,5 +1,4 @@
 import type { Preview } from "@storybook/react";
-import "@arco-design/web-react/dist/css/arco.css";
 import "../src/index.css";
 
 const preview: Preview = {
